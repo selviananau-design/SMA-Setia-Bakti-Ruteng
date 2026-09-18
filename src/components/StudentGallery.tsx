@@ -3,13 +3,18 @@ import { Image, X, Calendar, Tag, Eye } from 'lucide-react';
 import { INITIAL_GALLERY } from '../data/mockData';
 import { GalleryItem } from '../types';
 
-export const StudentGallery: React.FC = () => {
+interface StudentGalleryProps {
+  items?: GalleryItem[];
+}
+
+export const StudentGallery: React.FC<StudentGalleryProps> = ({ items }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);
 
   const categories = ['Semua', 'Rohani', 'Prestasi', 'Seni & Budaya', 'Akademik', 'Olahraga'];
+  const galleryList = items && items.length > 0 ? items : INITIAL_GALLERY;
 
-  const filteredItems = INITIAL_GALLERY.filter((item) =>
+  const filteredItems = galleryList.filter((item) =>
     selectedCategory === 'Semua' ? true : item.category === selectedCategory
   );
 

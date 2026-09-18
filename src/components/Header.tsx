@@ -8,10 +8,10 @@ interface HeaderProps {
   onOpenLogin: () => void;
   onLogout: () => void;
   onOpenNotifications: () => void;
-  onOpenEncryptionModal: () => void;
-  notifications: PushNotification[];
-  onSearch: (query: string) => void;
-  onNavigateTab: (tab: string) => void;
+  onOpenEncryptionModal?: () => void;
+  notifications?: PushNotification[];
+  onSearch?: (query: string) => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -20,16 +20,16 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onOpenNotifications,
   onOpenEncryptionModal,
-  notifications,
+  notifications = [],
   onSearch,
-  onNavigateTab,
+  onNavigateTab = () => {},
 }) => {
   const [searchInput, setSearchInput] = useState('');
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchInput.trim()) {
+    if (searchInput.trim() && onSearch) {
       onSearch(searchInput.trim());
     }
   };

@@ -5,10 +5,11 @@ import { NewsItem } from '../types';
 
 interface DistrictNewsProps {
   onNavigateTab: (tab: string) => void;
+  newsList?: NewsItem[];
 }
 
-export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab }) => {
-  const [newsList] = useState<NewsItem[]>(INITIAL_NEWS);
+export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsList: propNewsList }) => {
+  const newsList = propNewsList && propNewsList.length > 0 ? propNewsList : INITIAL_NEWS;
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [activeDot, setActiveDot] = useState(0);
 

@@ -5,13 +5,14 @@ import { SchoolEvent } from '../types';
 
 interface UpcomingEventsProps {
   onNavigateTab: (tab: string) => void;
+  events?: SchoolEvent[];
 }
 
-export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab }) => {
+export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, events: propEvents }) => {
   const [selectedEvent, setSelectedEvent] = useState<SchoolEvent | null>(null);
   const [startIndex, setStartIndex] = useState(0);
 
-  const events = INITIAL_EVENTS;
+  const events = propEvents && propEvents.length > 0 ? propEvents : INITIAL_EVENTS;
 
   const handlePrev = () => {
     setStartIndex((prev) => (prev > 0 ? prev - 1 : Math.max(0, events.length - 4)));

@@ -6,12 +6,12 @@ import { QuickActionRibbon } from './components/QuickActionRibbon';
 import { UpcomingEvents } from './components/UpcomingEvents';
 import { DistrictNews } from './components/DistrictNews';
 import { StatsDashboard } from './components/StatsDashboard';
+import { PPDBOnline } from './components/PPDBOnline';
 import { TeacherStaffSection } from './components/TeacherStaffSection';
 import { StudentGallery } from './components/StudentGallery';
-import { PPDBOnline } from './components/PPDBOnline';
 import { LoginModal } from './components/LoginModal';
-import { DashboardView } from './components/DashboardView';
 import { PushNotificationBanner } from './components/PushNotificationBanner';
+import { DashboardView } from './components/DashboardView';
 import { Footer } from './components/Footer';
 
 import {
@@ -19,8 +19,20 @@ import {
   INITIAL_TEACHERS,
   INITIAL_PPDB,
   INITIAL_NOTIFICATIONS,
+  INITIAL_NEWS,
+  INITIAL_EVENTS,
+  INITIAL_GALLERY,
 } from './data/mockData';
-import { Student, TeacherStaff, PPDBRegistration, PushNotification, UserSession } from './types';
+import {
+  Student,
+  TeacherStaff,
+  PPDBRegistration,
+  PushNotification,
+  UserSession,
+  NewsItem,
+  SchoolEvent,
+  GalleryItem,
+} from './types';
 import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function App() {
@@ -37,8 +49,29 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
   });
 
-  // Teachers state
-  const [teachers] = useState<TeacherStaff[]>(INITIAL_TEACHERS);
+  // Teachers state with localStorage sync
+  const [teachers, setTeachers] = useState<TeacherStaff[]>(() => {
+    const saved = localStorage.getItem('smak_teachers');
+    return saved ? JSON.parse(saved) : INITIAL_TEACHERS;
+  });
+
+  // News state with localStorage sync
+  const [newsList, setNewsList] = useState<NewsItem[]>(() => {
+    const saved = localStorage.getItem('smak_news');
+    return saved ? JSON.parse(saved) : INITIAL_NEWS;
+  });
+
+  // Events state with localStorage sync
+  const [eventsList, setEventsList] = useState<SchoolEvent[]>(() => {
+    const saved = localStorage.getItem('smak_events');
+    return saved ? JSON.parse(saved) : INITIAL_EVENTS;
+  });
+
+  // Gallery state with localStorage sync
+  const [galleryList, setGalleryList] = useState<GalleryItem[]>(() => {
+    const saved = localStorage.getItem('smak_gallery');
+    return saved ? JSON.parse(saved) : INITIAL_GALLERY;
+  });
 
   // PPDB Registrations state
   const [ppdbList, setPpdbList] = useState<PPDBRegistration[]>(() => {
@@ -58,6 +91,22 @@ export default function App() {
   }, [students]);
 
   useEffect(() => {
+    localStorage.setItem('smak_teachers', JSON.stringify(teachers));
+  }, [teachers]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_news', JSON.stringify(newsList));
+  }, [newsList]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_events', JSON.stringify(eventsList));
+  }, [eventsList]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_gallery', JSON.stringify(galleryList));
+  }, [galleryList]);
+
+  useEffect(() => {
     localStorage.setItem('smak_ppdb', JSON.stringify(ppdbList));
   }, [ppdbList]);
 
@@ -73,24 +122,52 @@ export default function App() {
     }
   }, [session]);
 
-  // Handler: Add student
+  // Handlers: Student
   const handleAddStudent = (newStudent: Student) => {
     setStudents((prev) => [newStudent, ...prev]);
   };
-
-  // Handler: Delete student
   const handleDeleteStudent = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data siswa ini dari sistem?')) {
       setStudents((prev) => prev.filter((s) => s.id !== id));
     }
   };
 
-  // Handler: Add PPDB
+  // Handlers: Teacher
+  const handleAddTeacher = (newTeacher: TeacherStaff) => {
+    setTeachers((prev) => [newTeacher, ...prev]);
+  };
+  const handleDeleteTeacher = (id: string) => {
+    setTeachers((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Handlers: News
+  const handleAddNews = (newNews: NewsItem) => {
+    setNewsList((prev) => [newNews, ...prev]);
+  };
+  const handleDeleteNews = (id: string) => {
+    setNewsList((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  // Handlers: Events
+  const handleAddEvent = (newEvent: SchoolEvent) => {
+    setEventsList((prev) => [newEvent, ...prev]);
+  };
+  const handleDeleteEvent = (id: string) => {
+    setEventsList((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  // Handlers: Gallery
+  const handleAddGallery = (newItem: GalleryItem) => {
+    setGalleryList((prev) => [newItem, ...prev]);
+  };
+  const handleDeleteGallery = (id: string) => {
+    setGalleryList((prev) => prev.filter((g) => g.id !== id));
+  };
+
+  // Handlers: PPDB
   const handleAddPPDB = (newReg: PPDBRegistration) => {
     setPpdbList((prev) => [newReg, ...prev]);
   };
-
-  // Handler: Update PPDB status
   const handleUpdatePPDBStatus = (id: string, status: PPDBRegistration['status'], notes?: string) => {
     setPpdbList((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status, notes: notes || item.notes } : item))
@@ -129,6 +206,8 @@ export default function App() {
       {/* 1. School Header with Crest and Notification Bell */}
       <Header
         session={session}
+        notifications={notifications}
+        onNavigateTab={(tab) => setActiveTab(tab)}
         onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={() => {
           setSession(null);
@@ -138,22 +217,12 @@ export default function App() {
           if (session) {
             setActiveTab('dashboard');
           } else {
-            setActiveTab('berita');
+            setIsLoginModalOpen(true);
           }
         }}
-        onOpenEncryptionModal={() => {
-          if (session) {
-            setActiveTab('dashboard');
-          } else {
-            alert('Sistem Enkripsi AES-256 Aktif: Seluruh identitas NIK, NISN, dan kontak siswa terlindungi.');
-          }
-        }}
-        notifications={notifications}
-        onSearch={() => setActiveTab('statistik')}
-        onNavigateTab={(tab) => setActiveTab(tab)}
       />
 
-      {/* 2. Responsive Purple Primary Navbar */}
+      {/* 2. Top Navigation Bar with Distinct Tabs */}
       <Navbar
         activeTab={activeTab}
         onSelectTab={(tab) => {
@@ -183,8 +252,8 @@ export default function App() {
             <QuickActionRibbon onNavigateTab={(tab) => setActiveTab(tab)} />
 
             {/* Two-Column Showcase: Upcoming Events & District News */}
-            <UpcomingEvents onNavigateTab={(tab) => setActiveTab(tab)} />
-            <DistrictNews onNavigateTab={(tab) => setActiveTab(tab)} />
+            <UpcomingEvents events={eventsList} onNavigateTab={(tab) => setActiveTab(tab)} />
+            <DistrictNews newsList={newsList} onNavigateTab={(tab) => setActiveTab(tab)} />
 
             {/* Interactive Statistics Dashboard Preview (Active vs Alumni Split!) */}
             <StatsDashboard students={students} />
@@ -193,7 +262,7 @@ export default function App() {
             <TeacherStaffSection teachers={teachers} />
 
             {/* Student Gallery Preview */}
-            <StudentGallery />
+            <StudentGallery items={galleryList} />
           </div>
         )}
 
@@ -219,21 +288,21 @@ export default function App() {
                 <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#432874] flex items-center justify-center">
                   <BookOpen className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">MIPA (Matematika & Sains)</h3>
+                <h3 className="text-lg font-bold text-slate-900">MIPA (Matematika & Ilmu Alam)</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Fasilitas laboratorium Fisika, Kimia, dan Biologi berstandar lengkap. Fokus pada eksperimen ilmiah,
-                  bimbingan intensif Olimpiade Sains Nasional (OSN), dan persiapan masuk fakultas kedokteran & teknik terkemuka.
+                  Fokus pada penguatan Fisika, Kimia, Biologi, dan Matematika Tingkat Lanjut dengan praktikum
+                  laboratorium sains modern dan riset keanekaragaman hayati Flores.
                 </p>
               </div>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">IPS (Ilmu Pengetahuan Sosial)</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Menelaah dinamika sosiologis, ekonomi moneter, kewirausahaan, serta sejarah dan hukum. Mempersiapkan lulusan
-                  menjadi pemimpin publik, diplomat, advokat, ekonom, dan aparatur sipil negara handal.
+                  Pendalaman Sosiologi masyarakat Manggarai, Ekonomi terapan, Geografi kepulauan, dan Sejarah Nusantara
+                  untuk mencetak calon pemimpin daerah yang berjiwa sosial dan berintegritas.
                 </p>
               </div>
 
@@ -273,7 +342,7 @@ export default function App() {
 
         {/* PAGE 6: GALERI KEGIATAN SISWA */}
         {activeTab === 'galeri' && (
-          <StudentGallery />
+          <StudentGallery items={galleryList} />
         )}
 
         {/* PAGE 7: BERITA & PENGUMUMAN */}
@@ -289,10 +358,10 @@ export default function App() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <DistrictNews onNavigateTab={(tab) => setActiveTab(tab)} />
+                <DistrictNews newsList={newsList} onNavigateTab={(tab) => setActiveTab(tab)} />
               </div>
               <div>
-                <UpcomingEvents onNavigateTab={(tab) => setActiveTab(tab)} />
+                <UpcomingEvents events={eventsList} onNavigateTab={(tab) => setActiveTab(tab)} />
               </div>
             </div>
           </div>
@@ -303,13 +372,27 @@ export default function App() {
           <DashboardView
             session={session}
             students={students}
+            teachers={teachers}
+            newsList={newsList}
+            eventsList={eventsList}
+            galleryList={galleryList}
             ppdbList={ppdbList}
             notifications={notifications}
             onAddStudent={handleAddStudent}
             onDeleteStudent={handleDeleteStudent}
+            onAddTeacher={handleAddTeacher}
+            onDeleteTeacher={handleDeleteTeacher}
+            onAddNews={handleAddNews}
+            onDeleteNews={handleDeleteNews}
+            onAddEvent={handleAddEvent}
+            onDeleteEvent={handleDeleteEvent}
+            onAddGallery={handleAddGallery}
+            onDeleteGallery={handleDeleteGallery}
+            onAddPPDB={handleAddPPDB}
             onUpdatePPDBStatus={handleUpdatePPDBStatus}
             onSendPushNotification={handleSendPushNotification}
             onBackToPortal={() => setActiveTab('beranda')}
+            onNavigateToWebsiteTab={(tab) => setActiveTab(tab)}
           />
         )}
       </main>

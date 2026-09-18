@@ -1,6 +1,15 @@
 import React from 'react';
 import { UserCheck, FileSpreadsheet, FileDown, BookOpen } from 'lucide-react';
-import { Student, PPDBRegistration, PushNotification, UserSession } from '../types';
+import {
+  Student,
+  PPDBRegistration,
+  PushNotification,
+  UserSession,
+  TeacherStaff,
+  NewsItem,
+  SchoolEvent,
+  GalleryItem,
+} from '../types';
 import { exportStudentReportPDF } from '../services/pdfExport';
 import { downloadStudentTemplate } from '../services/excelTemplate';
 import { AdminResultDashboard } from './AdminResultDashboard';
@@ -8,10 +17,23 @@ import { AdminResultDashboard } from './AdminResultDashboard';
 interface DashboardViewProps {
   session: UserSession;
   students: Student[];
+  teachers: TeacherStaff[];
+  newsList: NewsItem[];
+  eventsList: SchoolEvent[];
+  galleryList: GalleryItem[];
   ppdbList: PPDBRegistration[];
   notifications: PushNotification[];
   onAddStudent: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
+  onAddTeacher: (teacher: TeacherStaff) => void;
+  onDeleteTeacher: (id: string) => void;
+  onAddNews: (news: NewsItem) => void;
+  onDeleteNews: (id: string) => void;
+  onAddEvent: (event: SchoolEvent) => void;
+  onDeleteEvent: (id: string) => void;
+  onAddGallery: (item: GalleryItem) => void;
+  onDeleteGallery: (id: string) => void;
+  onAddPPDB: (reg: PPDBRegistration) => void;
   onUpdatePPDBStatus: (id: string, status: PPDBRegistration['status'], notes?: string) => void;
   onSendPushNotification: (
     title: string,
@@ -20,32 +42,61 @@ interface DashboardViewProps {
     priority: 'urgent' | 'info' | 'akademik'
   ) => void;
   onBackToPortal?: () => void;
+  onNavigateToWebsiteTab?: (tab: string) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   session,
   students,
+  teachers,
+  newsList,
+  eventsList,
+  galleryList,
   ppdbList,
   notifications,
   onAddStudent,
   onDeleteStudent,
+  onAddTeacher,
+  onDeleteTeacher,
+  onAddNews,
+  onDeleteNews,
+  onAddEvent,
+  onDeleteEvent,
+  onAddGallery,
+  onDeleteGallery,
+  onAddPPDB,
   onUpdatePPDBStatus,
   onSendPushNotification,
   onBackToPortal,
+  onNavigateToWebsiteTab,
 }) => {
-  // 1. If role is admin, render the requested Student Result Dashboard matching the uploaded image
+  // 1. If role is admin, render the requested Student Result Dashboard matching the website and reference UI
   if (session.role === 'admin') {
     return (
       <AdminResultDashboard
         session={session}
         students={students}
+        teachers={teachers}
+        newsList={newsList}
+        eventsList={eventsList}
+        galleryList={galleryList}
         ppdbList={ppdbList}
         notifications={notifications}
         onAddStudent={onAddStudent}
         onDeleteStudent={onDeleteStudent}
+        onAddTeacher={onAddTeacher}
+        onDeleteTeacher={onDeleteTeacher}
+        onAddNews={onAddNews}
+        onDeleteNews={onDeleteNews}
+        onAddEvent={onAddEvent}
+        onDeleteEvent={onDeleteEvent}
+        onAddGallery={onAddGallery}
+        onDeleteGallery={onDeleteGallery}
+        onAddPPDB={onAddPPDB}
         onUpdatePPDBStatus={onUpdatePPDBStatus}
         onSendPushNotification={onSendPushNotification}
         onBackToPortal={onBackToPortal}
+        onNavigateToWebsiteTab={onNavigateToWebsiteTab}
       />
     );
   }
@@ -232,12 +283,48 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {[
-                      { mapel: 'Pendidikan Agama Katolik & Budi Pekerti', kkm: 75, nilai: 94, predikat: 'A', ket: 'Sangat menguasai nilai-nilai etika kristiani dan sakramen gereja.' },
-                      { mapel: 'Fisika Peminatan', kkm: 75, nilai: 91, predikat: 'A', ket: 'Terampil melakukan pemodelan praktikum mekanika gerak dan listrik dinamis.' },
-                      { mapel: 'Biologi Peminatan', kkm: 75, nilai: 93, predikat: 'A', ket: 'Menunjukkan pemahaman mendalam pada analisis bioteknologi pangan lokal.' },
-                      { mapel: 'Matematika Tingkat Lanjut', kkm: 75, nilai: 88, predikat: 'B+', ket: 'Mampu menyelesaikan persoalan kalkulus diferensial dan matriks.' },
-                      { mapel: 'Bahasa & Sastra Inggris', kkm: 75, nilai: 87, predikat: 'B+', ket: 'Aktif berdialog dalam percakapan akademik formal.' },
-                      { mapel: 'Pendidikan Pancasila', kkm: 75, nilai: 92, predikat: 'A', ket: 'Menghayati nilai toleransi dan wawasan kebangsaan yang luhur.' },
+                      {
+                        mapel: 'Pendidikan Agama Katolik & Budi Pekerti',
+                        kkm: 75,
+                        nilai: 94,
+                        predikat: 'A',
+                        ket: 'Sangat menguasai nilai-nilai etika kristiani dan sakramen gereja.',
+                      },
+                      {
+                        mapel: 'Fisika Peminatan',
+                        kkm: 75,
+                        nilai: 91,
+                        predikat: 'A',
+                        ket: 'Terampil melakukan pemodelan praktikum mekanika gerak dan listrik dinamis.',
+                      },
+                      {
+                        mapel: 'Biologi Peminatan',
+                        kkm: 75,
+                        nilai: 93,
+                        predikat: 'A',
+                        ket: 'Menunjukkan pemahaman mendalam pada analisis bioteknologi pangan lokal.',
+                      },
+                      {
+                        mapel: 'Matematika Tingkat Lanjut',
+                        kkm: 75,
+                        nilai: 88,
+                        predikat: 'B+',
+                        ket: 'Mampu menyelesaikan persoalan kalkulus diferensial dan matriks.',
+                      },
+                      {
+                        mapel: 'Bahasa & Sastra Inggris',
+                        kkm: 75,
+                        nilai: 87,
+                        predikat: 'B+',
+                        ket: 'Aktif berdialog dalam percakapan akademik formal.',
+                      },
+                      {
+                        mapel: 'Pendidikan Pancasila',
+                        kkm: 75,
+                        nilai: 92,
+                        predikat: 'A',
+                        ket: 'Menghayati nilai toleransi dan wawasan kebangsaan yang luhur.',
+                      },
                     ].map((row, idx) => (
                       <tr key={idx} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-semibold text-slate-900">{row.mapel}</td>

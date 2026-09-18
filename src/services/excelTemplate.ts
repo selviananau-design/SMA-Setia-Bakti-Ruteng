@@ -163,3 +163,9 @@ export function exportCurrentStudentsToCSV(students: Student[], filename = 'Data
   link.click();
   document.body.removeChild(link);
 }
+
+export function exportStudentsToCSV(students: Student[], statusFilter = 'semua', filename = 'Data_Siswa_SMAK_Setia_Bakti.csv') {
+  const filtered = statusFilter === 'semua' ? students : students.filter((s) => s.status === statusFilter);
+  exportCurrentStudentsToCSV(filtered, filename);
+}
+
