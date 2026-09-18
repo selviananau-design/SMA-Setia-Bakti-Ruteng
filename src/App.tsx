@@ -309,6 +309,7 @@ export default function App() {
             onDeleteStudent={handleDeleteStudent}
             onUpdatePPDBStatus={handleUpdatePPDBStatus}
             onSendPushNotification={handleSendPushNotification}
+            onBackToPortal={() => setActiveTab('beranda')}
           />
         )}
       </main>
