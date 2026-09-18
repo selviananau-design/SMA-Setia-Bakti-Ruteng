@@ -3,14 +3,16 @@ import {
   MapPin,
   Phone,
   Mail,
-  ShieldCheck,
-  GraduationCap,
-  Heart,
-  Globe,
+  Clock,
   Facebook,
+  Twitter,
+  Linkedin,
   Instagram,
   Youtube,
+  ShieldCheck,
+  ArrowRight,
 } from 'lucide-react';
+import { SCHOOL_INFO } from '../data/mockData';
 
 interface FooterProps {
   onNavigate: (tab: string) => void;
@@ -19,173 +21,303 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLogin }) => {
   return (
-    <footer className="w-full bg-[#27104a] text-purple-100 border-t-4 border-amber-400">
+    <footer className="w-full bg-[#080e1a] text-slate-300 border-t border-slate-800 text-xs">
       {/* Upper Footer Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Col 1: School Identity */}
-          <div className="space-y-4">
+      <div className="max-w-7xl mx-auto px-4 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+          {/* Col 1 (4 cols on lg): Identity, Motto & Socials */}
+          <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-purple-900 border border-purple-400/40 flex items-center justify-center font-serif text-amber-300 font-extrabold text-xl shadow">
-                SB
+              <div className="w-10 h-10 rounded-lg bg-slate-900 border border-amber-400/40 flex items-center justify-center text-amber-400 font-serif font-black text-base shadow">
+                ✦
               </div>
               <div>
-                <h3 className="font-serif font-bold text-white text-base leading-tight">
-                  SMA KATOLIK SETIA BAKTI
+                <h3 className="font-serif font-bold text-white text-base tracking-tight uppercase leading-tight">
+                  SMAK SETIA BAKTI
                 </h3>
-                <p className="text-xs text-amber-300 font-semibold tracking-wider uppercase">
-                  Ruteng - Flores - NTT
+                <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  RUTENG — FLORES — NTT
                 </p>
               </div>
             </div>
 
-            <p className="text-xs text-purple-200 leading-relaxed">
-              Lembaga pendidikan menengah Katolik unggulan di bawah naungan Yayasan Sukma Keuskupan Ruteng.
-              Membentuk generasi cerdas, berbudi pekerti luhur, berkarakter kristiani, dan berdaya saing global.
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+              SMA Katolik Setia Bakti Ruteng berdedikasi membentuk pribadi unggul yang memadukan
+              keutamaan iman Kristiani, kecerdasan sains, dan kearifan budaya Manggarai untuk menjadi
+              pemimpin masa depan.
             </p>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="bg-purple-900/80 px-2 py-1 rounded text-amber-300 font-mono font-bold">
-                NPSN: 50302821
-              </span>
-              <span className="bg-emerald-900/60 px-2 py-1 rounded text-emerald-300 font-bold">
-                Akreditasi A Unggul
-              </span>
+            {/* Social Icons matching reference */}
+            <div className="flex items-center gap-2.5 pt-2">
+              <a
+                href="#facebook"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('Facebook Resmi SMA Katolik Setia Bakti Ruteng');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/80 hover:border-amber-400 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                title="Facebook"
+              >
+                <Facebook className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="#twitter"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('Twitter/X Resmi SMA Katolik Setia Bakti');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/80 hover:border-amber-400 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                title="Twitter"
+              >
+                <Twitter className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="#instagram"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('Instagram Resmi @smaksetiabaktirtg');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/80 hover:border-amber-400 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                title="Instagram"
+              >
+                <Instagram className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="#youtube"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('YouTube Humas SMA Katolik Setia Bakti');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700/80 hover:border-amber-400 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                title="YouTube"
+              >
+                <Youtube className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          {/* Col 2: Quick Links */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-purple-800 pb-2">
-              Navigasi Cepat
+          {/* Col 2 (2 cols on lg): Quick Links */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Tautan Cepat
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => onNavigate('beranda')}
-                  className="hover:text-amber-300 transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  Beranda Portal Sekolah
+                  Beranda Portal
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onNavigate('statistik')}
-                  className="hover:text-amber-300 transition-colors cursor-pointer"
+                  onClick={() => onNavigate('akademik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  Dasbor Statistik Siswa & Alumni
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('guru')}
-                  className="hover:text-amber-300 transition-colors cursor-pointer"
-                >
-                  Profil Guru & Tenaga Pendidik
+                  Profil & Kurikulum
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => onNavigate('ppdb')}
-                  className="hover:text-amber-300 transition-colors cursor-pointer font-bold text-amber-300"
+                  className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer font-bold"
                 >
-                  Pendaftaran PPDB Daring 2026/2027
+                  Pendaftaran PPDB
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => onNavigate('galeri')}
-                  className="hover:text-amber-300 transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  Galeri Foto & Video Siswa
+                  Kehidupan Siswa
                 </button>
               </li>
               <li>
                 <button
-                  onClick={onOpenLogin}
-                  className="hover:text-amber-300 transition-colors cursor-pointer text-purple-300 underline"
+                  onClick={() => onNavigate('guru')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  Sistem Login Guru & Orang Tua
+                  Guru & Pendidik
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('berita')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Warta & Berita
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Contact & Address */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-purple-800 pb-2">
-              Kontak & Alamat
+          {/* Col 3 (2 cols on lg): Resources */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Sumber Daya
             </h4>
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                <span className="text-purple-200">
-                  Jl. Pelita No. 7, Watu, Kec. Langke Rembong, Kabupaten Manggarai, Nusa Tenggara Timur 86511
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <span className="text-purple-200">(0385) 21543 / 0812-3456-7890</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <span className="text-purple-200">info@smaksetiabakti.sch.id</span>
-              </div>
-            </div>
-
-            <div className="pt-2 flex items-center gap-3">
-              <a
-                href="#facebook"
-                aria-label="Facebook SMAK Setia Bakti"
-                className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center hover:bg-amber-400 hover:text-purple-950 transition-colors"
-              >
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a
-                href="#instagram"
-                aria-label="Instagram SMAK Setia Bakti"
-                className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center hover:bg-amber-400 hover:text-purple-950 transition-colors"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a
-                href="#youtube"
-                aria-label="YouTube SMAK Setia Bakti"
-                className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center hover:bg-amber-400 hover:text-purple-950 transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-            </div>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <button
+                  onClick={onOpenLogin}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Portal Login Siswa
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={onOpenLogin}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Portal Guru & Staf
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('statistik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Ikatan Alumni (IKASBA)
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('statistik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Dasbor Statistik
+                </button>
+              </li>
+              <li>
+                <a
+                  href="#perpustakaan"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert('Layanan E-Library & Perpustakaan Digital SMAK Setia Bakti Ruteng');
+                  }}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer block"
+                >
+                  Perpustakaan Daring
+                </a>
+              </li>
+            </ul>
           </div>
 
-          {/* Col 4: Privacy & Encryption */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-purple-800 pb-2">
-              Keamanan Data & Privasi
+          {/* Col 4 (2 cols on lg): Admissions */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Akademik & PPDB
             </h4>
-            <div className="p-3 bg-purple-950/60 rounded-xl border border-purple-800/60 space-y-2">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
-                <span className="text-xs font-bold">Enkripsi AES-256 Aktif</span>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <button
+                  onClick={() => onNavigate('akademik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Peminatan MIPA
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('akademik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Peminatan IPS
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('akademik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Bahasa & Budaya
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('ppdb')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Beasiswa Pendidikan
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('akademik')}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Biaya & Syarat Masuk
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 5 (2 cols on lg): Contact Us */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Kontak Resmi
+            </h4>
+            <div className="space-y-2 text-xs text-slate-400">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
+                <span className="leading-snug">{SCHOOL_INFO.address}</span>
               </div>
-              <p className="text-[11px] text-purple-200 leading-relaxed">
-                Seluruh data identitas siswa (NIK/NISN), rekam jejak akademik, dan kontak wali murid dilindungi
-                berdasarkan Undang-Undang Perlindungan Data Pribadi (UU PDP No. 27 Tahun 2022).
-              </p>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <span>{SCHOOL_INFO.phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <span className="truncate">{SCHOOL_INFO.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <span>Sen - Jum: 07:00 - 15:00</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="bg-[#1b0a33] py-4 text-center text-xs text-purple-300 border-t border-purple-900/60">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} SMA Katolik Setia Bakti Ruteng. Hak Cipta Dilindungi.</p>
-          <p className="flex items-center gap-1">
-            <span>Fides, Scientia, et Fraternitas</span>
-            <span>•</span>
-            <span className="text-amber-400 font-semibold">Beriman, Berilmu, dan Bersaudara</span>
-          </p>
+      {/* Bottom Legal Bar */}
+      <div className="border-t border-slate-800/80 py-6 px-4 bg-[#050912]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+          <p>© 2026 SMA Katolik Setia Bakti Ruteng. Hak Cipta Dilindungi Undang-Undang.</p>
+          <div className="flex items-center gap-6">
+            <a
+              href="#privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Kebijakan Privasi & Perlindungan Data Siswa Sesuai UU No. 27/2022 (UU PDP).');
+              }}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Kebijakan Privasi
+            </a>
+            <a
+              href="#terms"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Syarat & Ketentuan Layanan Portal Resmi SMAK Setia Bakti Ruteng.');
+              }}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Syarat & Ketentuan
+            </a>
+            <a
+              href="#sitemap"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Peta Situs Portal SMAK Setia Bakti Ruteng.');
+              }}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Peta Situs
+            </a>
+          </div>
         </div>
       </div>
     </footer>

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { HeroSlider } from './components/HeroSlider';
+import { AcademicProgramsSection } from './components/AcademicProgramsSection';
+import { CampusLifeSection } from './components/CampusLifeSection';
+import { WhyChooseUsSection } from './components/WhyChooseUsSection';
+import { StudentVoiceAndNewsSection } from './components/StudentVoiceAndNewsSection';
 import { QuickActionRibbon } from './components/QuickActionRibbon';
 import { UpcomingEvents } from './components/UpcomingEvents';
 import { DistrictNews } from './components/DistrictNews';
@@ -220,6 +224,7 @@ export default function App() {
             setIsLoginModalOpen(true);
           }
         }}
+        activeTab={activeTab}
       />
 
       {/* 2. Top Navigation Bar with Distinct Tabs */}
@@ -245,23 +250,35 @@ export default function App() {
         {/* PAGE 1: BERANDA (HOME) */}
         {activeTab === 'beranda' && (
           <div className="space-y-0">
-            {/* Hero Slider with Quick Facts Badge */}
+            {/* 1. Grand Hero Slider with Overlapping Stats Ribbon (matches reference) */}
             <HeroSlider onNavigateTab={(tab) => setActiveTab(tab)} />
 
-            {/* Quick Action Ribbon (PPDB Daring, Info Akademik, Data Siswa, Profil Guru, Galeri) */}
+            {/* 2. Academic Excellence: "Find the Program That Inspires You" (matches reference) */}
+            <AcademicProgramsSection onNavigateTab={(tab) => setActiveTab(tab)} />
+
+            {/* 3. Vibrant Campus Life: "Experience More Than Education" Dark Navy Showcase (matches reference) */}
+            <CampusLifeSection onNavigateTab={(tab) => setActiveTab(tab)} />
+
+            {/* 4. Why SMAK Setia Bakti: "A School That Supports You" 4-Pillars (matches reference) */}
+            <WhyChooseUsSection onNavigateTab={(tab) => setActiveTab(tab)} />
+
+            {/* 5. Tri-Column Showcase: Student Voice + Latest News & Events + PPDB Next Step Callout (matches reference) */}
+            <StudentVoiceAndNewsSection
+              newsList={newsList}
+              events={eventsList}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+
+            {/* 6. Quick Action Facility Modals (Athletics, Asrama, Kantin Sehat, Kalender Akademik) */}
             <QuickActionRibbon onNavigateTab={(tab) => setActiveTab(tab)} />
 
-            {/* Two-Column Showcase: Upcoming Events & District News */}
-            <UpcomingEvents events={eventsList} onNavigateTab={(tab) => setActiveTab(tab)} />
-            <DistrictNews newsList={newsList} onNavigateTab={(tab) => setActiveTab(tab)} />
-
-            {/* Interactive Statistics Dashboard Preview (Active vs Alumni Split!) */}
+            {/* 7. Interactive Statistics & Alumni Tracker */}
             <StatsDashboard students={students} />
 
-            {/* Teachers & Staff Directory Preview */}
+            {/* 8. Teachers & Faculty Directory Preview */}
             <TeacherStaffSection teachers={teachers} />
 
-            {/* Student Gallery Preview */}
+            {/* 9. Student Gallery & Campus Life Documentation */}
             <StudentGallery items={galleryList} />
           </div>
         )}

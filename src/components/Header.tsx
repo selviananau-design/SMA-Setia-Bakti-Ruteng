@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
-import { Search, Bell, ShieldCheck, UserCheck, Phone, MapPin, Mail, LogOut } from 'lucide-react';
+import {
+  Search,
+  Bell,
+  Phone,
+  Mail,
+  Compass,
+  FileEdit,
+  Users,
+  GraduationCap,
+  ShieldCheck,
+  UserCheck,
+  LogOut,
+  ArrowRight,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import { SCHOOL_INFO } from '../data/mockData';
 import { UserSession, PushNotification } from '../types';
 
@@ -12,6 +27,7 @@ interface HeaderProps {
   notifications?: PushNotification[];
   onSearch?: (query: string) => void;
   onNavigateTab?: (tab: string) => void;
+  activeTab?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,186 +39,273 @@ export const Header: React.FC<HeaderProps> = ({
   notifications = [],
   onSearch,
   onNavigateTab = () => {},
+  activeTab = 'beranda',
 }) => {
   const [searchInput, setSearchInput] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchInput.trim() && onSearch) {
       onSearch(searchInput.trim());
+      setSearchOpen(false);
     }
   };
 
   return (
-    <header className="w-full bg-white border-b border-slate-200">
-      {/* Topmost Bar - Exactly matching the reference image topbar */}
-      <div className="bg-[#1f1635] text-slate-200 text-xs py-2 px-4 border-b border-purple-950">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          {/* Left: District / Home Breadcrumb */}
-          <div className="flex items-center gap-4">
+    <header className="w-full bg-white z-50">
+      {/* 1. TOP ANNOUNCEMENT BANNER (Matches top promo banner in reference) */}
+      <div className="w-full bg-[#170e28] text-white text-xs py-2 px-4 border-b border-purple-900/40">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="bg-amber-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+              PPDB 2026/2027
+            </span>
+            <span className="text-slate-200 text-xs font-medium hidden sm:inline">
+              Penerimaan Peserta Didik Baru Telah Dibuka! Buka Peluang Masa Depan Terbaikmu.
+            </span>
+            <span className="text-slate-200 text-xs font-medium sm:hidden">
+              Penerimaan Siswa Baru Dibuka!
+            </span>
+          </div>
+          <button
+            onClick={() => onNavigateTab('ppdb')}
+            className="bg-[#f59e0b] hover:bg-[#d97706] text-slate-950 font-bold px-3 py-1 rounded text-[11px] flex items-center gap-1.5 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+          >
+            <span>DAFTAR SEKARANG</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2. TOP UTILITY BAR (Matches clean utility row in reference) */}
+      <div className="w-full bg-[#f8fafc] border-b border-slate-200 text-slate-600 text-xs py-2 px-4 hidden md:block">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Left Utility Links */}
+          <div className="flex items-center space-x-6 text-[11px] font-semibold">
             <button
-              onClick={() => onNavigateTab('beranda')}
-              className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer font-medium"
+              onClick={() => onNavigateTab('akademik')}
+              className="flex items-center gap-1.5 hover:text-slate-950 transition-colors cursor-pointer"
             >
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Portal Resmi SMAK Setia Bakti
+              <Compass className="w-3.5 h-3.5 text-amber-600" />
+              <span>Tur Sekolah</span>
             </button>
-            <span className="text-purple-400 hidden md:inline">|</span>
-            <div className="hidden lg:flex items-center gap-2 text-slate-300">
-              <MapPin className="w-3.5 h-3.5 text-purple-400" />
-              <span>{SCHOOL_INFO.address}</span>
-            </div>
+            <button
+              onClick={() => onNavigateTab('ppdb')}
+              className="flex items-center gap-1.5 hover:text-slate-950 transition-colors cursor-pointer text-purple-900 font-bold"
+            >
+              <FileEdit className="w-3.5 h-3.5 text-purple-700" />
+              <span>Daftar PPDB</span>
+            </button>
+            <button
+              onClick={() => onNavigateTab('statistik')}
+              className="flex items-center gap-1.5 hover:text-slate-950 transition-colors cursor-pointer"
+            >
+              <Users className="w-3.5 h-3.5 text-slate-500" />
+              <span>Siswa & Alumni</span>
+            </button>
+            <button
+              onClick={() => onNavigateTab('guru')}
+              className="flex items-center gap-1.5 hover:text-slate-950 transition-colors cursor-pointer"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
+              <span>Guru & Staf</span>
+            </button>
           </div>
 
-          {/* Right: Contact & Quick Links */}
-          <div className="flex items-center gap-4 text-slate-300">
-            <div className="hidden sm:flex items-center gap-2">
-              <Phone className="w-3.5 h-3.5 text-purple-400" />
-              <span>Telp: {SCHOOL_INFO.phone}</span>
-            </div>
-            <span className="text-purple-400 hidden sm:inline">|</span>
-            <button
-              onClick={onOpenEncryptionModal}
-              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/50"
-              title="Perlindungan Enkripsi Data 256-Bit Aktif"
+          {/* Right Contact Info & Security */}
+          <div className="flex items-center space-x-5 text-[11px]">
+            <a
+              href="tel:038521455"
+              className="flex items-center gap-1.5 hover:text-slate-900 transition-colors font-medium text-slate-600"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-[11px] font-medium">Data Terenkripsi (UU PDP)</span>
-            </button>
+              <Phone className="w-3 h-3 text-slate-400" />
+              <span>+62 (0385) 21455</span>
+            </a>
+            <span className="text-slate-300">|</span>
+            <a
+              href="mailto:info@smaksetiabaktirtg.sch.id"
+              className="flex items-center gap-1.5 hover:text-slate-900 transition-colors font-medium text-slate-600"
+            >
+              <Mail className="w-3 h-3 text-slate-400" />
+              <span>info@smaksetiabaktirtg.sch.id</span>
+            </a>
+            {onOpenEncryptionModal && (
+              <>
+                <span className="text-slate-300">|</span>
+                <button
+                  onClick={onOpenEncryptionModal}
+                  className="flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-semibold transition-colors cursor-pointer"
+                  title="Enkripsi Data 256-Bit Aktif Sesuai UU PDP"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Data Terenkripsi</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Main Branding Header - Exactly matching Norwich City School District structure */}
-      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* School Logo and Title */}
-        <div
-          onClick={() => onNavigateTab('beranda')}
-          className="flex items-center gap-3.5 cursor-pointer group"
-        >
-          {/* Logo Emblem styled after the purple swirling torch emblem */}
-          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#3b1d70] via-[#512b91] to-[#25104a] flex items-center justify-center shadow-md shadow-purple-950/20 text-white border-2 border-purple-200/40 overflow-hidden flex-shrink-0">
-            {/* Artistic Catholic Cross & Light Rays */}
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-300 via-transparent to-transparent"></div>
-            <div className="text-center font-serif leading-none flex flex-col items-center">
-              <span className="text-amber-300 text-lg font-bold">✝</span>
-              <span className="text-[10px] tracking-widest font-sans font-bold text-purple-100 uppercase mt-0.5">SB</span>
-              <span className="text-[8px] text-amber-200/90 font-mono">1968</span>
+      {/* 3. MAIN STICKY NAVIGATION BAR (Matches sleek university navbar in reference) */}
+      <div className="w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+          {/* Logo & School Name */}
+          <div
+            onClick={() => onNavigateTab('beranda')}
+            className="flex items-center gap-3 cursor-pointer group select-none"
+          >
+            {/* Elegant Crest Logo (Square navy badge with gold heraldic star/cross) */}
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg bg-[#0f172a] text-[#f59e0b] flex items-center justify-center border border-amber-400/40 shadow-sm relative overflow-hidden group-hover:scale-105 transition-transform flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+              <div className="text-center flex flex-col items-center">
+                <span className="text-amber-400 font-serif font-black text-lg leading-none">✦</span>
+                <span className="text-[9px] font-sans font-extrabold tracking-widest text-slate-200 uppercase mt-0.5">
+                  SB
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight font-serif uppercase leading-tight group-hover:text-purple-900 transition-colors">
+                SMAK SETIA BAKTI
+              </h1>
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
+                RUTENG — FLORES — NTT
+              </p>
             </div>
           </div>
 
-          <div>
-            <p className="text-[10px] sm:text-xs font-semibold tracking-wider text-purple-800 uppercase font-['Plus_Jakarta_Sans']">
-              Yayasan Persekolahan St. Paulus Ruteng
-            </p>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#321759] tracking-tight font-['Cinzel',serif] uppercase leading-tight">
-              SMAK Setia Bakti
-            </h1>
-            <p className="text-xs sm:text-sm font-semibold text-purple-900 tracking-wider uppercase font-['Cinzel',serif]">
-              Ruteng - Flores - NTT
-            </p>
-          </div>
-        </div>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center space-x-7">
+            <button
+              onClick={() => onNavigateTab('beranda')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 ${
+                activeTab === 'beranda'
+                  ? 'text-[#0f172a] border-b-2 border-[#0f172a]'
+                  : 'text-slate-600 hover:text-[#0f172a]'
+              }`}
+            >
+              Beranda
+            </button>
+            <button
+              onClick={() => onNavigateTab('akademik')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 ${
+                activeTab === 'akademik'
+                  ? 'text-[#0f172a] border-b-2 border-[#0f172a]'
+                  : 'text-slate-600 hover:text-[#0f172a]'
+              }`}
+            >
+              Akademik
+            </button>
+            <button
+              onClick={() => onNavigateTab('ppdb')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 flex items-center gap-1.5 ${
+                activeTab === 'ppdb'
+                  ? 'text-amber-600 border-b-2 border-amber-600'
+                  : 'text-slate-600 hover:text-amber-600'
+              }`}
+            >
+              <span>PPDB Online</span>
+              <span className="bg-emerald-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase">
+                Buka
+              </span>
+            </button>
+            <button
+              onClick={() => onNavigateTab('galeri')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 ${
+                activeTab === 'galeri'
+                  ? 'text-[#0f172a] border-b-2 border-[#0f172a]'
+                  : 'text-slate-600 hover:text-[#0f172a]'
+              }`}
+            >
+              Kehidupan Siswa
+            </button>
+            <button
+              onClick={() => onNavigateTab('guru')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 ${
+                activeTab === 'guru'
+                  ? 'text-[#0f172a] border-b-2 border-[#0f172a]'
+                  : 'text-slate-600 hover:text-[#0f172a]'
+              }`}
+            >
+              Guru & Staf
+            </button>
+            <button
+              onClick={() => onNavigateTab('berita')}
+              className={`text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer pb-1 ${
+                activeTab === 'berita'
+                  ? 'text-[#0f172a] border-b-2 border-[#0f172a]'
+                  : 'text-slate-600 hover:text-[#0f172a]'
+              }`}
+            >
+              Warta & Agenda
+            </button>
+          </nav>
 
-        {/* Search Bar, Social Icons & User Role Controls */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto justify-end">
-          {/* Search Form matching the top-right search in reference photo */}
-          <form onSubmit={handleSearchSubmit} className="flex items-center w-full sm:w-64">
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Cari berita, agenda, siswa..."
-                className="w-full pl-3 pr-8 py-1.5 text-xs bg-slate-100 border border-slate-300 rounded-l focus:outline-none focus:ring-1 focus:ring-purple-600 focus:bg-white text-slate-800 placeholder:text-slate-400"
-              />
-              {searchInput && (
+          {/* Right Action Controls: Search, Notification, Apply Button */}
+          <div className="flex items-center space-x-3">
+            {/* Search Trigger / Inline Expandable */}
+            <div className="relative">
+              {searchOpen ? (
+                <form onSubmit={handleSearchSubmit} className="flex items-center">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Cari berita, agenda, siswa..."
+                    className="w-48 sm:w-60 text-xs py-1.5 pl-3 pr-8 bg-slate-100 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white text-slate-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(false)}
+                    className="absolute right-2.5 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              ) : (
                 <button
-                  type="button"
-                  onClick={() => setSearchInput('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  onClick={() => setSearchOpen(true)}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+                  aria-label="Buka Pencarian"
                 >
-                  ×
+                  <Search className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <button
-              type="submit"
-              className="bg-[#512b91] hover:bg-[#3d1d73] text-white px-3 py-1.5 rounded-r transition-colors flex items-center justify-center cursor-pointer"
-              title="Cari"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </form>
 
-          {/* Social Icons & Action Badges */}
-          <div className="flex items-center gap-2">
-            {/* Social media icons matching the blue circle icons in reference photo */}
-            <a
-              href="#facebook"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Membuka Halaman Resmi Facebook: SMA Katolik Setia Bakti Ruteng Official');
-              }}
-              className="w-7 h-7 rounded-full bg-[#1877F2] text-white flex items-center justify-center text-xs font-bold hover:opacity-90 shadow-sm"
-              title="Facebook SMAK Setia Bakti"
-            >
-              f
-            </a>
-            <a
-              href="#twitter"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Membuka Twitter/X: @SMAKSetiaBakti');
-              }}
-              className="w-7 h-7 rounded-full bg-[#1DA1F2] text-white flex items-center justify-center text-xs font-bold hover:opacity-90 shadow-sm"
-              title="Twitter/X SMAK Setia Bakti"
-            >
-              t
-            </a>
-            <a
-              href="#youtube"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Membuka Saluran YouTube: Humas SMAK Setia Bakti Ruteng');
-              }}
-              className="w-7 h-7 rounded-full bg-[#CD201F] text-white flex items-center justify-center text-xs font-bold hover:opacity-90 shadow-sm"
-              title="YouTube SMAK Setia Bakti"
-            >
-              ▶
-            </a>
-
-            {/* Notification Bell with Badge */}
+            {/* Notification Bell */}
             <button
               onClick={onOpenNotifications}
-              className="relative p-1.5 text-slate-600 hover:text-purple-700 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer ml-1"
-              title="Pemberitahuan & Notifikasi Real-Time"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Notifikasi & Pengumuman"
+              aria-label="Notifikasi"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white animate-bounce">
-                  {unreadCount}
-                </span>
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse" />
               )}
             </button>
 
-            {/* Session / Login Status */}
+            {/* Session / Portal Login Pill */}
             {session ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="flex items-center gap-1.5 pl-1">
                 <button
-                  onClick={() => onNavigateTab('portal')}
-                  className="flex items-center gap-1.5 bg-purple-100 hover:bg-purple-200 text-purple-900 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer"
+                  onClick={() => onNavigateTab('dashboard')}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-purple-700" />
-                  <span className="max-w-[100px] truncate">{session.name.split(' ')[0]}</span>
-                  <span className="bg-purple-700 text-white text-[10px] px-1 rounded uppercase font-mono">
+                  <span className="hidden sm:inline">{session.name.split(' ')[0]}</span>
+                  <span className="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-full uppercase">
                     {session.role}
                   </span>
                 </button>
                 <button
                   onClick={onLogout}
-                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-full hover:bg-rose-50 transition-colors cursor-pointer"
                   title="Keluar"
                 >
                   <LogOut className="w-4 h-4" />
@@ -211,11 +314,20 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={onOpenLogin}
-                className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold px-3 py-1.5 rounded shadow-sm hover:shadow transition-all cursor-pointer flex items-center gap-1.5 ml-1"
+                className="hidden sm:inline-block text-xs font-bold text-slate-700 hover:text-slate-950 px-2 py-1.5 transition-colors cursor-pointer"
               >
-                <span>Login Portal</span>
+                Masuk
               </button>
             )}
+
+            {/* Primary Navy Pill Button: DAFTAR PPDB -> (Matches APPLY NOW -> in mockup) */}
+            <button
+              onClick={() => onNavigateTab('ppdb')}
+              className="bg-[#0f172a] hover:bg-slate-800 text-white text-xs font-extrabold px-4 sm:px-5 py-2.5 rounded-md flex items-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap"
+            >
+              <span>DAFTAR PPDB</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>
