@@ -25,12 +25,12 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, e
   return (
     <section className="w-full py-8 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header with line and 'View All Events >' exactly like reference photo */}
+        {/* Section Header with line and 'Lihat Semua Agenda >' */}
         <div className="flex items-center justify-between border-b-2 border-purple-800 pb-2 mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#321759] font-serif tracking-tight flex items-center gap-2.5">
-            <span>Upcoming Events</span>
+            <span>Agenda & Kegiatan Mendatang</span>
             <span className="text-xs font-sans font-normal text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full hidden sm:inline-block">
-              Agenda Sekolah
+              Kalender Sekolah
             </span>
           </h2>
           <button
@@ -38,7 +38,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, e
             className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#522d8a] hover:text-purple-950 transition-colors cursor-pointer group"
           >
             <Calendar className="w-4 h-4 text-[#522d8a]" />
-            <span>View All Events &gt;</span>
+            <span>Lihat Semua Agenda &gt;</span>
           </button>
         </div>
 
@@ -48,7 +48,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, e
           <button
             onClick={handlePrev}
             className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-slate-300 shadow-md text-slate-600 hover:text-purple-900 hover:border-purple-600 flex items-center justify-center transition-all cursor-pointer"
-            aria-label="Previous Events"
+            aria-label="Agenda Sebelumnya"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -98,7 +98,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, e
                     onClick={() => setSelectedEvent(evt)}
                     className="text-xs font-bold text-[#522d8a] hover:text-purple-950 transition-colors cursor-pointer group-hover:translate-x-0.5 transition-transform"
                   >
-                    Read More &gt;
+                    Lihat Detail &gt;
                   </button>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ onNavigateTab, e
           <button
             onClick={handleNext}
             className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-slate-300 shadow-md text-slate-600 hover:text-purple-900 hover:border-purple-600 flex items-center justify-center transition-all cursor-pointer"
-            aria-label="Next Events"
+            aria-label="Agenda Berikutnya"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

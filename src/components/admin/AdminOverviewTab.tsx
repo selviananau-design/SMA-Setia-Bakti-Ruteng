@@ -60,9 +60,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-baseline gap-3 font-sans">
-            <span>OVERVIEW</span>
+            <span>IKHTISAR KINERJA</span>
             <span className="text-sm sm:text-base font-normal text-slate-500 tracking-normal">
-              Performance at a Glance
+              Rangkuman Capaian Akademik Sekolah
             </span>
           </h2>
         </div>
@@ -75,9 +75,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
               onChange={(e) => setAcademicYear(e.target.value)}
               className="appearance-none bg-white text-slate-700 text-xs font-semibold px-4 py-2.5 pr-8 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
-              <option value="2024/2025">Academic Year: 2024/2025</option>
-              <option value="2025/2026">Academic Year: 2025/2026</option>
-              <option value="2026/2027">Academic Year: 2026/2027</option>
+              <option value="2024/2025">Tahun Ajaran: 2024/2025</option>
+              <option value="2025/2026">Tahun Ajaran: 2025/2026</option>
+              <option value="2026/2027">Tahun Ajaran: 2026/2027</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -88,9 +88,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
               onChange={(e) => setTerm(e.target.value)}
               className="appearance-none bg-white text-slate-700 text-xs font-semibold px-4 py-2.5 pr-8 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
-              <option value="1st Term">Term: 1st Term</option>
-              <option value="2nd Term">Term: 2nd Term</option>
-              <option value="Final Term">Term: Final Term</option>
+              <option value="1st Term">Semester: Ganjil</option>
+              <option value="2nd Term">Semester: Genap</option>
+              <option value="Final Term">Semester: Ujian Akhir</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -98,14 +98,14 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           <button
             onClick={() => exportStudentReportPDF(students, 'semua')}
             className="w-10 h-10 rounded-xl bg-[#5d3b9e] hover:bg-[#4d2f88] text-white flex items-center justify-center shadow-md shadow-purple-500/20 transition-transform active:scale-95 cursor-pointer"
-            title="Print / Unduh Laporan PDF"
+            title="Cetak / Unduh Laporan PDF"
           >
             <Printer className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* 5 COLORFUL METRIC CARDS (Exact match to top row of screenshot) */}
+      {/* 5 COLORFUL METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* 1. TOTAL STUDENTS (Royal Blue) */}
         <div className="bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] text-white p-5 rounded-2xl shadow-lg shadow-blue-500/15 flex items-center gap-4 transition-transform hover:-translate-y-1">
@@ -114,11 +114,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-100 block">
-              TOTAL STUDENTS
+              TOTAL SISWA
             </span>
             <p className="text-2xl font-black tracking-tight mt-0.5">{totalCount.toLocaleString()}</p>
             <span className="text-[11px] font-semibold text-emerald-300 flex items-center gap-0.5 mt-0.5">
-              <TrendingUp className="w-3 h-3" /> ↑ 8.5% vs Last Term
+              <TrendingUp className="w-3 h-3" /> ↑ 8.5% vs Semester Lalu
             </span>
           </div>
         </div>
@@ -130,11 +130,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 block">
-              STUDENTS PASSED
+              SISWA LULUS / TUNTAS
             </span>
             <p className="text-2xl font-black tracking-tight mt-0.5">{passedCount > 0 ? passedCount : '1,078'}</p>
             <span className="text-[11px] font-semibold text-emerald-200 block mt-0.5">
-              {passedPercent}% Pass Rate
+              {passedPercent}% Tingkat Kelulusan
             </span>
           </div>
         </div>
@@ -146,11 +146,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-100 block">
-              DISTINCTIONS
+              PRESTASI UNGGUL
             </span>
             <p className="text-2xl font-black tracking-tight mt-0.5">{distinctionCount > 0 ? distinctionCount : '312'}</p>
             <span className="text-[11px] font-semibold text-purple-200 block mt-0.5">
-              {distinctionPercent}% of Total
+              {distinctionPercent}% dari Total Siswa
             </span>
           </div>
         </div>
@@ -162,11 +162,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100 block">
-              AVERAGE SCORE
+              RERATA NILAI
             </span>
             <p className="text-2xl font-black tracking-tight mt-0.5">{avgGpa}%</p>
             <span className="text-[11px] font-semibold text-emerald-300 flex items-center gap-0.5 mt-0.5">
-              <TrendingUp className="w-3 h-3" /> ↑ 4.7% vs Last Term
+              <TrendingUp className="w-3 h-3" /> ↑ 4.7% vs Semester Lalu
             </span>
           </div>
         </div>
@@ -178,11 +178,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-100 block">
-              FAIL RATE
+              TINGKAT REMEDIAL
             </span>
             <p className="text-2xl font-black tracking-tight mt-0.5">{failPercent}%</p>
             <span className="text-[11px] font-semibold text-cyan-200 flex items-center gap-0.5 mt-0.5">
-              <TrendingDown className="w-3 h-3" /> ↓ 4.7% vs Last Term
+              <TrendingDown className="w-3 h-3" /> ↓ 4.7% vs Semester Lalu
             </span>
           </div>
         </div>
@@ -260,8 +260,8 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
         {/* COLUMN 1 (Left 4 cols): RESULT SUMMARY DONUT */}
         <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase">RESULT SUMMARY</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Overall Grade Distribution</p>
+            <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase">REKAPITULASI NILAI</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Distribusi Predikat Nilai Seluruh Siswa</p>
           </div>
 
           {/* Donut Chart SVG */}
@@ -326,7 +326,7 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
               <span className="text-xl font-black text-slate-800 tracking-tight">1,250</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL SISWA</span>
             </div>
           </div>
 
@@ -335,35 +335,35 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                Distinction (80 - 100)
+                Sangat Baik / A (80 - 100)
               </span>
               <span className="font-bold text-slate-800">25.0%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                Credit (60 - 79)
+                Baik / B (60 - 79)
               </span>
               <span className="font-bold text-slate-800">35.6%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                Pass (50 - 59)
+                Cukup / C (50 - 59)
               </span>
               <span className="font-bold text-slate-800">18.2%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                Average (40 - 49)
+                Kurang / D (40 - 49)
               </span>
               <span className="font-bold text-slate-800">12.4%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                Fail (0 - 39)
+                Remedial / E (0 - 39)
               </span>
               <span className="font-bold text-slate-800">8.8%</span>
             </div>
@@ -374,9 +374,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
         <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase">
-              AVERAGE SCORE BY SUBJECT
+              RERATA NILAI PER MAPEL
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Top Core Academic Disciplines</p>
+            <p className="text-xs text-slate-400 mt-0.5">Mata Pelajaran Pokok Akademik</p>
           </div>
 
           <div className="h-56 my-2 flex items-end justify-between gap-3 px-2 pt-6 relative border-b border-slate-200">
@@ -388,11 +388,11 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
             </div>
 
             {[
-              { subject: 'Mathematics', score: 82, color: 'from-blue-500 to-indigo-600' },
-              { subject: 'English', score: 76, color: 'from-emerald-500 to-teal-600' },
-              { subject: 'Science', score: 72, color: 'from-purple-500 to-indigo-600' },
-              { subject: 'Social Studies', score: 69, color: 'from-amber-500 to-orange-600' },
-              { subject: 'Computer', score: 65, color: 'from-cyan-500 to-blue-600' },
+              { subject: 'Matematika', score: 82, color: 'from-blue-500 to-indigo-600' },
+              { subject: 'B. Inggris', score: 76, color: 'from-emerald-500 to-teal-600' },
+              { subject: 'IPA Sains', score: 72, color: 'from-purple-500 to-indigo-600' },
+              { subject: 'IPS Terpadu', score: 69, color: 'from-amber-500 to-orange-600' },
+              { subject: 'Informatika', score: 65, color: 'from-cyan-500 to-blue-600' },
             ].map((col) => (
               <div key={col.subject} className="flex-1 flex flex-col items-center gap-2 z-10">
                 <span className="text-[11px] font-bold text-slate-700">{col.score}%</span>
@@ -408,7 +408,7 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Target KKM Sekolah: 75%</span>
+            <span>Standar KKTP Sekolah: 75.0</span>
             <span className="font-bold text-emerald-600">80% Tercapai</span>
           </div>
         </div>
@@ -417,18 +417,18 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
         <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase">
-              TOP PERFORMING STUDENTS
+              SISWA PRESTASI TERBAIK
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Highest GPA & Academic Rank</p>
+            <p className="text-xs text-slate-400 mt-0.5">Peringkat & Nilai Rapor Tertinggi</p>
           </div>
 
           <div className="space-y-2.5 my-3">
             {[
-              { rank: 1, name: 'Aisha Muhammad', score: '95.6%', medal: 'bg-amber-400 text-purple-950', border: 'border-amber-400/40' },
-              { rank: 2, name: 'Ibrahim Yakubu', score: '92.4%', medal: 'bg-slate-300 text-slate-900', border: 'border-slate-300' },
-              { rank: 3, name: 'Fatima Ahmed', score: '91.1%', medal: 'bg-amber-600 text-white', border: 'border-amber-600/40' },
-              { rank: 4, name: 'Daniel Oladipo', score: '89.7%', medal: 'bg-slate-100 text-slate-600', border: 'border-slate-200' },
-              { rank: 5, name: 'Zainab Usman', score: '88.9%', medal: 'bg-slate-100 text-slate-600', border: 'border-slate-200' },
+              { rank: 1, name: 'Maria Fransiska Jelita', score: '95.6%', medal: 'bg-amber-400 text-purple-950', border: 'border-amber-400/40' },
+              { rank: 2, name: 'Yohanes Kevin Jebarus', score: '92.4%', medal: 'bg-slate-300 text-slate-900', border: 'border-slate-300' },
+              { rank: 3, name: 'Theresia Avilla Ndua', score: '91.1%', medal: 'bg-amber-600 text-white', border: 'border-amber-600/40' },
+              { rank: 4, name: 'Fransiskus Xaverius Dahu', score: '89.7%', medal: 'bg-slate-100 text-slate-600', border: 'border-slate-200' },
+              { rank: 5, name: 'Katarina Melati Nardi', score: '88.9%', medal: 'bg-slate-100 text-slate-600', border: 'border-slate-200' },
             ].map((st) => (
               <div
                 key={st.rank}
@@ -468,9 +468,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase">
-                CLASS PERFORMANCE OVERVIEW
+                IKHTISAR KINERJA PER KELAS
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Summary of results across class levels</p>
+              <p className="text-xs text-slate-400 mt-0.5">Rangkuman capaian akademik per rombongan belajar</p>
             </div>
             <span className="text-xs font-semibold text-slate-500">5 Rombongan Belajar</span>
           </div>
@@ -479,22 +479,22 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
             <table className="w-full text-left text-xs">
               <thead className="bg-[#0e1730] text-slate-200 text-[10px] uppercase font-bold tracking-wider rounded-xl">
                 <tr>
-                  <th className="py-3 px-4 rounded-l-xl">CLASS</th>
-                  <th className="py-3 px-3">TOTAL STUDENTS</th>
-                  <th className="py-3 px-3">AVERAGE SCORE</th>
-                  <th className="py-3 px-3">PASS RATE</th>
-                  <th className="py-3 px-3">DISTINCTIONS</th>
-                  <th className="py-3 px-3">FAIL RATE</th>
-                  <th className="py-3 px-4 rounded-r-xl">TREND</th>
+                  <th className="py-3 px-4 rounded-l-xl">KELAS / ROMBEL</th>
+                  <th className="py-3 px-3">TOTAL SISWA</th>
+                  <th className="py-3 px-3">RERATA NILAI</th>
+                  <th className="py-3 px-3">PERSENTASE LULUS</th>
+                  <th className="py-3 px-3">PRESTASI SANGAT BAIK</th>
+                  <th className="py-3 px-3">TINGKAT REMEDIAL</th>
+                  <th className="py-3 px-4 rounded-r-xl">TREN</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {[
-                  { cls: 'SS 1 (X-MIPA 1)', total: 250, avg: '78.5%', pass: '88.0%', dist: 65, fail: '12.0%', trend: 'up' },
-                  { cls: 'SS 2 (X-MIPA 2)', total: 245, avg: '76.2%', pass: '85.7%', dist: 58, fail: '14.3%', trend: 'up' },
-                  { cls: 'SS 3 (XI-MIPA 1)', total: 255, avg: '74.8%', pass: '84.3%', dist: 62, fail: '15.7%', trend: 'down' },
-                  { cls: 'SS 4 (XI-IPS 1)', total: 248, avg: '77.1%', pass: '87.5%', dist: 68, fail: '12.5%', trend: 'up' },
-                  { cls: 'SS 5 (XII-MIPA)', total: 252, avg: '75.9%', pass: '85.3%', dist: 59, fail: '14.7%', trend: 'down' },
+                  { cls: 'Kelas X - MIPA 1', total: 250, avg: '78.5%', pass: '88.0%', dist: 65, fail: '12.0%', trend: 'up' },
+                  { cls: 'Kelas X - MIPA 2', total: 245, avg: '76.2%', pass: '85.7%', dist: 58, fail: '14.3%', trend: 'up' },
+                  { cls: 'Kelas XI - MIPA 1', total: 255, avg: '74.8%', pass: '84.3%', dist: 62, fail: '15.7%', trend: 'down' },
+                  { cls: 'Kelas XI - IPS 1', total: 248, avg: '77.1%', pass: '87.5%', dist: 68, fail: '12.5%', trend: 'up' },
+                  { cls: 'Kelas XII - MIPA', total: 252, avg: '75.9%', pass: '85.3%', dist: 59, fail: '14.7%', trend: 'down' },
                 ].map((row, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-4 font-bold text-slate-900">{row.cls}</td>
@@ -525,9 +525,9 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col items-center text-center">
             <h3 className="text-sm font-black text-slate-800 tracking-wider uppercase mb-1">
-              PASS RATE BY CLASS
+              KELULUSAN PER KELAS
             </h3>
-            <p className="text-xs text-slate-400 mb-4">Proportion across grades</p>
+            <p className="text-xs text-slate-400 mb-4">Proporsi capaian kelulusan antar jenjang</p>
 
             <div className="relative w-40 h-40">
               <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
@@ -541,7 +541,7 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
                 <path
                   className="text-emerald-500"
                   strokeDasharray="86.2, 100"
-                  strokeWidth="4"
+                  strokeWidth="4.5"
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="none"
@@ -551,7 +551,7 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-xl font-black text-slate-800">86.2%</span>
                 <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">
-                  OVERALL PASS
+                  KELULUSAN TOTAL
                 </span>
               </div>
             </div>
@@ -563,7 +563,7 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
                 <span key={i} className="text-sm">★</span>
               ))}
             </div>
-            <h4 className="text-sm font-bold text-white mb-1">Keep up the great work!</h4>
+            <h4 className="text-sm font-bold text-white mb-1">Pertahankan Prestasi Membanggakan Ini!</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
               Capaian akademik siswa semester ini melampaui target yayasan dengan tingkat kelulusan 86.2%.
             </p>

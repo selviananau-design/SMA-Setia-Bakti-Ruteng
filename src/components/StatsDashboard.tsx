@@ -532,12 +532,12 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({ students }) => {
                 </div>
 
                 <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900 flex items-center justify-between">
-                  <span>Punya data update alumni? Hubungi sekretariat IKASBA:</span>
+                  <span>Punya pembaruan data alumni? Hubungi sekretariat IKASBA:</span>
                   <button
                     onClick={() => alert('Membuka formulir pembaruan tracer study alumni SMAK Setia Bakti.')}
                     className="font-bold underline cursor-pointer hover:text-amber-950"
                   >
-                    Update Data &gt;
+                    Perbarui Data &gt;
                   </button>
                 </div>
               </div>

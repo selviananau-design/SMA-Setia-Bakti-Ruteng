@@ -20,13 +20,13 @@ export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsL
         <div className="flex flex-wrap items-center justify-between border-b-2 border-purple-800 pb-2 mb-6 gap-3">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl sm:text-3xl font-bold text-[#321759] font-serif tracking-tight">
-              District News
+              Warta & Berita Sekolah
             </h2>
             <button
               onClick={() => onNavigateTab('berita')}
               className="text-xs sm:text-sm font-semibold text-purple-700 hover:text-purple-950 transition-colors cursor-pointer hidden sm:inline-block"
             >
-              News Archive &gt;
+              Arsip Berita &gt;
             </button>
           </div>
 
@@ -34,8 +34,8 @@ export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsL
             {/* Orange RSS icon matching the circular RSS badge in reference photo */}
             <div
               className="w-7 h-7 rounded-full bg-[#f26522] text-white flex items-center justify-center shadow-sm cursor-pointer hover:opacity-90"
-              title="RSS Feed Berita Sekolah"
-              onClick={() => alert('Feed RSS Berita SMAK Setia Bakti aktif.')}
+              title="Feed Berita Sekolah"
+              onClick={() => alert('Feed Berita SMAK Setia Bakti aktif.')}
             >
               <Rss className="w-4 h-4" />
             </div>
@@ -45,7 +45,7 @@ export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsL
               className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#522d8a] hover:text-purple-950 transition-colors cursor-pointer"
             >
               <FileText className="w-4 h-4 text-[#522d8a]" />
-              <span>View All News &gt;</span>
+              <span>Lihat Semua Berita &gt;</span>
             </button>
           </div>
         </div>
@@ -91,7 +91,7 @@ export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsL
                       onClick={() => setSelectedArticle(item)}
                       className="text-xs font-bold text-[#522d8a] hover:text-purple-950 transition-colors cursor-pointer group-hover:translate-x-0.5 transition-transform"
                     >
-                      Read More &gt;
+                      Baca Selengkapnya &gt;
                     </button>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export const DistrictNews: React.FC<DistrictNewsProps> = ({ onNavigateTab, newsL
                   ? 'bg-purple-800 w-5 ring-2 ring-purple-300'
                   : 'bg-slate-300 hover:bg-slate-400'
               }`}
-              aria-label={`Slide Page ${i + 1}`}
+              aria-label={`Halaman Berita ${i + 1}`}
             />
           ))}
         </div>

@@ -96,7 +96,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   >('overview');
 
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutGrid, sub: 'Ringkasan Kinerja' },
+    { id: 'overview', label: 'Ringkasan Kinerja', icon: LayoutGrid, sub: 'Ikhtisar & Statistik' },
     { id: 'berita', label: 'Berita & Agenda', icon: Newspaper, sub: 'Warta & Acara' },
     { id: 'siswa', label: 'Data Siswa & Alumni', icon: Users, sub: 'Input & Kelola Siswa' },
     { id: 'ppdb', label: 'PPDB Online', icon: UserPlus, sub: 'Verifikasi Calon Siswa' },
@@ -121,7 +121,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               </div>
               <div>
                 <h1 className="text-sm font-black text-white tracking-wider leading-tight">
-                  ADMIN DASHBOARD
+                  DASBOR ADMINISTRATOR
                 </h1>
                 <p className="text-[11px] font-bold text-sky-400 tracking-widest uppercase">
                   SMAK SETIA BAKTI
@@ -164,7 +164,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                 <Trophy className="w-4 h-4" />
               </div>
               <p className="text-[11px] text-slate-200 font-serif italic leading-relaxed">
-                “ Education is the key to success. Keep learning, keep growing! ”
+                “ Pendidikan adalah kunci keberhasilan. Teruslah belajar dan bertumbuh dalam iman! ”
               </p>
               <div className="mt-2 pt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] text-slate-400">
                 <span>SMAK Setia Bakti</span>
