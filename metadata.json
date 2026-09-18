@@ -1,0 +1,6 @@
+{
+  "name": "Portal SMAK Setia Bakti Ruteng",
+  "description": "Portal resmi SMA Katolik Setia Bakti Ruteng dengan informasi akademik, PPDB daring, profil guru, sistem login multi-peran, dasbor statistik interaktif, unduh laporan PDF & template Excel, serta enkripsi data aman.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
