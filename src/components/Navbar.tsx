@@ -42,20 +42,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <div className="w-full lg:hidden bg-slate-900 text-white border-b border-slate-800">
+    <div className="w-full lg:hidden bg-[#005fb8] text-white border-b border-[#004d99]">
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-            Menu Navigasi
+          <span className="text-xs font-bold uppercase tracking-wider text-white">
+            MENU NAVIGASI
           </span>
-          <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase font-semibold">
+          <span className="text-[10px] bg-[#004d99] text-white px-2 py-0.5 rounded uppercase font-semibold">
             {activeTab}
           </span>
         </div>
 
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1.5 rounded-md bg-slate-800 text-white hover:bg-slate-700 cursor-pointer"
+          className="p-1.5 rounded bg-[#004d99] text-white hover:bg-[#003d7a] cursor-pointer"
           aria-label="Buka Menu Navigasi"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -63,17 +63,17 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {mobileMenuOpen && (
-        <div className="bg-slate-950 border-t border-slate-800 px-4 py-3 space-y-1 animate-fadeIn">
+        <div className="bg-[#004d99] border-t border-[#003d7a] px-4 py-3 space-y-1">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left px-3 py-2.5 rounded text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between cursor-pointer ${
                   isActive
-                    ? 'bg-amber-400 text-slate-950 font-black'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    ? 'bg-white text-[#005fb8] font-black'
+                    : 'text-white hover:bg-[#003d7a]'
                 }`}
               >
                 <span>{item.label}</span>
