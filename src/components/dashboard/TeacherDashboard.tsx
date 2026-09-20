@@ -17,6 +17,17 @@ import {
   Download,
   Search,
   Filter,
+  FolderCheck,
+  Check,
+  FileCheck,
+  ExternalLink,
+  Eye,
+  RefreshCw,
+  FileSpreadsheet,
+  Sparkles,
+  Calendar,
+  AlertCircle,
+  FileCode,
 } from 'lucide-react';
 import {
   Student,
@@ -27,7 +38,15 @@ import {
   LeaveRequest,
   ClassDiscussion,
   UserSession,
+  TeacherAdministrationDoc,
+  TeacherAdminCategory,
+  SubjectAttendanceSession,
+  SubjectAttendanceItem,
 } from '../../types';
+import {
+  INITIAL_TEACHER_ADMIN_DOCS,
+  INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
+} from '../../data/mockData';
 
 interface TeacherDashboardProps {
   session: UserSession;
@@ -38,6 +57,8 @@ interface TeacherDashboardProps {
   waliNotes: WaliKelasNote[];
   leaveRequests: LeaveRequest[];
   discussions: ClassDiscussion[];
+  teacherAdminDocs?: TeacherAdministrationDoc[];
+  subjectAttendanceSessions?: SubjectAttendanceSession[];
   onAddStudyMaterial: (material: StudyMaterial) => void;
   onAddAssignment: (assignment: StudentAssignment) => void;
   onGradeSubmission: (submissionId: string, grade: number, feedback: string) => void;
@@ -45,6 +66,10 @@ interface TeacherDashboardProps {
   onReviewLeaveRequest: (requestId: string, status: 'Disetujui' | 'Ditolak', reviewNotes?: string) => void;
   onAddDiscussionMessage: (discussionId: string, replyContent: string) => void;
   onNewDiscussionTopic: (discussion: ClassDiscussion) => void;
+  onAddTeacherAdminDoc?: (doc: TeacherAdministrationDoc) => void;
+  onUploadTeacherAdminDoc?: (doc: TeacherAdministrationDoc) => void;
+  onAddSubjectAttendanceSession?: (session: SubjectAttendanceSession) => void;
+  onSaveSubjectAttendanceSession?: (session: SubjectAttendanceSession) => void;
 }
 
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
@@ -56,6 +81,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   waliNotes,
   leaveRequests,
   discussions,
+  teacherAdminDocs = INITIAL_TEACHER_ADMIN_DOCS,
+  subjectAttendanceSessions = INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
   onAddStudyMaterial,
   onAddAssignment,
   onGradeSubmission,
@@ -63,6 +90,10 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   onReviewLeaveRequest,
   onAddDiscussionMessage,
   onNewDiscussionTopic,
+  onAddTeacherAdminDoc,
+  onUploadTeacherAdminDoc,
+  onAddSubjectAttendanceSession,
+  onSaveSubjectAttendanceSession,
 }) => {
   // Mode Guru: Guru Wali Kelas vs Guru Mapel
   const [activeMode, setActiveMode] = useState<'walikelas' | 'gurumapel'>('walikelas');
@@ -74,7 +105,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   // Selected Subject & Class for Guru Mapel
   const [mapelSubject, setMapelSubject] = useState<string>('Biologi & Bioteknologi');
   const [mapelClass, setMapelClass] = useState<string>('X-MIPA 1');
-  const [mapelSubTab, setMapelSubTab] = useState<'materi' | 'tugas' | 'penilaian' | 'diskusi' | 'siswa'>('materi');
+  const [mapelSubTab, setMapelSubTab] = useState<
+    'materi' | 'tugas' | 'penilaian' | 'absen' | 'administrasi' | 'diskusi' | 'siswa'
+  >('materi');
 
   // Local Attendance State for today
   const [attendanceState, setAttendanceState] = useState<Record<string, 'Hadir' | 'Sakit' | 'Izin' | 'Alpa'>>({});
@@ -110,6 +143,37 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newTopicContent, setNewTopicContent] = useState('');
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
+
+  // Administrasi Guru State
+  const [showUploadAdminDocModal, setShowUploadAdminDocModal] = useState(false);
+  const [selectedAdminDocDetail, setSelectedAdminDocDetail] = useState<TeacherAdministrationDoc | null>(null);
+  const [adminFilterCategory, setAdminFilterCategory] = useState<string>('Semua');
+  const [adminFilterStatus, setAdminFilterStatus] = useState<string>('Semua');
+  const [adminSearchQuery, setAdminSearchQuery] = useState('');
+
+  // Upload Form states
+  const [adminDocCategory, setAdminDocCategory] = useState<TeacherAdminCategory>('Modul Ajar / RPP Merdeka');
+  const [adminDocTitle, setAdminDocTitle] = useState('');
+  const [adminDocTargetClass, setAdminDocTargetClass] = useState('Fase E (Kelas X)');
+  const [adminDocAcademicYear, setAdminDocAcademicYear] = useState('2026/2027');
+  const [adminDocSemester, setAdminDocSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
+  const [adminDocFileType, setAdminDocFileType] = useState<'PDF' | 'DOCX' | 'XLSX' | 'ZIP'>('PDF');
+  const [adminDocDescription, setAdminDocDescription] = useState('');
+  const [adminDocFileName, setAdminDocFileName] = useState('');
+  const [adminDocSuccessToast, setAdminDocSuccessToast] = useState<string | null>(null);
+
+  // Presensi Mapel State
+  const [mapelAttendanceDate, setMapelAttendanceDate] = useState<string>(
+    new Date().toISOString().split('T')[0] || '2026-08-04'
+  );
+  const [mapelTimeSlot, setMapelTimeSlot] = useState<string>('07.30 - 09.00 WITA');
+  const [mapelTopic, setMapelTopic] = useState<string>('Praktikum Pengamatan Struktur Sel Hewan dan Sel Tumbuhan');
+  const [mapelMeetingNumber, setMapelMeetingNumber] = useState<number>(3);
+  const [mapelStudentAttendance, setMapelStudentAttendance] = useState<
+    Record<string, { status: 'Hadir' | 'Sakit' | 'Izin' | 'Alpa'; notes: string }>
+  >({});
+  const [attendanceSuccessToast, setAttendanceSuccessToast] = useState<string | null>(null);
+  const [selectedHistoricalSession, setSelectedHistoricalSession] = useState<SubjectAttendanceSession | null>(null);
 
   // Available classes list from all active students or defaults
   const allClasses = Array.from(new Set(students.map((s) => s.className).filter(Boolean))).sort();
@@ -150,9 +214,172 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     (d) => d.className === mapelClass && d.type === 'mapel'
   );
 
+  // Filter teacher's admin docs (all docs or matching teacher)
+  const myAdminDocs = teacherAdminDocs;
+
+  const filteredMyAdminDocs = myAdminDocs.filter((doc) => {
+    const matchesCategory = adminFilterCategory === 'Semua' || doc.category === adminFilterCategory;
+    const matchesStatus = adminFilterStatus === 'Semua' || doc.status === adminFilterStatus;
+    const matchesQuery =
+      adminSearchQuery === '' ||
+      doc.title.toLowerCase().includes(adminSearchQuery.toLowerCase()) ||
+      doc.subject.toLowerCase().includes(adminSearchQuery.toLowerCase()) ||
+      doc.teacherName.toLowerCase().includes(adminSearchQuery.toLowerCase());
+    return matchesCategory && matchesStatus && matchesQuery;
+  });
+
+  // Filter subject attendance sessions for current class & subject
+  const currentSubjectSessions = subjectAttendanceSessions.filter(
+    (sess) =>
+      sess.className === mapelClass &&
+      (sess.subject.toLowerCase().includes(mapelSubject.toLowerCase()) ||
+        mapelSubject.toLowerCase().includes(sess.subject.toLowerCase()))
+  );
+
   const handleSaveAttendance = () => {
     setAttendanceSaved(true);
     setTimeout(() => setAttendanceSaved(false), 4000);
+  };
+
+  // Handler for saving Mapel Attendance Session
+  const handleSetAllPresent = () => {
+    const updated: Record<string, { status: 'Hadir' | 'Sakit' | 'Izin' | 'Alpa'; notes: string }> = {};
+    mapelStudents.forEach((student) => {
+      updated[student.id] = { status: 'Hadir', notes: '' };
+    });
+    setMapelStudentAttendance(updated);
+  };
+
+  const handleUpdateStudentAttendance = (
+    studentId: string,
+    status: 'Hadir' | 'Sakit' | 'Izin' | 'Alpa',
+    notes?: string
+  ) => {
+    setMapelStudentAttendance((prev) => ({
+      ...prev,
+      [studentId]: {
+        status,
+        notes: notes !== undefined ? notes : prev[studentId]?.notes || '',
+      },
+    }));
+  };
+
+  const handleSaveSubjectAttendanceSession = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (mapelStudents.length === 0) {
+      alert(`Tidak ada siswa di kelas ${mapelClass} untuk dicatat presensinya.`);
+      return;
+    }
+
+    const items: SubjectAttendanceItem[] = mapelStudents.map((s) => {
+      const record = mapelStudentAttendance[s.id] || { status: 'Hadir', notes: '' };
+      return {
+        studentId: s.id,
+        studentName: s.name,
+        studentNisn: s.nisn,
+        nisn: s.nisn,
+        status: record.status,
+        notes: record.notes,
+      };
+    });
+
+    const presentCount = items.filter((i) => i.status === 'Hadir').length;
+    const sickCount = items.filter((i) => i.status === 'Sakit').length;
+    const permitCount = items.filter((i) => i.status === 'Izin').length;
+    const absentCount = items.filter((i) => i.status === 'Alpa').length;
+    const total = items.length;
+    const attendanceRate = total > 0 ? Math.round((presentCount / total) * 100) : 100;
+
+    const newSession: SubjectAttendanceSession = {
+      id: `sess-${Date.now()}`,
+      subject: mapelSubject,
+      className: mapelClass,
+      teacherId: session.identifier || 'guru-session',
+      teacherName: session.name || 'Guru Mata Pelajaran',
+      teacherNip: session.nip || session.identifier || '19780512 200312 2 004',
+      meetingNumber: mapelMeetingNumber,
+      date: mapelAttendanceDate,
+      timeSlot: mapelTimeSlot,
+      topic: mapelTopic.trim() || `Pembelajaran Tatap Muka ${mapelSubject} Pertemuan ${mapelMeetingNumber}`,
+      attendanceList: items,
+      items,
+      summary: {
+        total,
+        hadir: presentCount,
+        sakit: sickCount,
+        izin: permitCount,
+        alpa: absentCount,
+        percentage: attendanceRate,
+      },
+      presentCount,
+      sickCount,
+      permitCount,
+      absentCount,
+      attendanceRate,
+      createdAt: `${mapelAttendanceDate} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WITA`,
+    };
+
+    if (onSaveSubjectAttendanceSession) {
+      onSaveSubjectAttendanceSession(newSession);
+    } else if (onAddSubjectAttendanceSession) {
+      onAddSubjectAttendanceSession(newSession);
+    }
+
+    setAttendanceSuccessToast(
+      `Presensi Pertemuan Ke-${mapelMeetingNumber} untuk kelas ${mapelClass} (${mapelSubject}) berhasil disimpan dan otomatis masuk ke monitoring Admin Utama!`
+    );
+    setTimeout(() => setAttendanceSuccessToast(null), 6000);
+    setMapelMeetingNumber((prev) => prev + 1);
+  };
+
+  // Handler for uploading Teacher Administration Doc
+  const handleUploadAdminDoc = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminDocTitle.trim()) {
+      alert('Mohon isi judul dokumen administrasi!');
+      return;
+    }
+
+    const cleanCategorySlug = adminDocCategory.replace(/[\/\s]+/g, '_');
+    const generatedFileName =
+      adminDocFileName.trim() ||
+      `${cleanCategorySlug}_${mapelClass}_${adminDocSemester}_2026.pdf`;
+
+    const newDoc: TeacherAdministrationDoc = {
+      id: `doc-${Date.now()}`,
+      teacherId: session.identifier || 'guru-session',
+      teacherName: session.name || 'Guru Mata Pelajaran',
+      teacherNip: session.nip || session.identifier || '19780512 200312 2 004',
+      subject: mapelSubject,
+      targetClass: adminDocTargetClass,
+      category: adminDocCategory,
+      title: adminDocTitle.trim(),
+      academicYear: adminDocAcademicYear,
+      semester: adminDocSemester,
+      fileUrl: '#unduh-administrasi',
+      fileName: generatedFileName,
+      fileSize: '2.4 MB',
+      fileType: adminDocFileType,
+      uploadedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+      status: 'Menunggu Verifikasi',
+      description:
+        adminDocDescription.trim() ||
+        'Dokumen perangkat ajar Kurikulum Merdeka diajukan untuk supervisi akademik dan verifikasi Admin Utama.',
+    };
+
+    if (onUploadTeacherAdminDoc) {
+      onUploadTeacherAdminDoc(newDoc);
+    } else if (onAddTeacherAdminDoc) {
+      onAddTeacherAdminDoc(newDoc);
+    }
+    setShowUploadAdminDocModal(false);
+    setAdminDocTitle('');
+    setAdminDocDescription('');
+    setAdminDocFileName('');
+    setAdminDocSuccessToast(
+      `Berkas "${newDoc.title}" berhasil diunggah! Berkas telah masuk ke antrean verifikasi Admin Utama (Kepala Sekolah & Tim Kurikulum).`
+    );
+    setTimeout(() => setAdminDocSuccessToast(null), 6000);
   };
 
   const handleCreateMaterial = (e: React.FormEvent) => {
@@ -864,6 +1091,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               { id: 'materi', label: 'Bahan Ajar & Modul', icon: BookOpen, count: filteredMaterials.length },
               { id: 'tugas', label: 'Tugas & Evaluasi', icon: FileText, count: filteredAssignments.length },
               { id: 'penilaian', label: 'Pengumpulan & Penilaian Tugas', icon: Award, count: filteredSubmissions.length },
+              { id: 'absen', label: 'Presensi & Absen Mapel', icon: CalendarCheck, count: currentSubjectSessions.length },
+              { id: 'administrasi', label: 'Upload Administrasi Guru', icon: FolderCheck, count: filteredMyAdminDocs.length },
               { id: 'diskusi', label: 'Forum Tanya Jawab Mapel', icon: MessageSquare, count: mapelDiscussions.length },
               { id: 'siswa', label: 'Daftar Siswa Kelas Mapel', icon: Users, count: mapelStudents.length },
             ].map((tab) => {
@@ -1118,7 +1347,634 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             </div>
           )}
 
-          {/* MAPEL SUBTAB 4: FORUM DISKUSI MAPEL */}
+          {/* ========================================================= */}
+          {/* MAPEL SUBTAB: PRESENSI & ABSEN MAPEL */}
+          {/* ========================================================= */}
+          {mapelSubTab === 'absen' && (
+            <div className="space-y-6">
+              {/* Success Notification Banner */}
+              {attendanceSuccessToast && (
+                <div className="p-4 bg-emerald-600 text-white rounded-2xl shadow-lg flex items-start justify-between gap-3 animate-fadeIn">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-200" />
+                    <div>
+                      <p className="text-xs font-bold">{attendanceSuccessToast}</p>
+                      <p className="text-[11px] text-emerald-100">
+                        Admin Utama dan Wali Kelas dapat langsung melihat rekapitulasi data presensi ini di dasbor mereka.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAttendanceSuccessToast(null)}
+                    className="text-white/80 hover:text-white text-xs font-bold p-1 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Main Attendance Input Card */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                {/* Header with Title & Quick Action */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <CalendarCheck className="w-5 h-5 text-sky-700" />
+                      <span>Input Presensi Tatap Muka: {mapelSubject}</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Kelas: <strong className="text-slate-800 font-mono">{mapelClass}</strong> • Pengajar:{' '}
+                      <strong className="text-slate-800">{session.name}</strong> • Data tersimpan otomatis masuk ke Admin Utama.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSetAllPresent}
+                      className="px-3.5 py-2 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Set Semua Hadir</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMapelStudentAttendance({})}
+                      className="px-3 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      Reset Pilihan
+                    </button>
+                  </div>
+                </div>
+
+                {/* Session Meta Form: Pertemuan, Tanggal, Jam, Pokok Bahasan */}
+                <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Pertemuan Ke-</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={40}
+                      value={mapelMeetingNumber}
+                      onChange={(e) => setMapelMeetingNumber(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Tanggal KBM</label>
+                    <input
+                      type="date"
+                      value={mapelAttendanceDate}
+                      onChange={(e) => setMapelAttendanceDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Waktu / Jam Pelajaran</label>
+                    <select
+                      value={mapelTimeSlot}
+                      onChange={(e) => setMapelTimeSlot(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                    >
+                      <option value="07.30 - 09.00 WITA">07.30 - 09.00 WITA (Jam 1-2)</option>
+                      <option value="09.15 - 10.45 WITA">09.15 - 10.45 WITA (Jam 3-4)</option>
+                      <option value="11.00 - 12.30 WITA">11.00 - 12.30 WITA (Jam 5-6)</option>
+                      <option value="13.00 - 14.30 WITA">13.00 - 14.30 WITA (Jam 7-8)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Pokok Bahasan / Materi KBM</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Praktikum Mikroskopik Sel Tumbuhan"
+                      value={mapelTopic}
+                      onChange={(e) => setMapelTopic(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Realtime Attendance Stats Summary */}
+                {(() => {
+                  const items = mapelStudents.map((s) => mapelStudentAttendance[s.id]?.status || 'Hadir');
+                  const pCount = items.filter((st) => st === 'Hadir').length;
+                  const sCount = items.filter((st) => st === 'Sakit').length;
+                  const iCount = items.filter((st) => st === 'Izin').length;
+                  const aCount = items.filter((st) => st === 'Alpa').length;
+                  const total = mapelStudents.length;
+                  const rate = total > 0 ? Math.round((pCount / total) * 100) : 100;
+
+                  return (
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Hadir</p>
+                          <p className="text-xl font-black text-emerald-700">{pCount}</p>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-emerald-600">{rate}%</span>
+                      </div>
+
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Sakit</p>
+                        <p className="text-xl font-black text-amber-700">{sCount}</p>
+                      </div>
+
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-blue-800">Izin</p>
+                        <p className="text-xl font-black text-blue-700">{iCount}</p>
+                      </div>
+
+                      <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-rose-800">Alpa</p>
+                        <p className="text-xl font-black text-rose-700">{aCount}</p>
+                      </div>
+
+                      <div className="p-3 bg-slate-100 border border-slate-200 rounded-xl col-span-2 sm:col-span-1">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Total Siswa</p>
+                        <p className="text-xl font-black text-slate-800">{total}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Student Attendance List Table */}
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#17325c] text-white uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="px-4 py-3 w-12 text-center">No</th>
+                        <th className="px-4 py-3 w-28">NISN</th>
+                        <th className="px-4 py-3">Nama Lengkap Siswa</th>
+                        <th className="px-4 py-3 w-16 text-center">L/P</th>
+                        <th className="px-4 py-3 w-64 text-center">Status Kehadiran</th>
+                        <th className="px-4 py-3">Keterangan / Catatan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {mapelStudents.map((student, idx) => {
+                        const currentStatus = mapelStudentAttendance[student.id]?.status || 'Hadir';
+                        const currentNotes = mapelStudentAttendance[student.id]?.notes || '';
+
+                        return (
+                          <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-3 text-center text-slate-400 font-mono font-medium">{idx + 1}</td>
+                            <td className="px-4 py-3 font-mono font-bold text-slate-700">{student.nisn}</td>
+                            <td className="px-4 py-3">
+                              <p className="font-bold text-slate-900">{student.name}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">Kelas: {student.className}</p>
+                            </td>
+                            <td className="px-4 py-3 text-center font-bold text-slate-600">{student.gender}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center gap-1.5">
+                                {[
+                                  { label: 'Hadir', key: 'Hadir', bg: 'bg-emerald-600 text-white', hover: 'hover:bg-emerald-50 text-emerald-800 border-emerald-300' },
+                                  { label: 'Sakit', key: 'Sakit', bg: 'bg-amber-500 text-white', hover: 'hover:bg-amber-50 text-amber-800 border-amber-300' },
+                                  { label: 'Izin', key: 'Izin', bg: 'bg-blue-600 text-white', hover: 'hover:bg-blue-50 text-blue-800 border-blue-300' },
+                                  { label: 'Alpa', key: 'Alpa', bg: 'bg-rose-600 text-white', hover: 'hover:bg-rose-50 text-rose-800 border-rose-300' },
+                                ].map((opt) => {
+                                  const isSelected = currentStatus === opt.key;
+                                  return (
+                                    <button
+                                      key={opt.key}
+                                      type="button"
+                                      onClick={() =>
+                                        handleUpdateStudentAttendance(student.id, opt.key as any)
+                                      }
+                                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer border ${
+                                        isSelected
+                                          ? `${opt.bg} shadow-sm border-transparent`
+                                          : `bg-white border-slate-200 text-slate-600 ${opt.hover}`
+                                      }`}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                placeholder="Catatan siswa (opsional)..."
+                                value={currentNotes}
+                                onChange={(e) =>
+                                  handleUpdateStudentAttendance(student.id, currentStatus, e.target.value)
+                                }
+                                className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-600"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {mapelStudents.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-10 text-slate-400">
+                            Belum ada data siswa untuk kelas {mapelClass}. Silakan pilih rombel kelas yang lain atau pastikan Admin telah menginput siswa.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Save Attendance Button */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                  <p className="text-xs text-slate-500">
+                    Sesi presensi yang Anda simpan akan langsung tercatat dalam arsip akademik dan dapat dipantau oleh Kepala Sekolah di Dasbor Admin.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveSubjectAttendanceSession()}
+                    disabled={mapelStudents.length === 0}
+                    className="w-full sm:w-auto px-6 py-3 bg-[#17325c] hover:bg-[#0f2343] disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <CalendarCheck className="w-4 h-4 text-sky-300" />
+                    <span>Simpan Presensi Pertemuan Ini</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Historical Attendance Sessions for this Subject & Class */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-sky-700" />
+                      <span>Riwayat Pertemuan & Presensi Sebelumnya ({mapelSubject} - {mapelClass})</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Daftar rekaman presensi tatap muka yang sudah tersimpan untuk kelas dan mapel ini.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-mono">
+                    {currentSubjectSessions.length} Sesi Terdata
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentSubjectSessions.map((sessionItem) => (
+                    <div
+                      key={sessionItem.id}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-slate-50 hover:border-sky-300 transition-all space-y-3"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-sky-900 text-white font-bold text-[10px] rounded-md">
+                              Pertemuan {sessionItem.meetingNumber}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-700">{sessionItem.date}</span>
+                            <span className="text-xs text-slate-400">• {sessionItem.timeSlot}</span>
+                          </div>
+                          <h5 className="font-bold text-slate-900 text-xs mt-1.5">{sessionItem.topic}</h5>
+                        </div>
+                        <span
+                          className={`text-xs font-black px-2 py-1 rounded-lg ${
+                            (sessionItem.attendanceRate ?? sessionItem.summary?.percentage ?? 100) >= 90
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {sessionItem.attendanceRate ?? sessionItem.summary?.percentage ?? 100}% Hadir
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/80 text-xs">
+                        <div className="flex items-center gap-3 text-[11px] font-medium">
+                          <span className="text-emerald-700 font-bold">Hadir: {sessionItem.presentCount ?? sessionItem.summary?.hadir ?? 0}</span>
+                          <span className="text-amber-700 font-bold">Sakit: {sessionItem.sickCount ?? sessionItem.summary?.sakit ?? 0}</span>
+                          <span className="text-blue-700 font-bold">Izin: {sessionItem.permitCount ?? sessionItem.summary?.izin ?? 0}</span>
+                          <span className="text-rose-700 font-bold">Alpa: {sessionItem.absentCount ?? sessionItem.summary?.alpa ?? 0}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedHistoricalSession(sessionItem)}
+                          className="text-sky-700 hover:text-sky-900 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Rincian Siswa</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {currentSubjectSessions.length === 0 && (
+                    <div className="col-span-2 text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      Belum ada sesi presensi tersimpan untuk {mapelSubject} di kelas {mapelClass}. Silakan input presensi pertemuan di atas.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* MAPEL SUBTAB: UPLOAD ADMINISTRASI GURU */}
+          {/* ========================================================= */}
+          {mapelSubTab === 'administrasi' && (
+            <div className="space-y-6">
+              {/* Success Notification Banner */}
+              {adminDocSuccessToast && (
+                <div className="p-4 bg-emerald-600 text-white rounded-2xl shadow-lg flex items-start justify-between gap-3 animate-fadeIn">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-200" />
+                    <div>
+                      <p className="text-xs font-bold">{adminDocSuccessToast}</p>
+                      <p className="text-[11px] text-emerald-100">
+                        Admin Utama (Kepala Sekolah & Tim Kurikulum) dapat meninjau, menilai skor supervisi, dan menyetujui dokumen ini di tab Administrasi Guru.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAdminDocSuccessToast(null)}
+                    className="text-white/80 hover:text-white text-xs font-bold p-1 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Header Info Banner */}
+              <div className="bg-gradient-to-r from-[#17325c] to-sky-900 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 bg-amber-400 text-slate-950 font-black text-[10px] rounded uppercase tracking-wider">
+                      Kurikulum Merdeka
+                    </span>
+                    <span className="text-sky-200 text-xs">SMAK Setia Bakti Ruteng</span>
+                  </div>
+                  <h3 className="text-lg font-bold">Administrasi Pembelajaran & Perangkat Ajar Guru</h3>
+                  <p className="text-xs text-sky-100 max-w-2xl leading-relaxed">
+                    Unggah dokumen Modul Ajar (RPP Merdeka), Prota, Promes, ATP, KKTP, Jurnal, dan Kisi-kisi. Berkas yang diunggah akan otomatis masuk ke antrean verifikasi Admin Utama untuk ditelaah dan dinilai supervisinya.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowUploadAdminDocModal(true)}
+                  className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all cursor-pointer whitespace-nowrap self-start md:self-auto"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Unggah Administrasi Baru</span>
+                </button>
+              </div>
+
+              {/* Statistics Cards */}
+              {(() => {
+                const totalDocs = filteredMyAdminDocs.length;
+                const approvedDocs = filteredMyAdminDocs.filter((d) => d.status === 'Disetujui').length;
+                const pendingDocs = filteredMyAdminDocs.filter((d) => d.status === 'Menunggu Verifikasi').length;
+                const revisionDocs = filteredMyAdminDocs.filter((d) => d.status === 'Perlu Perbaikan').length;
+
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
+                        <FolderCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-slate-500">Total Berkas</p>
+                        <p className="text-lg font-black text-slate-800">{totalDocs}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-emerald-700">Disetujui</p>
+                        <p className="text-lg font-black text-emerald-800">{approvedDocs}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-xl border border-amber-200 shadow-sm flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-amber-700">Menunggu Verifikasi</p>
+                        <p className="text-lg font-black text-amber-800">{pendingDocs}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white rounded-xl border border-rose-200 shadow-sm flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center font-bold">
+                        <AlertTriangle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-rose-700">Perlu Perbaikan</p>
+                        <p className="text-lg font-black text-rose-800">{revisionDocs}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Filters & Search Toolbar */}
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+                <div className="flex-1 w-full relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="Cari judul perangkat ajar, kategori, atau mata pelajaran..."
+                    value={adminSearchQuery}
+                    onChange={(e) => setAdminSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-600 text-xs"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                  <div className="flex items-center gap-1.5">
+                    <Filter className="w-3.5 h-3.5 text-slate-400" />
+                    <select
+                      value={adminFilterCategory}
+                      onChange={(e) => setAdminFilterCategory(e.target.value)}
+                      className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 text-xs focus:outline-none"
+                    >
+                      <option value="Semua">Semua Kategori Perangkat</option>
+                      <option value="Modul Ajar / RPP Merdeka">Modul Ajar / RPP Merdeka</option>
+                      <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
+                      <option value="Program Semester (Promes)">Program Semester (Promes)</option>
+                      <option value="Alur Tujuan Pembelajaran (ATP)">Alur Tujuan Pembelajaran (ATP)</option>
+                      <option value="KKTP / Kriteria Ketuntasan">KKTP / Kriteria Ketuntasan</option>
+                      <option value="Jurnal Mengajar Harian">Jurnal Mengajar Harian</option>
+                      <option value="Kisi-kisi & Asesmen Sumatif">Kisi-kisi & Asesmen Sumatif</option>
+                      <option value="Buku Kerja Guru">Buku Kerja Guru</option>
+                      <option value="Silabus & Modul Suplemen">Silabus & Modul Suplemen</option>
+                    </select>
+                  </div>
+
+                  <select
+                    value={adminFilterStatus}
+                    onChange={(e) => setAdminFilterStatus(e.target.value)}
+                    className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 text-xs focus:outline-none"
+                  >
+                    <option value="Semua">Semua Status Verifikasi</option>
+                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                    <option value="Disetujui">Disetujui (Lolos Supervisi)</option>
+                    <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Documents Table / Grid */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-sky-700" />
+                    <span>Daftar Berkas Administrasi & Status Verifikasi Admin</span>
+                  </h4>
+                  <span className="text-[11px] text-slate-500 font-mono">
+                    Menampilkan {filteredMyAdminDocs.length} berkas
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#17325c] text-white uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="px-4 py-3">Dokumen Administrasi</th>
+                        <th className="px-4 py-3">Mapel & Kelas</th>
+                        <th className="px-4 py-3">Tahun & Semester</th>
+                        <th className="px-4 py-3">Diunggah</th>
+                        <th className="px-4 py-3">Status Verifikasi Admin</th>
+                        <th className="px-4 py-3 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {filteredMyAdminDocs.map((doc) => {
+                        return (
+                          <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                            {/* Dokumen & Kategori */}
+                            <td className="px-4 py-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center flex-shrink-0 font-bold">
+                                  {doc.fileType === 'PDF' && <FileText className="w-4 h-4 text-rose-600" />}
+                                  {doc.fileType === 'DOCX' && <FileText className="w-4 h-4 text-blue-600" />}
+                                  {doc.fileType === 'XLSX' && <FileSpreadsheet className="w-4 h-4 text-emerald-600" />}
+                                  {doc.fileType === 'ZIP' && <FolderCheck className="w-4 h-4 text-amber-600" />}
+                                </div>
+                                <div>
+                                  <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 font-bold text-[10px] rounded mb-1">
+                                    {doc.category}
+                                  </span>
+                                  <p className="font-bold text-slate-900">{doc.title}</p>
+                                  <p className="text-[11px] text-slate-500 font-mono">
+                                    {doc.fileName} • {doc.fileSize}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Mapel & Kelas */}
+                            <td className="px-4 py-3">
+                              <p className="font-semibold text-slate-800">{doc.subject}</p>
+                              <span className="text-[10px] font-mono text-sky-800 bg-sky-50 px-1.5 py-0.5 rounded">
+                                {doc.targetClass}
+                              </span>
+                            </td>
+
+                            {/* Tahun & Semester */}
+                            <td className="px-4 py-3 font-mono text-slate-700">
+                              <p className="font-bold">{doc.academicYear}</p>
+                              <p className="text-[10px] text-slate-500">{doc.semester}</p>
+                            </td>
+
+                            {/* Tanggal Upload */}
+                            <td className="px-4 py-3 text-slate-500 font-mono text-[11px]">
+                              {doc.uploadedAt}
+                            </td>
+
+                            {/* Status Verifikasi Admin Utama */}
+                            <td className="px-4 py-3">
+                              {doc.status === 'Disetujui' && (
+                                <div className="space-y-1">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold text-[11px] rounded-lg">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Disetujui</span>
+                                    {doc.supervisionScore && (
+                                      <span className="ml-1 bg-emerald-700 text-white px-1.5 py-0.2 rounded text-[10px] font-mono">
+                                        Skor: {doc.supervisionScore}
+                                      </span>
+                                    )}
+                                  </span>
+                                  {doc.verifiedBy && (
+                                    <p className="text-[10px] text-slate-500">
+                                      Oleh: <span className="font-medium text-slate-700">{doc.verifiedBy}</span>
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+
+                              {doc.status === 'Menunggu Verifikasi' && (
+                                <div className="space-y-1">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-[11px] rounded-lg">
+                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                    <span>Menunggu Verifikasi</span>
+                                  </span>
+                                  <p className="text-[10px] text-slate-400">Dalam antrean telaah Admin Utama</p>
+                                </div>
+                              )}
+
+                              {doc.status === 'Perlu Perbaikan' && (
+                                <div className="space-y-1">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-100 text-rose-800 font-bold text-[11px] rounded-lg">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Perlu Perbaikan</span>
+                                  </span>
+                                  {doc.feedbackNotes && (
+                                    <p className="text-[10px] text-rose-700 line-clamp-1 italic">
+                                      "{doc.feedbackNotes}"
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Aksi */}
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedAdminDocDetail(doc)}
+                                  className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                                  title="Lihat Detail & Catatan Supervisi"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  <span>Detail</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => alert(`Mengunduh berkas administrasi guru: ${doc.fileName}`)}
+                                  className="p-1.5 text-sky-700 hover:bg-sky-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Unduh Berkas"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {filteredMyAdminDocs.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-10 text-slate-400">
+                            Tidak ada berkas administrasi yang cocok dengan kriteria pencarian. Klik "+ Unggah Administrasi Baru" untuk mengirim perangkat ajar ke Admin Utama.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
           {mapelSubTab === 'diskusi' && (
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -1693,6 +2549,463 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 1: UNGGAH DOKUMEN ADMINISTRASI GURU BARU */}
+      {/* ========================================================= */}
+      {showUploadAdminDocModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200">
+            <div className="bg-[#17325c] text-white p-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-amber-400" />
+                  <span>Unggah Administrasi & Perangkat Ajar Guru</span>
+                </h3>
+                <p className="text-[11px] text-sky-200 mt-0.5">
+                  Berkas otomatis masuk ke antrean verifikasi Admin Utama (Kepala Sekolah & Tim Kurikulum).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowUploadAdminDocModal(false)}
+                className="text-white/80 hover:text-white p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadAdminDoc} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+              {/* Mapel & Pengunggah Notice */}
+              <div className="p-3 bg-sky-50 rounded-xl border border-sky-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-sky-700 uppercase font-bold tracking-wider">Mata Pelajaran:</span>
+                  <p className="font-bold text-slate-900">{mapelSubject}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-sky-700 uppercase font-bold tracking-wider">Guru Pengunggah:</span>
+                  <p className="font-bold text-slate-900">{session.name}</p>
+                </div>
+              </div>
+
+              {/* Kategori Berkas */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Kategori Perangkat Ajar <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={adminDocCategory}
+                  onChange={(e) => setAdminDocCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                >
+                  <option value="Modul Ajar / RPP Merdeka">Modul Ajar / RPP Merdeka</option>
+                  <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
+                  <option value="Program Semester (Promes)">Program Semester (Promes)</option>
+                  <option value="Alur Tujuan Pembelajaran (ATP)">Alur Tujuan Pembelajaran (ATP)</option>
+                  <option value="KKTP / Kriteria Ketuntasan">KKTP / Kriteria Ketuntasan</option>
+                  <option value="Jurnal Mengajar Harian">Jurnal Mengajar Harian</option>
+                  <option value="Kisi-kisi & Asesmen Sumatif">Kisi-kisi & Asesmen Sumatif</option>
+                  <option value="Buku Kerja Guru">Buku Kerja Guru</option>
+                  <option value="Silabus & Modul Suplemen">Silabus & Modul Suplemen</option>
+                </select>
+              </div>
+
+              {/* Judul Dokumen */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Judul Dokumen Perangkat <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Modul Ajar Bab 3: Metabolisme & Enzim Katalisator..."
+                  value={adminDocTitle}
+                  onChange={(e) => setAdminDocTitle(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                />
+              </div>
+
+              {/* Grid Tingkat / Rombel Sasaran & Tahun Ajaran */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Rombel / Sasaran</label>
+                  <select
+                    value={adminDocTargetClass}
+                    onChange={(e) => setAdminDocTargetClass(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-none"
+                  >
+                    <option value="Fase E (Kelas X)">Fase E (Kelas X)</option>
+                    <option value="Fase F (Kelas XI)">Fase F (Kelas XI)</option>
+                    <option value="Fase F (Kelas XII)">Fase F (Kelas XII)</option>
+                    <option value="Kelas X-MIPA 1">Kelas X-MIPA 1</option>
+                    <option value="Kelas X-MIPA 2">Kelas X-MIPA 2</option>
+                    <option value="Kelas XI-MIPA 1">Kelas XI-MIPA 1</option>
+                    <option value="Semua Rombel Mapel">Semua Rombel Mapel</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Tahun Pelajaran</label>
+                  <input
+                    type="text"
+                    value={adminDocAcademicYear}
+                    onChange={(e) => setAdminDocAcademicYear(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Semester</label>
+                  <select
+                    value={adminDocSemester}
+                    onChange={(e) => setAdminDocSemester(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-none"
+                  >
+                    <option value="Ganjil">Semester Ganjil</option>
+                    <option value="Genap">Semester Genap</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Format Berkas & Simulasi File Picker */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Format Berkas</label>
+                  <select
+                    value={adminDocFileType}
+                    onChange={(e) => setAdminDocFileType(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-800 focus:outline-none"
+                  >
+                    <option value="PDF">PDF (Dokumen Standar)</option>
+                    <option value="DOCX">DOCX (Microsoft Word)</option>
+                    <option value="XLSX">XLSX (Spreadsheet / Excel)</option>
+                    <option value="ZIP">ZIP (Paket Kompresi)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Nama Berkas</label>
+                  <input
+                    type="text"
+                    placeholder="RPP_Biologi_Bab3_Merdeka.pdf"
+                    value={adminDocFileName}
+                    onChange={(e) => setAdminDocFileName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Drag and drop simulation box */}
+              <div className="border-2 border-dashed border-sky-300 bg-sky-50/40 rounded-xl p-4 text-center">
+                <Upload className="w-6 h-6 text-sky-700 mx-auto mb-1.5" />
+                <p className="font-bold text-slate-800 text-xs">Pilih dokumen dari perangkat Anda</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Format didukung: PDF, DOCX, XLSX, ZIP (Maks. 25 MB)</p>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setAdminDocFileName(file.name);
+                      if (!adminDocTitle) {
+                        setAdminDocTitle(file.name.replace(/\.[^/.]+$/, ''));
+                      }
+                    }
+                  }}
+                  className="mt-2 text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-900 file:text-white hover:file:bg-sky-950 cursor-pointer"
+                />
+              </div>
+
+              {/* Deskripsi / Catatan Pengantar */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Catatan Pengantar / Uraian Singkat</label>
+                <textarea
+                  rows={3}
+                  placeholder="Tuliskan catatan pengantar untuk Tim Kurikulum & Kepala Sekolah saat memverifikasi berkas..."
+                  value={adminDocDescription}
+                  onChange={(e) => setAdminDocDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadAdminDocModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 font-bold transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#17325c] hover:bg-[#0f2343] text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Kirim ke Admin Utama</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 2: DETAIL & CATATAN SUPERVISI DOKUMEN */}
+      {/* ========================================================= */}
+      {selectedAdminDocDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div className="bg-[#17325c] text-white p-5 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-amber-400">
+                  {selectedAdminDocDetail.category}
+                </span>
+                <h3 className="text-sm font-bold text-white mt-0.5 line-clamp-1">
+                  {selectedAdminDocDetail.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedAdminDocDetail(null)}
+                className="text-white/80 hover:text-white p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+              {/* Status Banner */}
+              {selectedAdminDocDetail.status === 'Disetujui' && (
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 font-bold text-emerald-800 text-xs">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Status: Disetujui & Terverifikasi
+                    </span>
+                    {selectedAdminDocDetail.supervisionScore && (
+                      <span className="px-2.5 py-1 bg-emerald-600 text-white font-mono font-black text-xs rounded-lg">
+                        Nilai: {selectedAdminDocDetail.supervisionScore} / 100
+                      </span>
+                    )}
+                  </div>
+                  {selectedAdminDocDetail.verifiedBy && (
+                    <p className="text-slate-600">
+                      Diverifikasi oleh: <strong className="text-slate-900">{selectedAdminDocDetail.verifiedBy}</strong>
+                      {selectedAdminDocDetail.verifiedAt && ` pada ${selectedAdminDocDetail.verifiedAt}`}
+                    </p>
+                  )}
+                  {selectedAdminDocDetail.feedbackNotes && (
+                    <div className="p-2.5 bg-white rounded-lg border border-emerald-100 text-slate-700 italic">
+                      "{selectedAdminDocDetail.feedbackNotes}"
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedAdminDocDetail.status === 'Menunggu Verifikasi' && (
+                <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-1">
+                  <span className="inline-flex items-center gap-1 font-bold text-amber-800 text-xs">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    Status: Menunggu Verifikasi Admin Utama
+                  </span>
+                  <p className="text-slate-600">
+                    Berkas ini sedang berada dalam antrean penelaahan Kepala Sekolah dan Tim Kurikulum SMAK Setia Bakti Ruteng.
+                  </p>
+                </div>
+              )}
+
+              {selectedAdminDocDetail.status === 'Perlu Perbaikan' && (
+                <div className="p-4 bg-rose-50 rounded-xl border border-rose-200 space-y-2">
+                  <span className="inline-flex items-center gap-1 font-bold text-rose-800 text-xs">
+                    <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    Status: Perlu Perbaikan / Revisi
+                  </span>
+                  {selectedAdminDocDetail.feedbackNotes && (
+                    <div className="p-2.5 bg-white rounded-lg border border-rose-100 text-rose-800">
+                      <strong>Catatan Revisi dari Admin:</strong>
+                      <p className="mt-1 italic">{selectedAdminDocDetail.feedbackNotes}</p>
+                    </div>
+                  )}
+                  <p className="text-slate-600 text-[11px]">
+                    Silakan perbaiki dokumen sesuai catatan di atas dan unggah kembali berkas perbaikan melalui tombol "+ Unggah Administrasi Baru".
+                  </p>
+                </div>
+              )}
+
+              {/* Document Meta Info Grid */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Mata Pelajaran</span>
+                  <p className="font-bold text-slate-900 mt-0.5">{selectedAdminDocDetail.subject}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Rombel / Sasaran</span>
+                  <p className="font-bold text-slate-900 mt-0.5">{selectedAdminDocDetail.targetClass}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Tahun Pelajaran & Sem.</span>
+                  <p className="font-mono font-bold text-slate-900 mt-0.5">
+                    {selectedAdminDocDetail.academicYear} • {selectedAdminDocDetail.semester}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Ukuran & Format</span>
+                  <p className="font-mono font-bold text-slate-900 mt-0.5">
+                    {selectedAdminDocDetail.fileSize} • {selectedAdminDocDetail.fileType}
+                  </p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">
+                  Deskripsi / Keterangan Dokumen
+                </span>
+                <p className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 leading-relaxed">
+                  {selectedAdminDocDetail.description}
+                </p>
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => alert(`Mengunduh berkas: ${selectedAdminDocDetail.fileName}`)}
+                  className="px-4 py-2 bg-sky-50 text-sky-800 hover:bg-sky-100 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh {selectedAdminDocDetail.fileName}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedAdminDocDetail(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 3: RINCIAN SESI PRESENSI SEBELUMNYA */}
+      {/* ========================================================= */}
+      {selectedHistoricalSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200">
+            <div className="bg-[#17325c] text-white p-5 flex items-center justify-between">
+              <div>
+                <span className="px-2 py-0.5 bg-amber-400 text-slate-950 font-bold text-[10px] rounded uppercase">
+                  Pertemuan {selectedHistoricalSession.meetingNumber}
+                </span>
+                <h3 className="text-sm font-bold text-white mt-1">
+                  Rincian Presensi: {selectedHistoricalSession.subject} ({selectedHistoricalSession.className})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedHistoricalSession(null)}
+                className="text-white/80 hover:text-white p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+              {/* Meta information */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-3 gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Tanggal & Waktu</span>
+                  <p className="font-bold text-slate-800 mt-0.5">{selectedHistoricalSession.date}</p>
+                  <p className="text-[11px] text-slate-500">{selectedHistoricalSession.timeSlot}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[10px] text-slate-500 uppercase font-bold">Pokok Bahasan / Materi</span>
+                  <p className="font-semibold text-slate-900 mt-0.5">{selectedHistoricalSession.topic}</p>
+                </div>
+              </div>
+
+              {/* Attendance Stats */}
+              <div className="grid grid-cols-5 gap-2">
+                <div className="p-2.5 bg-emerald-50 rounded-lg text-center border border-emerald-200">
+                  <span className="text-[10px] text-emerald-800 font-bold uppercase block">Hadir</span>
+                  <span className="text-base font-black text-emerald-700">{selectedHistoricalSession.presentCount ?? selectedHistoricalSession.summary?.hadir ?? 0}</span>
+                </div>
+                <div className="p-2.5 bg-amber-50 rounded-lg text-center border border-amber-200">
+                  <span className="text-[10px] text-amber-800 font-bold uppercase block">Sakit</span>
+                  <span className="text-base font-black text-amber-700">{selectedHistoricalSession.sickCount ?? selectedHistoricalSession.summary?.sakit ?? 0}</span>
+                </div>
+                <div className="p-2.5 bg-blue-50 rounded-lg text-center border border-blue-200">
+                  <span className="text-[10px] text-blue-800 font-bold uppercase block">Izin</span>
+                  <span className="text-base font-black text-blue-700">{selectedHistoricalSession.permitCount ?? selectedHistoricalSession.summary?.izin ?? 0}</span>
+                </div>
+                <div className="p-2.5 bg-rose-50 rounded-lg text-center border border-rose-200">
+                  <span className="text-[10px] text-rose-800 font-bold uppercase block">Alpa</span>
+                  <span className="text-base font-black text-rose-700">{selectedHistoricalSession.absentCount ?? selectedHistoricalSession.summary?.alpa ?? 0}</span>
+                </div>
+                <div className="p-2.5 bg-sky-900 text-white rounded-lg text-center">
+                  <span className="text-[10px] text-sky-200 font-bold uppercase block">Kehadiran</span>
+                  <span className="text-base font-black">{selectedHistoricalSession.attendanceRate ?? selectedHistoricalSession.summary?.percentage ?? 100}%</span>
+                </div>
+              </div>
+
+              {/* Student Items List */}
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 text-slate-700 uppercase text-[10px]">
+                    <tr>
+                      <th className="px-3 py-2 w-10">No</th>
+                      <th className="px-3 py-2">Nama Siswa</th>
+                      <th className="px-3 py-2 w-24 text-center">Status</th>
+                      <th className="px-3 py-2">Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {(selectedHistoricalSession.items || selectedHistoricalSession.attendanceList || []).map((item, idx) => (
+                      <tr key={item.studentId} className="hover:bg-slate-50">
+                        <td className="px-3 py-2 text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                        <td className="px-3 py-2 font-bold text-slate-900">{item.studentName}</td>
+                        <td className="px-3 py-2 text-center">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              item.status === 'Hadir'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : item.status === 'Sakit'
+                                ? 'bg-amber-100 text-amber-800'
+                                : item.status === 'Izin'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-slate-500 italic text-[11px]">
+                          {item.notes || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Close Button */}
+              <div className="flex justify-end pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setSelectedHistoricalSession(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold cursor-pointer transition-colors"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

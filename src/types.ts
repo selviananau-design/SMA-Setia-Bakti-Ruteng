@@ -103,9 +103,11 @@ export interface PushNotification {
 export type NewsArticle = NewsItem;
 
 export interface UserSession {
+  id?: string;
   role: UserRole;
   name: string;
   identifier: string; // NIP, NISN, or Admin username
+  nip?: string;
   token: string;
   email?: string;
   childNisn?: string; // for parent
@@ -134,6 +136,83 @@ export interface StudyMaterial {
   fileSize: string;
   downloadUrl: string;
   description: string;
+}
+
+// 1b. Dokumen Administrasi & Perangkat Ajar Guru (untuk diverifikasi Admin Utama / Kepala Sekolah)
+export type TeacherAdminCategory =
+  | 'Modul Ajar / RPP Merdeka'
+  | 'Program Tahunan (Prota)'
+  | 'Program Semester (Promes)'
+  | 'Alur Tujuan Pembelajaran (ATP)'
+  | 'KKTP / Kriteria Ketuntasan'
+  | 'Jurnal Mengajar Harian'
+  | 'Kisi-kisi & Asesmen Sumatif'
+  | 'Buku Kerja Guru'
+  | 'Silabus & Modul Suplemen';
+
+export interface TeacherAdministrationDoc {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  teacherNip: string;
+  subject: string;
+  targetClass: string; // e.g. 'X-MIPA 1', 'Fase E (Kelas X)', 'Semua Kelas'
+  academicYear: string; // e.g. '2026/2027'
+  semester: 'Ganjil' | 'Genap';
+  category: TeacherAdminCategory;
+  title: string;
+  description?: string;
+  fileUrl: string;
+  fileName: string;
+  fileSize: string;
+  fileType: 'PDF' | 'DOCX' | 'XLSX' | 'ZIP';
+  uploadedAt: string;
+  status: 'Menunggu Verifikasi' | 'Disetujui' | 'Perlu Perbaikan';
+  verifiedBy?: string;
+  verifiedAt?: string;
+  feedbackNotes?: string;
+  supervisionScore?: number; // Skala 1-100
+}
+
+export type TeacherAdminDocument = TeacherAdministrationDoc;
+
+// 1c. Presensi Siswa per Pertemuan Mata Pelajaran (Guru Mapel)
+export interface SubjectAttendanceItem {
+  studentId: string;
+  studentName: string;
+  studentNisn: string;
+  nisn?: string;
+  status: 'Hadir' | 'Sakit' | 'Izin' | 'Alpa';
+  notes?: string;
+}
+
+export interface SubjectAttendanceSession {
+  id: string;
+  subject: string;
+  className: string;
+  teacherName: string;
+  teacherNip: string;
+  teacherId?: string;
+  meetingNumber: number; // Pertemuan ke-1, 2, dst.
+  date: string; // YYYY-MM-DD
+  timeSlot?: string; // e.g. 'Jam 07.30 - 09.00'
+  topic: string; // Pokok Bahasan / Topik Pembelajaran
+  attendanceList: SubjectAttendanceItem[];
+  items?: SubjectAttendanceItem[];
+  summary: {
+    total: number;
+    hadir: number;
+    sakit: number;
+    izin: number;
+    alpa: number;
+    percentage: number;
+  };
+  presentCount?: number;
+  sickCount?: number;
+  permitCount?: number;
+  absentCount?: number;
+  attendanceRate?: number;
+  createdAt: string;
 }
 
 // 2. Tugas dari Guru Mapel

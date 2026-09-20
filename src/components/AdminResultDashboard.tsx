@@ -29,12 +29,16 @@ import {
   MajorProgram,
   Extracurricular,
   StudentWork,
+  TeacherAdministrationDoc,
+  SubjectAttendanceSession,
 } from '../types';
 import {
   INITIAL_SCHOOL_PROFILE,
   INITIAL_MAJORS,
   INITIAL_EXTRACURRICULARS,
   INITIAL_STUDENT_WORKS,
+  INITIAL_TEACHER_ADMIN_DOCS,
+  INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
 } from '../data/mockData';
 
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
@@ -49,6 +53,8 @@ import { AdminSecurityNotifTab } from './admin/AdminSecurityNotifTab';
 import { AdminProfileTab } from './admin/AdminProfileTab';
 import { AdminMajorsTab } from './admin/AdminMajorsTab';
 import { AdminCampusLifeTab } from './admin/AdminCampusLifeTab';
+import { AdminTeacherAdminTab } from './admin/AdminTeacherAdminTab';
+import { FolderCheck } from 'lucide-react';
 
 interface AdminResultDashboardProps {
   session: UserSession;
@@ -63,6 +69,8 @@ interface AdminResultDashboardProps {
   majors?: MajorProgram[];
   extracurriculars?: Extracurricular[];
   studentWorks?: StudentWork[];
+  teacherAdminDocs?: TeacherAdministrationDoc[];
+  subjectAttendanceSessions?: SubjectAttendanceSession[];
   onAddStudent: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onAddTeacher: (teacher: TeacherStaff) => void;
@@ -81,6 +89,21 @@ interface AdminResultDashboardProps {
     target: 'all' | 'guru' | 'orangtua' | 'siswa',
     priority: 'urgent' | 'info' | 'akademik'
   ) => void;
+  onUpdateTeacherAdminDoc?: (
+    id: string,
+    status: TeacherAdministrationDoc['status'],
+    feedbackNotes?: string,
+    supervisionScore?: number,
+    verifiedBy?: string
+  ) => void;
+  onVerifyTeacherAdminDoc?: (
+    id: string,
+    status: TeacherAdministrationDoc['status'],
+    score?: number,
+    notes?: string,
+    verifierName?: string
+  ) => void;
+  onDeleteTeacherAdminDoc?: (id: string) => void;
   onUpdateSchoolProfile?: (profile: SchoolProfile) => void;
   onAddMajor?: (major: MajorProgram) => void;
   onDeleteMajor?: (id: string) => void;
@@ -105,6 +128,8 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   majors = INITIAL_MAJORS,
   extracurriculars = INITIAL_EXTRACURRICULARS,
   studentWorks = INITIAL_STUDENT_WORKS,
+  teacherAdminDocs = INITIAL_TEACHER_ADMIN_DOCS,
+  subjectAttendanceSessions = INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
   onAddStudent,
   onDeleteStudent,
   onAddTeacher,
@@ -118,6 +143,9 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onAddPPDB,
   onUpdatePPDBStatus,
   onSendPushNotification,
+  onUpdateTeacherAdminDoc,
+  onVerifyTeacherAdminDoc,
+  onDeleteTeacherAdminDoc = () => {},
   onUpdateSchoolProfile = () => {},
   onAddMajor = () => {},
   onDeleteMajor = () => {},
@@ -129,7 +157,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onNavigateToWebsiteTab,
 }) => {
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'profil' | 'jurusan' | 'guru' | 'siswa' | 'berita' | 'kehidupan' | 'ppdb' | 'galeri' | 'akademik' | 'laporan' | 'keamanan'
+    'overview' | 'profil' | 'jurusan' | 'guru' | 'administrasi' | 'siswa' | 'berita' | 'kehidupan' | 'ppdb' | 'galeri' | 'akademik' | 'laporan' | 'keamanan'
   >('overview');
 
   const menuItems = [
@@ -137,6 +165,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     { id: 'profil', label: 'Profil Sekolah', icon: School, sub: 'Visi, Misi & Legalitas' },
     { id: 'jurusan', label: 'Jurusan & Peminatan', icon: GraduationCap, sub: 'MIPA, IPS, Bahasa' },
     { id: 'guru', label: 'Profil Guru & Pegawai', icon: UserCheck, sub: 'Direktori Pendidik' },
+    { id: 'administrasi', label: 'Administrasi Guru', icon: FolderCheck, sub: 'Perangkat Ajar & Presensi' },
     { id: 'siswa', label: 'Data Siswa & Alumni', icon: Users, sub: 'Input & Kelola Siswa' },
     { id: 'berita', label: 'Warta & Berita Sekolah', icon: Newspaper, sub: 'Pengumuman & Agenda' },
     { id: 'kehidupan', label: 'Kehidupan Siswa & Eskul', icon: Sparkles, sub: 'Upload Karya Siswa & Eskul' },
@@ -322,6 +351,23 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               teachers={teachers}
               onAddTeacher={onAddTeacher}
               onDeleteTeacher={onDeleteTeacher}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+            />
+          )}
+
+          {/* TAB: ADMINISTRASI GURU (VERIFIKASI PERANGKAT AJAR & MONITORING PRESENSI) */}
+          {activeMenu === 'administrasi' && (
+            <AdminTeacherAdminTab
+              session={session}
+              teacherAdminDocs={teacherAdminDocs}
+              subjectAttendanceSessions={subjectAttendanceSessions}
+              onUpdateTeacherAdminDoc={
+                onUpdateTeacherAdminDoc ||
+                ((id, status, notes, score, verifier) => {
+                  onVerifyTeacherAdminDoc?.(id, status, score, notes, verifier);
+                })
+              }
+              onDeleteTeacherAdminDoc={onDeleteTeacherAdminDoc}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
           )}

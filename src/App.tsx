@@ -38,6 +38,8 @@ import {
   INITIAL_STUDENT_WORKS,
   INITIAL_MAJORS,
   INITIAL_SCHOOL_PROFILE,
+  INITIAL_TEACHER_ADMIN_DOCS,
+  INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
 } from './data/mockData';
 import {
   Student,
@@ -59,6 +61,8 @@ import {
   StudentWork,
   MajorProgram,
   SchoolProfile,
+  TeacherAdminDocument,
+  SubjectAttendanceSession,
 } from './types';
 import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
@@ -180,6 +184,18 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_SCHOOL_PROFILE;
   });
 
+  // Teacher Admin Documents state (Administrasi Guru Mapel & Supervisi)
+  const [teacherAdminDocs, setTeacherAdminDocs] = useState<TeacherAdminDocument[]>(() => {
+    const saved = localStorage.getItem('smak_teacher_admin_docs');
+    return saved ? JSON.parse(saved) : INITIAL_TEACHER_ADMIN_DOCS;
+  });
+
+  // Subject Attendance Sessions state (Presensi Guru Mapel Per Pertemuan)
+  const [subjectAttendanceSessions, setSubjectAttendanceSessions] = useState<SubjectAttendanceSession[]>(() => {
+    const saved = localStorage.getItem('smak_subject_attendance');
+    return saved ? JSON.parse(saved) : INITIAL_SUBJECT_ATTENDANCE_SESSIONS;
+  });
+
   // Sync state changes to localStorage
   useEffect(() => {
     localStorage.setItem('smak_students', JSON.stringify(students));
@@ -250,12 +266,57 @@ export default function App() {
   }, [schoolProfile]);
 
   useEffect(() => {
+    localStorage.setItem('smak_teacher_admin_docs', JSON.stringify(teacherAdminDocs));
+  }, [teacherAdminDocs]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_subject_attendance', JSON.stringify(subjectAttendanceSessions));
+  }, [subjectAttendanceSessions]);
+
+  useEffect(() => {
     if (session) {
       localStorage.setItem('smak_user_session', JSON.stringify(session));
     } else {
       localStorage.removeItem('smak_user_session');
     }
   }, [session]);
+
+  // Handlers: Teacher Administration Documents
+  const handleUploadTeacherAdminDoc = (doc: TeacherAdminDocument) => {
+    setTeacherAdminDocs((prev) => [doc, ...prev]);
+  };
+
+  const handleVerifyTeacherAdminDoc = (
+    id: string,
+    status: TeacherAdminDocument['status'],
+    score?: number,
+    notes?: string,
+    verifierName?: string
+  ) => {
+    setTeacherAdminDocs((prev) =>
+      prev.map((doc) =>
+        doc.id === id
+          ? {
+              ...doc,
+              status,
+              supervisionScore: score !== undefined ? score : doc.supervisionScore,
+              feedbackNotes: notes !== undefined ? notes : doc.feedbackNotes,
+              verifiedBy: verifierName || doc.verifiedBy,
+              verifiedAt: new Date().toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              }),
+            }
+          : doc
+      )
+    );
+  };
+
+  // Handlers: Subject Attendance Sessions
+  const handleSaveSubjectAttendanceSession = (sessionData: SubjectAttendanceSession) => {
+    setSubjectAttendanceSessions((prev) => [sessionData, ...prev]);
+  };
 
   // Handlers: Student
   const handleAddStudent = (newStudent: Student) => {
@@ -619,6 +680,11 @@ export default function App() {
             studentWorks={studentWorks}
             majors={majors}
             schoolProfile={schoolProfile}
+            teacherAdminDocs={teacherAdminDocs}
+            subjectAttendanceSessions={subjectAttendanceSessions}
+            onUploadTeacherAdminDoc={handleUploadTeacherAdminDoc}
+            onVerifyTeacherAdminDoc={handleVerifyTeacherAdminDoc}
+            onSaveSubjectAttendanceSession={handleSaveSubjectAttendanceSession}
             onAddStudent={handleAddStudent}
             onDeleteStudent={handleDeleteStudent}
             onAddTeacher={handleAddTeacher}

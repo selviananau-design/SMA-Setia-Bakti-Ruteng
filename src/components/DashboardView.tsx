@@ -19,6 +19,8 @@ import {
   StudentWork,
   MajorProgram,
   SchoolProfile,
+  TeacherAdminDocument,
+  SubjectAttendanceSession,
 } from '../types';
 import { AdminResultDashboard } from './AdminResultDashboard';
 import { TeacherDashboard } from './dashboard/TeacherDashboard';
@@ -44,6 +46,11 @@ export interface DashboardViewProps {
   studentWorks: StudentWork[];
   majors: MajorProgram[];
   schoolProfile: SchoolProfile;
+  teacherAdminDocs?: TeacherAdminDocument[];
+  subjectAttendanceSessions?: SubjectAttendanceSession[];
+  onUploadTeacherAdminDoc?: (doc: TeacherAdminDocument) => void;
+  onVerifyTeacherAdminDoc?: (id: string, status: TeacherAdminDocument['status'], score?: number, notes?: string, verifierName?: string) => void;
+  onSaveSubjectAttendanceSession?: (session: SubjectAttendanceSession) => void;
   onAddStudent: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onAddTeacher: (teacher: TeacherStaff) => void;
@@ -104,6 +111,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   studentWorks,
   majors,
   schoolProfile,
+  teacherAdminDocs = [],
+  subjectAttendanceSessions = [],
+  onUploadTeacherAdminDoc,
+  onVerifyTeacherAdminDoc,
+  onSaveSubjectAttendanceSession,
   onAddStudent,
   onDeleteStudent,
   onAddTeacher,
@@ -175,6 +187,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         onDeleteExtracurricular={onDeleteExtracurricular}
         onAddStudentWork={onAddStudentWork}
         onDeleteStudentWork={onDeleteStudentWork}
+        teacherAdminDocs={teacherAdminDocs}
+        subjectAttendanceSessions={subjectAttendanceSessions}
+        onVerifyTeacherAdminDoc={onVerifyTeacherAdminDoc}
         onBackToPortal={onBackToPortal}
         onNavigateToWebsiteTab={onNavigateToWebsiteTab}
       />
@@ -195,6 +210,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             waliNotes={waliNotes}
             leaveRequests={leaveRequests}
             discussions={discussions}
+            teacherAdminDocs={teacherAdminDocs}
+            subjectAttendanceSessions={subjectAttendanceSessions}
+            onUploadTeacherAdminDoc={onUploadTeacherAdminDoc}
+            onSaveSubjectAttendanceSession={onSaveSubjectAttendanceSession}
             onAddStudyMaterial={onAddStudyMaterial}
             onAddAssignment={onAddAssignment}
             onGradeSubmission={(subId, grade, feedback) => onGradeSubmission(subId, grade, feedback)}
