@@ -26,6 +26,16 @@ import {
   INITIAL_NEWS,
   INITIAL_EVENTS,
   INITIAL_GALLERY,
+  INITIAL_STUDY_MATERIALS,
+  INITIAL_ASSIGNMENTS,
+  INITIAL_SUBMISSIONS,
+  INITIAL_WALI_NOTES,
+  INITIAL_LEAVE_REQUESTS,
+  INITIAL_DISCUSSIONS,
+  INITIAL_EXTRACURRICULARS,
+  INITIAL_STUDENT_WORKS,
+  INITIAL_MAJORS,
+  INITIAL_SCHOOL_PROFILE,
 } from './data/mockData';
 import {
   Student,
@@ -36,6 +46,17 @@ import {
   NewsItem,
   SchoolEvent,
   GalleryItem,
+  StudyMaterial,
+  Assignment,
+  AssignmentSubmission,
+  WaliKelasNote,
+  LeaveRequest,
+  SubjectDiscussion,
+  DiscussionReply,
+  Extracurricular,
+  StudentWork,
+  MajorProgram,
+  SchoolProfile,
 } from './types';
 import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
@@ -89,6 +110,66 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
 
+  // Study Materials state (Bahan Ajar)
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
+    const saved = localStorage.getItem('smak_materials');
+    return saved ? JSON.parse(saved) : INITIAL_STUDY_MATERIALS;
+  });
+
+  // Assignments state (Tugas Siswa)
+  const [assignments, setAssignments] = useState<Assignment[]>(() => {
+    const saved = localStorage.getItem('smak_assignments');
+    return saved ? JSON.parse(saved) : INITIAL_ASSIGNMENTS;
+  });
+
+  // Submissions state (Pengumpulan Tugas Siswa)
+  const [submissions, setSubmissions] = useState<AssignmentSubmission[]>(() => {
+    const saved = localStorage.getItem('smak_submissions');
+    return saved ? JSON.parse(saved) : INITIAL_SUBMISSIONS;
+  });
+
+  // Wali Kelas Notes state (Catatan Khusus Wali Kelas)
+  const [waliNotes, setWaliNotes] = useState<WaliKelasNote[]>(() => {
+    const saved = localStorage.getItem('smak_wali_notes');
+    return saved ? JSON.parse(saved) : INITIAL_WALI_NOTES;
+  });
+
+  // Leave Requests state (Permohonan Izin dari Orang Tua ke Wali Kelas)
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(() => {
+    const saved = localStorage.getItem('smak_leave_requests');
+    return saved ? JSON.parse(saved) : INITIAL_LEAVE_REQUESTS;
+  });
+
+  // Subject Discussions state (Forum Diskusi Siswa & Guru)
+  const [discussions, setDiscussions] = useState<SubjectDiscussion[]>(() => {
+    const saved = localStorage.getItem('smak_discussions');
+    return saved ? JSON.parse(saved) : INITIAL_DISCUSSIONS;
+  });
+
+  // Extracurriculars state (Ekskul Siswa)
+  const [extracurriculars, setExtracurriculars] = useState<Extracurricular[]>(() => {
+    const saved = localStorage.getItem('smak_extracurriculars');
+    return saved ? JSON.parse(saved) : INITIAL_EXTRACURRICULARS;
+  });
+
+  // Student Works state (Karya Siswa: Cerita, Puisi, Jurnalistik)
+  const [studentWorks, setStudentWorks] = useState<StudentWork[]>(() => {
+    const saved = localStorage.getItem('smak_student_works');
+    return saved ? JSON.parse(saved) : INITIAL_STUDENT_WORKS;
+  });
+
+  // Majors state (Jurusan & Peminatan)
+  const [majors, setMajors] = useState<MajorProgram[]>(() => {
+    const saved = localStorage.getItem('smak_majors');
+    return saved ? JSON.parse(saved) : INITIAL_MAJORS;
+  });
+
+  // School Profile state (Profil Sekolah Admin Utama)
+  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(() => {
+    const saved = localStorage.getItem('smak_school_profile');
+    return saved ? JSON.parse(saved) : INITIAL_SCHOOL_PROFILE;
+  });
+
   // Sync state changes to localStorage
   useEffect(() => {
     localStorage.setItem('smak_students', JSON.stringify(students));
@@ -117,6 +198,46 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('smak_notifications', JSON.stringify(notifications));
   }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_materials', JSON.stringify(studyMaterials));
+  }, [studyMaterials]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_assignments', JSON.stringify(assignments));
+  }, [assignments]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_submissions', JSON.stringify(submissions));
+  }, [submissions]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_wali_notes', JSON.stringify(waliNotes));
+  }, [waliNotes]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_leave_requests', JSON.stringify(leaveRequests));
+  }, [leaveRequests]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_discussions', JSON.stringify(discussions));
+  }, [discussions]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_extracurriculars', JSON.stringify(extracurriculars));
+  }, [extracurriculars]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_student_works', JSON.stringify(studentWorks));
+  }, [studentWorks]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_majors', JSON.stringify(majors));
+  }, [majors]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_school_profile', JSON.stringify(schoolProfile));
+  }, [schoolProfile]);
 
   useEffect(() => {
     if (session) {
@@ -205,6 +326,108 @@ export default function App() {
     );
   };
 
+  // Handlers: Study Materials (Bahan Ajar)
+  const handleAddStudyMaterial = (mat: StudyMaterial) => {
+    setStudyMaterials((prev) => [mat, ...prev]);
+  };
+  const handleDeleteStudyMaterial = (id: string) => {
+    setStudyMaterials((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  // Handlers: Assignments (Tugas)
+  const handleAddAssignment = (assignment: Assignment) => {
+    setAssignments((prev) => [assignment, ...prev]);
+  };
+  const handleDeleteAssignment = (id: string) => {
+    setAssignments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // Handlers: Submissions (Pengumpulan Tugas)
+  const handleAddSubmission = (submission: AssignmentSubmission) => {
+    setSubmissions((prev) => {
+      const filtered = prev.filter(
+        (s) => !(s.assignmentId === submission.assignmentId && s.studentId === submission.studentId)
+      );
+      return [submission, ...filtered];
+    });
+  };
+  const handleGradeSubmission = (id: string, grade: number, feedback?: string) => {
+    setSubmissions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, grade, feedback, status: 'Dinilai' } : s))
+    );
+  };
+
+  // Handlers: Wali Kelas Notes
+  const handleAddWaliNote = (note: WaliKelasNote) => {
+    setWaliNotes((prev) => [note, ...prev]);
+  };
+  const handleDeleteWaliNote = (id: string) => {
+    setWaliNotes((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  // Handlers: Leave Requests (Izin Orang Tua)
+  const handleSubmitLeaveRequest = (req: LeaveRequest) => {
+    setLeaveRequests((prev) => [req, ...prev]);
+  };
+  const handleReviewLeaveRequest = (
+    id: string,
+    status: LeaveRequest['status'],
+    notes?: string,
+    reviewer?: string
+  ) => {
+    setLeaveRequests((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              status,
+              reviewNotes: notes,
+              reviewedBy: reviewer || 'Wali Kelas',
+            }
+          : r
+      )
+    );
+  };
+
+  // Handlers: Discussions (Diskusi Siswa & Guru)
+  const handleAddDiscussion = (disc: SubjectDiscussion) => {
+    setDiscussions((prev) => [disc, ...prev]);
+  };
+  const handleAddDiscussionReply = (discussionId: string, reply: DiscussionReply) => {
+    setDiscussions((prev) =>
+      prev.map((d) => (d.id === discussionId ? { ...d, replies: [...d.replies, reply] } : d))
+    );
+  };
+
+  // Handlers: School Profile
+  const handleUpdateSchoolProfile = (profile: SchoolProfile) => {
+    setSchoolProfile(profile);
+  };
+
+  // Handlers: Majors
+  const handleAddMajor = (major: MajorProgram) => {
+    setMajors((prev) => [major, ...prev]);
+  };
+  const handleDeleteMajor = (id: string) => {
+    setMajors((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  // Handlers: Extracurriculars
+  const handleAddExtracurricular = (eskul: Extracurricular) => {
+    setExtracurriculars((prev) => [eskul, ...prev]);
+  };
+  const handleDeleteExtracurricular = (id: string) => {
+    setExtracurriculars((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  // Handlers: Student Works (Cerita, Puisi, Jurnalistik)
+  const handleAddStudentWork = (work: StudentWork) => {
+    setStudentWorks((prev) => [work, ...prev]);
+  };
+  const handleDeleteStudentWork = (id: string) => {
+    setStudentWorks((prev) => prev.filter((w) => w.id !== id));
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 font-sans">
       {/* 1. School Header with Crest and Notification Bell */}
@@ -256,8 +479,12 @@ export default function App() {
             {/* 2. Academic Excellence: "Find the Program That Inspires You" (matches reference) */}
             <AcademicProgramsSection onNavigateTab={(tab) => setActiveTab(tab)} />
 
-            {/* 3. Vibrant Campus Life: "Experience More Than Education" Dark Navy Showcase (matches reference) */}
-            <CampusLifeSection onNavigateTab={(tab) => setActiveTab(tab)} />
+            {/* 3. Vibrant Campus Life: "Experience More Than Education" Dark Navy Showcase + Karya Siswa & Ekskul */}
+            <CampusLifeSection
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              extracurriculars={extracurriculars}
+              studentWorks={studentWorks}
+            />
 
             {/* 4. Why SMAK Setia Bakti: "A School That Supports You" 4-Pillars (matches reference) */}
             <WhyChooseUsSection onNavigateTab={(tab) => setActiveTab(tab)} />
@@ -384,7 +611,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PAGE 8: AUTHENTICATED DASHBOARD (ADMIN / GURU / ORANG TUA) */}
+        {/* PAGE 8: AUTHENTICATED DASHBOARD (ADMIN / GURU / SISWA / ORANG TUA) */}
         {activeTab === 'dashboard' && session && (
           <DashboardView
             session={session}
@@ -395,6 +622,16 @@ export default function App() {
             galleryList={galleryList}
             ppdbList={ppdbList}
             notifications={notifications}
+            studyMaterials={studyMaterials}
+            assignments={assignments}
+            submissions={submissions}
+            waliNotes={waliNotes}
+            leaveRequests={leaveRequests}
+            discussions={discussions}
+            extracurriculars={extracurriculars}
+            studentWorks={studentWorks}
+            majors={majors}
+            schoolProfile={schoolProfile}
             onAddStudent={handleAddStudent}
             onDeleteStudent={handleDeleteStudent}
             onAddTeacher={handleAddTeacher}
@@ -408,6 +645,25 @@ export default function App() {
             onAddPPDB={handleAddPPDB}
             onUpdatePPDBStatus={handleUpdatePPDBStatus}
             onSendPushNotification={handleSendPushNotification}
+            onAddStudyMaterial={handleAddStudyMaterial}
+            onDeleteStudyMaterial={handleDeleteStudyMaterial}
+            onAddAssignment={handleAddAssignment}
+            onDeleteAssignment={handleDeleteAssignment}
+            onAddSubmission={handleAddSubmission}
+            onGradeSubmission={handleGradeSubmission}
+            onAddWaliNote={handleAddWaliNote}
+            onDeleteWaliNote={handleDeleteWaliNote}
+            onSubmitLeaveRequest={handleSubmitLeaveRequest}
+            onReviewLeaveRequest={handleReviewLeaveRequest}
+            onAddDiscussion={handleAddDiscussion}
+            onAddDiscussionReply={handleAddDiscussionReply}
+            onUpdateSchoolProfile={handleUpdateSchoolProfile}
+            onAddMajor={handleAddMajor}
+            onDeleteMajor={handleDeleteMajor}
+            onAddExtracurricular={handleAddExtracurricular}
+            onDeleteExtracurricular={handleDeleteExtracurricular}
+            onAddStudentWork={handleAddStudentWork}
+            onDeleteStudentWork={handleDeleteStudentWork}
             onBackToPortal={() => setActiveTab('beranda')}
             onNavigateToWebsiteTab={(tab) => setActiveTab(tab)}
           />
@@ -421,7 +677,7 @@ export default function App() {
         onNavigateToPPDB={() => setActiveTab('ppdb')}
       />
 
-      {/* 5. Login Modal for Admin, Guru, Orang Tua */}
+      {/* 5. Login Modal for Admin, Guru, Siswa, Orang Tua */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}

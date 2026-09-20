@@ -1,16 +1,40 @@
-import React from 'react';
-import { ArrowRight, Trophy, Sparkles, Calendar, Home, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  ArrowRight,
+  Trophy,
+  Sparkles,
+  Calendar,
+  Home,
+  Users,
+  Feather,
+  BookOpen,
+  Eye,
+  CheckCircle2,
+  Clock,
+  MapPin,
+} from 'lucide-react';
+import { Extracurricular, StudentWork } from '../types';
+import { INITIAL_EXTRACURRICULARS, INITIAL_STUDENT_WORKS } from '../data/mockData';
 
 interface CampusLifeSectionProps {
   onNavigateTab: (tab: string) => void;
+  extracurriculars?: Extracurricular[];
+  studentWorks?: StudentWork[];
 }
 
-export const CampusLifeSection: React.FC<CampusLifeSectionProps> = ({ onNavigateTab }) => {
+export const CampusLifeSection: React.FC<CampusLifeSectionProps> = ({
+  onNavigateTab,
+  extracurriculars = INITIAL_EXTRACURRICULARS,
+  studentWorks = INITIAL_STUDENT_WORKS,
+}) => {
+  const [selectedWork, setSelectedWork] = useState<StudentWork | null>(null);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('semua');
+
   const highlights = [
     {
       id: 'clubs',
-      title: 'Klub & Organisasi',
-      desc: '15+ Ekstrakurikuler minat & bakat siswa',
+      title: 'Klub & Jurnalistik',
+      desc: '15+ Ekstrakurikuler minat & bakat serta majalah dinding',
       icon: Users,
       badge: '15+ Ekskul',
     },
@@ -37,9 +61,14 @@ export const CampusLifeSection: React.FC<CampusLifeSectionProps> = ({ onNavigate
     },
   ];
 
+  const filteredWorks = studentWorks.filter((w) => {
+    if (activeCategoryFilter === 'semua') return true;
+    return w.category === activeCategoryFilter;
+  });
+
   return (
-    <section className="w-full py-12 sm:py-16 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="w-full py-12 sm:py-16 bg-slate-50 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 space-y-10">
         {/* Dark Navy Rounded Container matching the reference mockup */}
         <div className="bg-[#091326] text-white rounded-3xl p-6 sm:p-10 lg:p-12 shadow-2xl border border-slate-800/80">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
@@ -52,8 +81,8 @@ export const CampusLifeSection: React.FC<CampusLifeSectionProps> = ({ onNavigate
                 Pengalaman Lebih dari Sekadar Pendidikan Kelas
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Dari riset ilmiah, panggung paduan suara hingga kompetisi olahraga dan pembinaan rohani di
-                asrama, SMAK Setia Bakti memberikan ribuan peluang untuk bertumbuh seutuhnya.
+                Dari riset ilmiah, panggung paduan suara, liputan jurnalistik siswa, hingga kompetisi olahraga dan
+                pembinaan rohani di asrama, SMAK Setia Bakti memberikan ribuan peluang untuk bertumbuh seutuhnya.
               </p>
               <div>
                 <button
@@ -112,7 +141,195 @@ export const CampusLifeSection: React.FC<CampusLifeSectionProps> = ({ onNavigate
             </div>
           </div>
         </div>
+
+        {/* SECTION 2: KARYA SASTRA & JURNALISTIK SISWA (CERITA, PUISI, ARTIKEL) */}
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <span className="text-xs font-bold text-amber-700 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full">
+                Kreativitas & Literasi Siswa
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#321759] font-serif mt-2">
+                Karya Siswa: Cerita, Puisi & Jurnalistik
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+                Wadah apresiasi karya tulis siswa SMA Katolik Setia Bakti dalam bidang sastra, cerpen reflektif,
+                puisi kearifan Manggarai, dan liputan berita jurnalistik sekolah.
+              </p>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {['semua', 'Cerita', 'Puisi', 'Jurnalistik', 'Esai'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategoryFilter(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeCategoryFilter === cat
+                      ? 'bg-[#3b1d70] text-white shadow-sm'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-purple-50'
+                  }`}
+                >
+                  {cat === 'semua' ? 'Semua Karya' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredWorks.slice(0, 4).map((work) => (
+              <div
+                key={work.id}
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-purple-300 transition-all group"
+              >
+                {work.coverImage && (
+                  <div className="h-44 w-full overflow-hidden relative">
+                    <img
+                      src={work.coverImage}
+                      alt={work.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="absolute top-2.5 left-2.5 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-[#211142]/85 backdrop-blur-sm text-amber-300">
+                      {work.category}
+                    </span>
+                  </div>
+                )}
+
+                <div className="p-5 flex-1 space-y-2.5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                      <span>{work.date}</span>
+                      <span className="font-semibold text-slate-600">{work.authorClass}</span>
+                    </div>
+
+                    <h4 className="text-base font-bold text-slate-900 mt-1 leading-snug group-hover:text-purple-900 transition-colors line-clamp-2">
+                      {work.title}
+                    </h4>
+
+                    <p className="text-xs text-slate-500 mt-1 font-semibold">
+                      Oleh: <strong className="text-slate-800">{work.author}</strong>
+                    </p>
+
+                    <p className="text-xs text-slate-600 mt-2 line-clamp-3 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100 italic">
+                      "{work.excerpt}"
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedWork(work)}
+                    className="w-full py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-purple-200"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Baca Selengkapnya</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTION 3: DAFTAR EKSTRAKURIKULER UNGGULAN */}
+        <div className="space-y-6 pt-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <span className="text-xs font-bold text-blue-700 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">
+                Pengembangan Diri
+              </span>
+              <h3 className="text-2xl font-bold text-[#321759] font-serif mt-2">
+                Ragam Pilihan Ekstrakurikuler Siswa
+              </h3>
+            </div>
+            <span className="text-xs text-slate-500">
+              Menyalurkan potensi minat, bakat sains, seni, kepemimpinan & olahraga
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {extracurriculars.map((eskul) => (
+              <div
+                key={eskul.id}
+                className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 hover:border-blue-300 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded bg-blue-50 text-blue-800">
+                    {eskul.category}
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400">{eskul.membersCount} Anggota</span>
+                </div>
+
+                <h4 className="text-base font-bold text-slate-900">{eskul.name}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">{eskul.description}</p>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Pembina: <strong>{eskul.coach}</strong></span>
+                  <span className="text-blue-700 font-semibold">{eskul.schedule.split(',')[0]}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* MODAL BACA LENGKAP KARYA SISWA */}
+      {selectedWork && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 max-h-[85vh] flex flex-col">
+            <div className="bg-[#211142] text-white p-5 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                  Karya Siswa: {selectedWork.category}
+                </span>
+                <h3 className="text-lg font-bold text-white mt-0.5">{selectedWork.title}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedWork(null)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-700">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-xs">
+                <div>
+                  <p className="font-bold text-slate-900 text-sm">{selectedWork.author}</p>
+                  <p className="text-slate-500">Kelas {selectedWork.authorClass} • SMAK Setia Bakti Ruteng</p>
+                </div>
+                <span className="text-slate-400 font-mono text-[11px]">{selectedWork.date}</span>
+              </div>
+
+              {selectedWork.coverImage && (
+                <div className="h-48 w-full rounded-xl overflow-hidden">
+                  <img
+                    src={selectedWork.coverImage}
+                    alt={selectedWork.title}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              )}
+
+              <div className="whitespace-pre-line text-slate-800 font-serif text-sm leading-relaxed p-5 bg-slate-50 rounded-xl border border-slate-200">
+                {selectedWork.content}
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">
+                Diterbitkan secara resmi oleh Redaksi Portal SMAK Setia Bakti
+              </span>
+              <button
+                onClick={() => setSelectedWork(null)}
+                className="px-4 py-2 bg-[#3b1d70] hover:bg-[#2e1557] text-white text-xs font-bold rounded-lg cursor-pointer"
+              >
+                Tutup Jendela
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

@@ -1,4 +1,22 @@
-import { NewsItem, SchoolEvent, Student, TeacherStaff, PPDBRegistration, PushNotification, GalleryItem } from '../types';
+import {
+  NewsItem,
+  SchoolEvent,
+  Student,
+  TeacherStaff,
+  PPDBRegistration,
+  PushNotification,
+  GalleryItem,
+  StudyMaterial,
+  StudentAssignment,
+  AssignmentSubmission,
+  WaliKelasNote,
+  LeaveRequest,
+  ClassDiscussion,
+  ExtracurricularActivity,
+  StudentWork,
+  MajorProgram,
+  SchoolProfile,
+} from '../types';
 import { simulateAesEncrypt } from '../services/encryption';
 
 export const SCHOOL_INFO = {
@@ -700,3 +718,537 @@ export const INITIAL_GALLERY: GalleryItem[] = [
     description: 'Aksi nyata peduli lingkungan Laudato Si menanam 1.000 anakan pohon beringin dan trembesi di catchment area.',
   },
 ];
+
+// ==========================================
+// 1. BAHAN AJAR GURU MAPEL (UNTUK SISWA UNDUH)
+// ==========================================
+export const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [
+  {
+    id: 'mat-1',
+    title: 'Modul Ajar Bab 3: Keanekaragaman Hayati Endemik Flores & Nusa Tenggara',
+    subject: 'Biologi & Bioteknologi',
+    className: 'X-MIPA 1',
+    teacherName: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    teacherNip: '198811202015022004',
+    uploadDate: '15 Juli 2026',
+    fileType: 'PDF',
+    fileSize: '4.8 MB',
+    downloadUrl: '#download-mat-1',
+    description: 'Rangkuman materi klasifikasi flora dan fauna Wallacea, teknik herbarium basah, dan perlindungan ekosistem Komodo.',
+  },
+  {
+    id: 'mat-2',
+    title: 'Slide Presentasi: Hukum Newton & Dinamika Gerak Planet',
+    subject: 'Fisika Peminatan',
+    className: 'X-MIPA 1',
+    teacherName: 'Yoseph Marselinus Roga, S.Pd.',
+    teacherNip: '197906142005011009',
+    uploadDate: '18 Juli 2026',
+    fileType: 'PPTX',
+    fileSize: '8.2 MB',
+    downloadUrl: '#download-mat-2',
+    description: 'Materi lengkap penurunan rumus gerak melingkar beraturan, gaya gravitasi Newton, dan contoh soal persiapan olimpiade.',
+  },
+  {
+    id: 'mat-3',
+    title: 'Diktat Kuliah Ringkas: Struktur Sosial & Kearifan Lokal Budaya Manggarai',
+    subject: 'Sosiologi & Antropologi Budaya',
+    className: 'X-IPS 1',
+    teacherName: 'Kornelis Hambur, S.Sos., M.AP.',
+    teacherNip: '198501252010011008',
+    uploadDate: '20 Juli 2026',
+    fileType: 'PDF',
+    fileSize: '3.1 MB',
+    downloadUrl: '#download-mat-3',
+    description: 'Kajian konsep Mbaru Niang, filosofi Lodok (pembagian tanah lingko), dan interaksi sosial masyarakat pedesaan Flores.',
+  },
+  {
+    id: 'mat-4',
+    title: 'Pedoman Menulis Academic Essay & Critical Reading Workbook',
+    subject: 'Bahasa & Sastra Inggris',
+    className: 'XI-MIPA 1',
+    teacherName: 'Bernadetta Lidia Jemamu, S.Pd.',
+    teacherNip: '199003182018012005',
+    uploadDate: '21 Juli 2026',
+    fileType: 'DOCX',
+    fileSize: '2.4 MB',
+    downloadUrl: '#download-mat-4',
+    description: 'Panduan tata bahasa formal, sitasi literatur, dan latihan analisis teks argumen untuk persiapan TOEFL & IELTS.',
+  },
+];
+
+// ==========================================
+// 2. TUGAS DARI GURU MAPEL
+// ==========================================
+export const INITIAL_ASSIGNMENTS: StudentAssignment[] = [
+  {
+    id: 'asg-1',
+    title: 'Tugas Mandiri 1: Laporan Pengamatan Herbarium Tumbuhan Obat Tradisional',
+    subject: 'Biologi & Bioteknologi',
+    className: 'X-MIPA 1',
+    teacherName: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    teacherNip: '198811202015022004',
+    assignedDate: '18 Juli 2026',
+    dueDate: '25 Juli 2026',
+    description: 'Kumpulkan minimal 3 sampel tanaman herbal lokal Manggarai, keringkan, tempel pada kertas kalkir dan buat deskripsi taksonominya dalam format PDF.',
+    maxScore: 100,
+  },
+  {
+    id: 'asg-2',
+    title: 'Lembar Kerja Siswa (LKS) 2: Pemodelan Vektor dan Lintasan Parabola',
+    subject: 'Fisika Peminatan',
+    className: 'X-MIPA 1',
+    teacherName: 'Yoseph Marselinus Roga, S.Pd.',
+    teacherNip: '197906142005011009',
+    assignedDate: '20 Juli 2026',
+    dueDate: '27 Juli 2026',
+    description: 'Kerjakan 5 soal perhitungan gerak peluru dan sertakan grafik lintasan posisi terhadap waktu menggunakan millimeter block.',
+    maxScore: 100,
+  },
+  {
+    id: 'asg-3',
+    title: 'Studi Kasus: Analisis Perubahan Peran Pemuda di Era Globalisasi Manggarai',
+    subject: 'Sosiologi & Antropologi Budaya',
+    className: 'X-IPS 1',
+    teacherName: 'Kornelis Hambur, S.Sos., M.AP.',
+    teacherNip: '198501252010011008',
+    assignedDate: '19 Juli 2026',
+    dueDate: '26 Juli 2026',
+    description: 'Tulis esai sepanjang 500-800 kata yang menguraikan pengaruh media sosial terhadap pelestarian tradisi gotong royong (lonto leok).',
+    maxScore: 100,
+  },
+];
+
+// ==========================================
+// 3. PENGUMPULAN TUGAS SISWA (SUBMISSIONS)
+// ==========================================
+export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
+  {
+    id: 'sub-1',
+    assignmentId: 'asg-1',
+    assignmentTitle: 'Tugas Mandiri 1: Laporan Pengamatan Herbarium Tumbuhan Obat Tradisional',
+    studentId: 's-1',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentNisn: '0078129011',
+    className: 'X-MIPA 1',
+    submittedAt: '23 Juli 2026, 19:45 WITA',
+    answerText: 'Selamat malam Ibu Theresia. Berikut saya lampirkan laporan herbarium lengkap 4 sampel tumbuhan obat lokal Manggarai (Kelor, Temulawak, Sirih Hutan, dan Daun Cakar Ayam). File laporan telah saya susun rapi dalam PDF.',
+    fileName: 'Laporan_Herbarium_Yohanes_Ndau_XMIPA1.pdf',
+    fileSize: '3.2 MB',
+    grade: 96,
+    feedback: 'Pekerjaan yang sangat teliti, analisis taksonomi akurat dan dokumentasi foto jelas. Pertahankan prestasi ini!',
+    gradedBy: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    gradedAt: '24 Juli 2026',
+    status: 'Sudah Dinilai',
+  },
+  {
+    id: 'sub-2',
+    assignmentId: 'asg-2',
+    assignmentTitle: 'Lembar Kerja Siswa (LKS) 2: Pemodelan Vektor dan Lintasan Parabola',
+    studentId: 's-1',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentNisn: '0078129011',
+    className: 'X-MIPA 1',
+    submittedAt: '24 Juli 2026, 14:10 WITA',
+    answerText: 'Selamat siang Pak Yoseph. Jawaban soal nomor 1 sampai 5 beserta grafik lintasan elevasi 45 derajat sudah saya selesaikan dan diunggah.',
+    fileName: 'LKS2_Fisika_Yohanes_Ndau.pdf',
+    fileSize: '1.9 MB',
+    status: 'Menunggu Dinilai',
+  },
+];
+
+// ==========================================
+// 4. CATATAN PENTING WALI KELAS
+// ==========================================
+export const INITIAL_WALI_NOTES: WaliKelasNote[] = [
+  {
+    id: 'wn-1',
+    studentId: 's-1',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentNisn: '0078129011',
+    className: 'X-MIPA 1',
+    teacherName: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    date: '20 Juli 2026',
+    category: 'Apresiasi Prestasi',
+    title: 'Apresiasi Sikap Teladan & Kepemimpinan Belajar',
+    content: 'Yohanes menunjukkan disiplin belajar yang luar biasa tinggi, selalu hadir tepat waktu, aktif membimbing rekan-rekannya dalam kelompok belajar sains, dan memiliki sopan santun yang terpuji.',
+    actionRequired: 'Dicalonkan sebagai ketua kelas atau duta sains mewakili SMAK Setia Bakti.',
+  },
+  {
+    id: 'wn-2',
+    studentId: 's-1',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentNisn: '0078129011',
+    className: 'X-MIPA 1',
+    teacherName: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    date: '10 Juli 2026',
+    category: 'Akademik',
+    title: 'Persiapan Pembinaan Olimpiade Sains Nasional (OSN)',
+    content: 'Mohon orang tua memberikan dukungan izin untuk jadwal latihan intensif OSN Biologi setiap hari Selasa dan Kamis sore pukul 15.00 - 17.00 WITA.',
+    actionRequired: 'Konfirmasi ketersediaan transportasi pulang siswa dari pihak orang tua.',
+  },
+  {
+    id: 'wn-3',
+    studentId: 's-3',
+    studentName: 'Ignatius Loyola Rendang',
+    studentNisn: '0078129013',
+    className: 'X-IPS 1',
+    teacherName: 'Kornelis Hambur, S.Sos., M.AP.',
+    date: '18 Juli 2026',
+    category: 'Kedisiplinan',
+    title: 'Catatan Kehadiran & Partisipasi Diskusi',
+    content: 'Ignatius sangat berbakat dalam orasi dan debat sosial. Perlu sedikit peningkatan konsistensi pengumpulan tugas tepat waktu.',
+    actionRequired: 'Pendampingan belajar mandiri di perpustakaan sekolah.',
+  },
+];
+
+// ==========================================
+// 5. PENGAJUAN IZIN DARI ORANG TUA KE WALI KELAS
+// ==========================================
+export const INITIAL_LEAVE_REQUESTS: LeaveRequest[] = [
+  {
+    id: 'lr-1',
+    studentId: 's-1',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentNisn: '0078129011',
+    className: 'X-MIPA 1',
+    parentName: 'Antonius Ngganggu',
+    parentPhone: '081237664422',
+    type: 'Sakit',
+    startDate: '2026-07-28',
+    endDate: '2026-07-29',
+    totalDays: 2,
+    reason: 'Anak kami mengalami demam dan flu tinggi setelah kegiatan lapangan, saat ini sedang istirahat di rumah sesuai anjuran dokter Puskesmas Ruteng.',
+    doctorLetterAttached: true,
+    status: 'Disetujui',
+    requestDate: '2026-07-27',
+    reviewedBy: 'Theresia Imelda Ndua, S.Pd., M.Si. (Wali Kelas)',
+    reviewedAt: '2026-07-27, 20:15 WITA',
+    reviewNotes: 'Izin telah disetujui dan dicatat resmi pada buku presensi kelas. Semoga lekas sembuh Yohanes.',
+  },
+  {
+    id: 'lr-2',
+    studentId: 's-3',
+    studentName: 'Ignatius Loyola Rendang',
+    studentNisn: '0078129013',
+    className: 'X-IPS 1',
+    parentName: 'Dominikus Rendang',
+    parentPhone: '081338112233',
+    type: 'Izin Urusan Keluarga',
+    startDate: '2026-08-05',
+    endDate: '2026-08-06',
+    totalDays: 2,
+    reason: 'Mengikuti upacara adat syukur keluarga (Wenti Cici) di kampung halaman Manggarai Timur bersama orang tua.',
+    doctorLetterAttached: false,
+    status: 'Menunggu Persetujuan',
+    requestDate: '2026-07-25',
+  },
+];
+
+// ==========================================
+// 6. FORUM DISKUSI SISWA DENGAN GURU & WALI KELAS
+// ==========================================
+export const INITIAL_DISCUSSIONS: ClassDiscussion[] = [
+  {
+    id: 'disc-1',
+    type: 'mapel',
+    topic: 'Tanya Soal Praktikum Bioteknologi: Pengaruh Ragi Tape',
+    subject: 'Biologi & Bioteknologi',
+    className: 'X-MIPA 1',
+    authorRole: 'siswa',
+    authorName: 'Yohanes Maria Vianney Ndau',
+    createdAt: '22 Juli 2026, 16:30 WITA',
+    content: 'Selamat sore Ibu Theresia, izin bertanya untuk praktikum fermentasi singkong, apakah perbandingan ragi dan massa singkong harus tepat 1% atau boleh sedikit dilebihkan bila suhu udara dingin di Ruteng?',
+    replies: [
+      {
+        id: 'rep-1',
+        authorRole: 'guru',
+        authorName: 'Theresia Imelda Ndua, S.Pd., M.Si. (Guru Biologi)',
+        createdAt: '22 Juli 2026, 17:15 WITA',
+        content: 'Pertanyaan yang sangat bagus Yohanes! Khusus suhu dingin Ruteng (sekitar 18-21°C), ragi boleh dinaikkan hingga 1.2% - 1.5% agar proses inokulasi jamur Saccharomyces cerevisiae berjalan optimal. Pastikan wadah ditutup rapat.',
+      },
+    ],
+  },
+  {
+    id: 'disc-2',
+    type: 'walikelas',
+    topic: 'Koordinasi Seragam & Perlengkapan Misa Jumat Pertama Bulan Agustus',
+    className: 'X-MIPA 1',
+    authorRole: 'guru',
+    authorName: 'Theresia Imelda Ndua, S.Pd., M.Si. (Wali Kelas)',
+    createdAt: '21 Juli 2026, 10:00 WITA',
+    content: 'Selamat pagi anak-anak kelas X-MIPA 1 yang terkasih. Mengingatkan kembali bahwa pada Misa Jumat Pertama tanggal 7 Agustus, kita semua mengenakan seragam putih abu-abu lengkap dengan selendang tenun Manggarai. Mari kita persiapkan hati dengan baik.',
+    replies: [
+      {
+        id: 'rep-2',
+        authorRole: 'siswa',
+        authorName: 'Maria Goreti Djehadut',
+        createdAt: '21 Juli 2026, 10:45 WITA',
+        content: 'Baik Ibu Wali Kelas, kami sudah saling mengingatkan dan petugas lektor dari kelas kita sudah siap berlatih.',
+      },
+    ],
+  },
+];
+
+// ==========================================
+// 7. EKSTRAKURIKULER SISWA (KEHIDUPAN SISWA)
+// ==========================================
+export const INITIAL_EXTRACURRICULARS: ExtracurricularActivity[] = [
+  {
+    id: 'ekskul-1',
+    name: 'Jurnalistik & Mading Digital "Gema Setia Bakti"',
+    category: 'Jurnalistik & Literasi',
+    coach: 'Kornelis Hambur, S.Sos., M.AP. & Redaksi Siswa',
+    schedule: 'Rabu & Sabtu (14:30 - 16:30 WITA)',
+    location: 'Ruang Redaksi Jurnalistik & Lab Komputer',
+    memberCount: 42,
+    description: 'Wadah eksplorasi literasi, peliputan berita sekolah, penulisan cerita pendek, puisi, opini sosial, fotografi jurnalistik, dan pengelolaan mading sekolah serta webzine berkala.',
+    imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Juara 1 Lomba Majalah Dinding Sekolah Tingkat Kabupaten Manggarai 2025',
+      'Penerbitan Antologi Puisi & Cerpen Siswa Flores "Suara Hati Dari Lembah Ranaka"',
+    ],
+  },
+  {
+    id: 'ekskul-2',
+    name: 'Pramuka Gugus Depan St. Paulus Ruteng',
+    category: 'Kepemimpinan',
+    coach: 'Drs. Petrus Kanisius Dadi & Tim Pembina',
+    schedule: 'Jumat (15:00 - 17:30 WITA)',
+    location: 'Lapangan Utama & Halaman Terbuka',
+    memberCount: 120,
+    description: 'Pembinaan kedisiplinan, kemandirian, kecakapan bertahan hidup (survival), pionering, pertolongan pertama, dan pengabdian masyarakat ramah lingkungan.',
+    imageUrl: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Juara Umum Kemah Bakti Pramuka Penegak se-Keuskupan Ruteng 2024',
+      'Utusan Jambore Nasional Pramuka Indonesia',
+    ],
+  },
+  {
+    id: 'ekskul-3',
+    name: 'Paduan Suara Remaja (Koor Gita Setia Bakti)',
+    category: 'Seni & Musik',
+    coach: 'Sr. Maria Anselma, S.Pd. & Pelatih Vokal Profesional',
+    schedule: 'Selasa & Kamis (15:30 - 17:30 WITA)',
+    location: 'Kapela Pusat & Ruang Akustik Musik',
+    memberCount: 65,
+    description: 'Pelatihan teknik vokal, harmoni paduan suara sakral Katolik, lagu-lagu etnik nusantara, dan solois untuk liturgi gereja serta festival paduan suara tingkat provinsi dan nasional.',
+    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Medali Emas Pesparani (Pesta Paduan Suara Gerejani) Tingkat Remaja NTT',
+      'Paduan Suara Utama Misa Pentahbisan Imam Baru Keuskupan Ruteng',
+    ],
+  },
+  {
+    id: 'ekskul-4',
+    name: 'Sanggar Seni Tari Tradisional Manggarai & Teater',
+    category: 'Seni & Musik',
+    coach: 'Bernadetta Lidia Jemamu, S.Pd. & Tetua Sanggar',
+    schedule: 'Senin & Kamis (15:00 - 17:00 WITA)',
+    location: 'Gedung Serbaguna St. Fransiskus',
+    memberCount: 50,
+    description: 'Pelestarian gerak tari tradisional Manggarai seperti Tiba Meka, Sae, Danding, drama teater musikal, dan peragaan busana tenun ikat Flores.',
+    imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Juara 1 Festival Tari Etnik Pelajar Tingkat Kabupaten Manggarai',
+      'Tampil pada Penyambutan Tamu Kehormatan Kenegaraan di Labuan Bajo',
+    ],
+  },
+  {
+    id: 'ekskul-5',
+    name: 'Palang Merah Remaja (PMR Wira)',
+    category: 'Kemanusiaan & PMR',
+    coach: 'Clara Florentina Jedia, M.Psi. & PMI Manggarai',
+    schedule: 'Rabu (15:00 - 17:00 WITA)',
+    location: 'Ruang UKS Terpadu',
+    memberCount: 38,
+    description: 'Pelatihan pertolongan pertama pada kecelakaan (PPGD), mitigasi bencana alam gempa dan longsor di daerah perbukitan, aksi donor darah, dan pola hidup bersih.',
+    imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Peringkat 1 Lomba Tandu Cepat & Pertolongan Pertama PMR Wira Flores',
+      'Koordinator Posko Tanggap Bencana Erupsi Gunung Lewotobi',
+    ],
+  },
+  {
+    id: 'ekskul-6',
+    name: 'Klub Olahraga Prestasi (Bola Voli & Basket)',
+    category: 'Olahraga',
+    coach: 'Yoseph Marselinus Roga, S.Pd. & Pelatih Fisik',
+    schedule: 'Setiap Sore (16:00 - 18:00 WITA)',
+    location: 'Gelanggang Olahraga & Lapangan Basket Terpadu',
+    memberCount: 55,
+    description: 'Pembinaan atlet muda putra dan putri bidang bola voli, bola basket, futsal, dan atletik lari jarak menengah dengan program latihan fisik terukur.',
+    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Juara 1 Turnamen Bola Voli Antar SMA Se-Daratan Flores 2025',
+      'Runner-Up DBL Basket Pelajar Regional NTT',
+    ],
+  },
+  {
+    id: 'ekskul-7',
+    name: 'Komunitas Rohani Katolik, Misdinar & Legio Maria',
+    category: 'Rohani',
+    coach: 'Pastor Moderator Kampus & Sr. Maria Anselma',
+    schedule: 'Sabtu Pagi & Sore Misa Minggu',
+    location: 'Kapela Pusat SMAK Setia Bakti',
+    memberCount: 75,
+    description: 'Pembinaan hidup rohani katolik, pelatihan pelayan altar (putra-putri altar/misdinar), rekoleksi berkala, novena devosi Maria, dan kunjungan sosial ke panti asuhan.',
+    imageUrl: 'https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=800&q=80',
+    achievements: [
+      'Pelayan Liturgi Teladan Paroki Katedral St. Yosef Ruteng',
+      'Penggerak Program Peduli Sesama & Berbagi Kasih Natal/Paskah',
+    ],
+  },
+];
+
+// ==========================================
+// 8. KARYA SISWA (CERITA, PUISI, JURNALISTIK, SENI)
+// ==========================================
+export const INITIAL_STUDENT_WORKS: StudentWork[] = [
+  {
+    id: 'kw-1',
+    title: 'Kabut Pagi di Puncak Ranaka: Sebuah Renungan Anak Pegunungan',
+    type: 'Cerita',
+    studentName: 'Yohanes Maria Vianney Ndau',
+    studentClass: 'X-MIPA 1',
+    publishDate: '18 Juli 2026',
+    excerpt: 'Dingin merambat perlahan dari balik lereng Ranaka yang diselimuti kabut tebal. Di sudut kota Ruteng, lonceng kapela mulai berdentang...',
+    content: `Dingin merambat perlahan dari balik lereng Gunung Ranaka yang diselimuti kabut tebal berwarna putih susu. Di sudut kota Ruteng, kota seribu biara yang damai, dentang lonceng kapela terdengar syahdu memecah keheningan fajar.
+
+Bagi Yohanes, kabut ini bukan sekadar udara dingin yang menusuk tulang, melainkan selimut kasih Tuhan yang senantiasa mengingatkannya pada perjuangan orang tuanya yang gigih berkebun kopi Arabika Flores. Setiap butir embun yang menetes dari pucuk daun kopi seolah menjadi saksi tetes keringat para petani Manggarai demi menyekolahkan anak-anaknya di SMA Katolik Setia Bakti.
+
+"Belajarlah setinggi langit anakku, agar kelak iman dan ilmumu menjadi lentera bagi sesama," pesan ayahnya selalu terngiang setiap kali ia melangkahkan kaki menyusuri jalan berbatu menuju gerbang sekolah tercinta. Di balik dinding kelas yang hangat, mimpi-mimpi besar anak-anak Flores dirajut dengan cinta, doa, dan ketekunan yang tak pernah pudar.`,
+    coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+    likes: 58,
+    reads: 240,
+    commentsCount: 12,
+    status: 'Terbit',
+  },
+  {
+    id: 'kw-2',
+    title: 'Nyanyian Lembah Wae Rebo: Puisi Kerinduan pada Leluhur',
+    type: 'Puisi',
+    studentName: 'Maria Goreti Djehadut',
+    studentClass: 'X-MIPA 2',
+    publishDate: '16 Juli 2026',
+    excerpt: 'Di balik atap kerucut Mbaru Niang yang menjulang, hembusan angin membawa pesan para leluhur yang tak lekang oleh masa...',
+    content: `Di balik atap kerucut Mbaru Niang yang menjulang,
+Kabut menari di sela rimbun dedaunan hijau,
+Ada bisik doa mengalun pelan,
+Dari bibir para tetua yang teduh memandang.
+
+Tujuh atap rumah berpadu harmoni,
+Lambang persaudaraan yang tak terbagi,
+Tanah Manggarai tumpah darah kami,
+Kusimpan setia di relung hati.
+
+Oh Wae Rebo di puncak sunyi,
+Engkau wariskan adat dan budi pekerti,
+Meski dunia berganti wajah teknologi,
+Akar budaya kami kan tetap abadi!`,
+    coverImage: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=800&q=80',
+    likes: 74,
+    reads: 310,
+    commentsCount: 18,
+    status: 'Terbit',
+  },
+  {
+    id: 'kw-3',
+    title: 'Liputan Khusus Jurnalistik: Menelusuri Jejak Literasi Kopi Arabika Ruteng',
+    type: 'Jurnalistik',
+    studentName: 'Redaksi Siswa (Ignatius Loyola Rendang & Tim Mading)',
+    studentClass: 'X-IPS 1 / Tim Gema Setia Bakti',
+    publishDate: '20 Juli 2026',
+    excerpt: 'Tim jurnalistik SMAK Setia Bakti melakukan investigasi langsung ke perkebunan rakyat Desa Mano untuk melihat bagaimana kopi menopang pendidikan anak-anak Manggarai...',
+    content: `RUTENG — Aroma khas kopi Arabika Manggarai yang baru disangrai tercium pekat saat tim jurnalis siswa "Gema Setia Bakti" menginjakkan kaki di Desa Mano, sebuah desa penghasil kopi specialty yang tersohor hingga ke mancanegara.
+
+Dalam liputan investigatif kali ini, kami menemui Bapak Hendrikus (54), seorang petani kopi yang berhasil menguliahkan ketiga anaknya berkat ketekunan menjaga mutu panen petik merah. "Kopi ini adalah berkat dari alam Flores dan buah dari doa. Sekolah anak-anak adalah prioritas paling utama," tuturnya dengan mata berbinar.
+
+Melalui program integrasi sekolah vokasi sains dan lingkungan, SMA Katolik Setia Bakti kini turut mengembangkan laboratorium mikrobiologi fermentasi pascapanen kopi. Siswa-siswi jurusan MIPA dan IPS berkolaborasi: anak MIPA meneliti fermentasi ragi alami kopi, sedangkan anak IPS belajar rantai pasok ekonomi mikro dan pemasaran digital. Sebuah bukti nyata bahwa pendidikan di Setia Bakti berakar kuat pada potensi bumi Flores tercinta.`,
+    coverImage: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=800&q=80',
+    likes: 89,
+    reads: 420,
+    commentsCount: 24,
+    status: 'Terbit',
+  },
+  {
+    id: 'kw-4',
+    title: 'Esai Ilmiah Populer: Pelestarian Satwa Endemik Komodo dan Tanggung Jawab Generasi Z',
+    type: 'Esai',
+    studentName: 'Clara Bernadetha Madu',
+    studentClass: 'XI-MIPA 1',
+    publishDate: '22 Juli 2026',
+    excerpt: 'Sebagai generasi muda Nusa Tenggara Timur, kita tidak boleh menjadi penonton di rumah sendiri ketika ekosistem langka dunia membutuhkan perlindungan nyata...',
+    content: `Biawak Raksasa Komodo (Varanus komodoensis) adalah keajaiban purba yang dianugerahkan Tuhan di tanah Nusa Tenggara Timur. Namun di tengah masifnya arus pariwisata global di Labuan Bajo, tantangan ekologis semakin nyata.
+
+Dalam esai ini, penulis menyoroti tiga pilar penting yang harus digagas oleh pelajar NTT: pertama, peningkatan literasi biokonservasi sejak bangku sekolah menengah; kedua, keterlibatan aktif dalam kampanye pengurangan sampah plastik di daerah pesisir; dan ketiga, pemanfaatan riset teknologi DNA barcoding untuk memonitor kesehatan populasi komodo di habitat alaminya.
+
+Generasi Z Flores tidak boleh hanya berbangga pada nama besar Komodo, melainkan harus berdiri di garis depan sebagai penjaga ekosistem yang berilmu, berintegritas, dan mencintai kelestarian ciptaan.`,
+    coverImage: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=800&q=80',
+    likes: 62,
+    reads: 275,
+    commentsCount: 15,
+    status: 'Terbit',
+  },
+];
+
+// ==========================================
+// 9. JURUSAN & PEMINATAN (DIKELOLA ADMIN UTAMA)
+// ==========================================
+export const INITIAL_MAJORS: MajorProgram[] = [
+  {
+    id: 'jur-1',
+    name: 'Peminatan Matematika & Ilmu Pengetahuan Alam (MIPA)',
+    code: 'MIPA',
+    headOfDepartment: 'Theresia Imelda Ndua, S.Pd., M.Si.',
+    description: 'Fokus pada pengembangan nalar riset ilmiah, bioteknologi terapan, fisika eksperimental, kimia organik, dan logika matematika olimpiade dengan laboratorium terakreditasi.',
+    totalStudents: 312,
+    curriculumHighlights: ['Bioteknologi Pangan Lokal', 'Praktikum Robotika Dasar', 'Analisis Data Skolastik', 'Kalkulus & Mekanika'],
+    careerProspects: ['Kedokteran & Farmasi', 'Teknik Informatika & Elektro', 'Peneliti Sains & Biologi', 'Aktuaria & Data Scientist'],
+  },
+  {
+    id: 'jur-2',
+    name: 'Peminatan Ilmu Pengetahuan Sosial (IPS)',
+    code: 'IPS',
+    headOfDepartment: 'Kornelis Hambur, S.Sos., M.AP.',
+    description: 'Membangun kepekaan sosial kritis, penguasaan ekonomi makro-mikro, akuntansi keuangan, sosiologi antropologi Manggarai, serta hukum tata negara dan kepemimpinan publik.',
+    totalStudents: 268,
+    curriculumHighlights: ['Studi Kasus Antropologi Flores', 'Ekonomi Digital & Koperasi', 'Debat Hukum & Diplomasi', 'Riset Sosial Lapangan'],
+    careerProspects: ['Ekonom & Bankir', 'Diplomat & Hubungan Internasional', 'Advokat & Praktisi Hukum', 'Jurnalis & Kebijakan Publik'],
+  },
+  {
+    id: 'jur-3',
+    name: 'Peminatan Bahasa & Kebudayaan Nusantara',
+    code: 'BAHASA',
+    headOfDepartment: 'Bernadetta Lidia Jemamu, S.Pd.',
+    description: 'Mengasah kemahiran berbahasa Inggris, Jerman dasar, Bahasa Indonesia sastra, filologi budaya Flores, kajian etnolinguistik, serta seni sastra dan jurnalistik modern.',
+    totalStudents: 168,
+    curriculumHighlights: ['English Academic Debate', 'Sastra Nusantara & Teater', 'Jurnalistik Digital & Webzine', 'Pariwisata Internasional Flores'],
+    careerProspects: ['Penerjemah & Interpreter Resmi', 'Pemandu Wisata & Public Relations', 'Penulis & Editor Sastra', 'Dosen & Akademisi Bahasa'],
+  },
+];
+
+// ==========================================
+// 10. PROFIL SEKOLAH (DIKELOLA ADMIN UTAMA)
+// ==========================================
+export const INITIAL_SCHOOL_PROFILE: SchoolProfile = {
+  name: 'SMA Katolik Setia Bakti Ruteng',
+  npsn: '50302811',
+  accreditation: 'A (Unggul) - BAN S/M',
+  yayasan: 'Yayasan Persekolahan St. Paulus Ruteng (YAPERPATER)',
+  principal: 'Drs. Petrus Kanisius Dadi',
+  motto: 'Fides, Scientia, et Mores (Iman, Ilmu, dan Moralitas)',
+  vision: 'Menjadi lembaga pendidikan Katolik unggulan di tingkat regional dan nasional yang menghasilkan generasi beriman teguh, cerdas berpengetahuan, berkarakter luhur, serta mencintai kebudayaan lokal Flores pada tahun 2030.',
+  missions: [
+    'Menyelenggarakan proses pembelajaran akademis bermutu tinggi berbasis Kurikulum Merdeka yang menumbuhkan daya nalar kritis dan inovasi.',
+    'Menanamkan nilai-nilai moralitas kristiani, spiritualitas cinta kasih, dan keteladanan santo pelindung sekolah dalam kehidupan sehari-hari.',
+    'Mengembangkan potensi minat, bakat, kepemimpinan, dan kewirausahaan siswa melalui beragam kegiatan ekstrakurikuler serta literasi jurnalistik.',
+    'Melestarikan dan mendayagunakan kearifan lokal budaya Manggarai dalam harmoni kebhinekaan nusantara.',
+    'Mewujudkan tata kelola sekolah yang transparan, akuntabel, berbasis teknologi digital terpadu, dan berorientasi pada kepuasan civitas akademika.',
+  ],
+  history: 'SMA Katolik Setia Bakti Ruteng didirikan pada tanggal 1 Agustus 1968 oleh para misionaris dan tokoh perintis pendidikan Katolik di bawah naungan Keuskupan Ruteng dan Yayasan Persekolahan St. Paulus Ruteng. Selama lebih dari 58 tahun mengabdi di tanah Manggarai, SMAK Setia Bakti telah melahirkan ribuan alumni sukses yang berkiprah sebagai imam, biarawan/biarawati, dokter, insinyur, akademisi, pejabat publik, dan pengusaha terkemuka di seantero nusantara dan mancanegara.',
+  address: 'Jl. Kartini No. 8, Kel. Pitak, Kec. Langke Rembong, Kota Ruteng, Kabupaten Manggarai, Nusa Tenggara Timur 86511',
+  phone: '+62 (0385) 21455',
+  email: 'info@smaksetiabaktirtg.sch.id',
+};
+

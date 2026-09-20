@@ -13,6 +13,8 @@ import {
   GraduationCap,
   ArrowLeft,
   Globe,
+  School,
+  Sparkles,
 } from 'lucide-react';
 import {
   Student,
@@ -23,7 +25,17 @@ import {
   NewsItem,
   SchoolEvent,
   GalleryItem,
+  SchoolProfile,
+  MajorProgram,
+  Extracurricular,
+  StudentWork,
 } from '../types';
+import {
+  INITIAL_SCHOOL_PROFILE,
+  INITIAL_MAJORS,
+  INITIAL_EXTRACURRICULARS,
+  INITIAL_STUDENT_WORKS,
+} from '../data/mockData';
 
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { AdminNewsEventsTab } from './admin/AdminNewsEventsTab';
@@ -34,6 +46,9 @@ import { AdminGalleryTab } from './admin/AdminGalleryTab';
 import { AdminAcademicTab } from './admin/AdminAcademicTab';
 import { AdminReportsTab } from './admin/AdminReportsTab';
 import { AdminSecurityNotifTab } from './admin/AdminSecurityNotifTab';
+import { AdminProfileTab } from './admin/AdminProfileTab';
+import { AdminMajorsTab } from './admin/AdminMajorsTab';
+import { AdminCampusLifeTab } from './admin/AdminCampusLifeTab';
 
 interface AdminResultDashboardProps {
   session: UserSession;
@@ -44,6 +59,10 @@ interface AdminResultDashboardProps {
   galleryList: GalleryItem[];
   ppdbList: PPDBRegistration[];
   notifications: PushNotification[];
+  schoolProfile?: SchoolProfile;
+  majors?: MajorProgram[];
+  extracurriculars?: Extracurricular[];
+  studentWorks?: StudentWork[];
   onAddStudent: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onAddTeacher: (teacher: TeacherStaff) => void;
@@ -62,6 +81,13 @@ interface AdminResultDashboardProps {
     target: 'all' | 'guru' | 'orangtua' | 'siswa',
     priority: 'urgent' | 'info' | 'akademik'
   ) => void;
+  onUpdateSchoolProfile?: (profile: SchoolProfile) => void;
+  onAddMajor?: (major: MajorProgram) => void;
+  onDeleteMajor?: (id: string) => void;
+  onAddExtracurricular?: (eskul: Extracurricular) => void;
+  onDeleteExtracurricular?: (id: string) => void;
+  onAddStudentWork?: (work: StudentWork) => void;
+  onDeleteStudentWork?: (id: string) => void;
   onBackToPortal?: () => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
@@ -75,6 +101,10 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   galleryList,
   ppdbList,
   notifications,
+  schoolProfile = INITIAL_SCHOOL_PROFILE,
+  majors = INITIAL_MAJORS,
+  extracurriculars = INITIAL_EXTRACURRICULARS,
+  studentWorks = INITIAL_STUDENT_WORKS,
   onAddStudent,
   onDeleteStudent,
   onAddTeacher,
@@ -88,19 +118,29 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onAddPPDB,
   onUpdatePPDBStatus,
   onSendPushNotification,
+  onUpdateSchoolProfile = () => {},
+  onAddMajor = () => {},
+  onDeleteMajor = () => {},
+  onAddExtracurricular = () => {},
+  onDeleteExtracurricular = () => {},
+  onAddStudentWork = () => {},
+  onDeleteStudentWork = () => {},
   onBackToPortal,
   onNavigateToWebsiteTab,
 }) => {
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'berita' | 'siswa' | 'ppdb' | 'guru' | 'galeri' | 'akademik' | 'laporan' | 'keamanan'
+    'overview' | 'profil' | 'jurusan' | 'guru' | 'siswa' | 'berita' | 'kehidupan' | 'ppdb' | 'galeri' | 'akademik' | 'laporan' | 'keamanan'
   >('overview');
 
   const menuItems = [
     { id: 'overview', label: 'Ringkasan Kinerja', icon: LayoutGrid, sub: 'Ikhtisar & Statistik' },
-    { id: 'berita', label: 'Berita & Agenda', icon: Newspaper, sub: 'Warta & Acara' },
-    { id: 'siswa', label: 'Data Siswa & Alumni', icon: Users, sub: 'Input & Kelola Siswa' },
-    { id: 'ppdb', label: 'PPDB Online', icon: UserPlus, sub: 'Verifikasi Calon Siswa' },
+    { id: 'profil', label: 'Profil Sekolah', icon: School, sub: 'Visi, Misi & Legalitas' },
+    { id: 'jurusan', label: 'Jurusan & Peminatan', icon: GraduationCap, sub: 'MIPA, IPS, Bahasa' },
     { id: 'guru', label: 'Profil Guru & Pegawai', icon: UserCheck, sub: 'Direktori Pendidik' },
+    { id: 'siswa', label: 'Data Siswa & Alumni', icon: Users, sub: 'Input & Kelola Siswa' },
+    { id: 'berita', label: 'Warta & Berita Sekolah', icon: Newspaper, sub: 'Pengumuman & Agenda' },
+    { id: 'kehidupan', label: 'Kehidupan Siswa & Eskul', icon: Sparkles, sub: 'Upload Karya Siswa & Eskul' },
+    { id: 'ppdb', label: 'PPDB Online', icon: UserPlus, sub: 'Verifikasi Calon Siswa' },
     { id: 'galeri', label: 'Galeri Kegiatan', icon: Image, sub: 'Dokumentasi Siswa' },
     { id: 'akademik', label: 'Kurikulum & Mapel', icon: BookOpen, sub: 'Kurikulum Merdeka' },
     { id: 'laporan', label: 'Statistik & Laporan', icon: FileDown, sub: 'Unduh PDF & Excel' },
@@ -206,6 +246,38 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               galleryList={galleryList}
               ppdbList={ppdbList}
               onNavigateToTab={(id) => setActiveMenu(id as any)}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+            />
+          )}
+
+          {/* TAB: PROFIL SEKOLAH */}
+          {activeMenu === 'profil' && (
+            <AdminProfileTab
+              profile={schoolProfile}
+              onUpdateProfile={onUpdateSchoolProfile}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+            />
+          )}
+
+          {/* TAB: JURUSAN & PEMINATAN */}
+          {activeMenu === 'jurusan' && (
+            <AdminMajorsTab
+              majors={majors}
+              onAddMajor={onAddMajor}
+              onDeleteMajor={onDeleteMajor}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+            />
+          )}
+
+          {/* TAB: KEHIDUPAN SISWA & ESKUL (UPLOAD KARYA SISWA) */}
+          {activeMenu === 'kehidupan' && (
+            <AdminCampusLifeTab
+              extracurriculars={extracurriculars}
+              studentWorks={studentWorks}
+              onAddExtracurricular={onAddExtracurricular}
+              onDeleteExtracurricular={onDeleteExtracurricular}
+              onAddStudentWork={onAddStudentWork}
+              onDeleteStudentWork={onDeleteStudentWork}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
           )}

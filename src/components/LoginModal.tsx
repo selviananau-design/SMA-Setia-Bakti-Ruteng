@@ -27,8 +27,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setUsername('admin');
       setPassword('admin123');
     } else if (role === 'guru') {
-      setUsername('197508122002121003');
+      setUsername('198811202015022004');
       setPassword('guru123');
+    } else if (role === 'siswa') {
+      setUsername('0078129011');
+      setPassword('siswa123');
     } else if (role === 'orangtua') {
       setUsername('0078129011');
       setPassword('ortu123');
@@ -54,20 +57,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     } else if (selectedRole === 'guru') {
       onLoginSuccess({
         role: 'guru',
-        name: 'Sr. Maria Anselma, S.Pd. (Guru Informatika)',
-        identifier: username || '198304152009032008',
+        name: 'Theresia Imelda Ndua, S.Pd., M.Si. (Wali Kelas X-MIPA 1 & Guru Biologi)',
+        identifier: username || '198811202015022004',
         token: 'token_guru_auth',
-        email: 'sr.anselma@smaksetiabakti.sch.id',
+        email: 'theresia.ndua@smaksetiabakti.sch.id',
+        className: 'X-MIPA 1',
+      });
+      onClose();
+      return;
+    } else if (selectedRole === 'siswa') {
+      onLoginSuccess({
+        role: 'siswa',
+        name: 'Yohanes Maria Vianney Ndau',
+        identifier: username || '0078129011',
+        token: 'token_siswa_auth',
+        className: 'X-MIPA 1',
       });
       onClose();
       return;
     } else if (selectedRole === 'orangtua') {
       onLoginSuccess({
         role: 'orangtua',
-        name: 'Antonius Ngganggu (Orang Tua Yohanes Maria)',
+        name: 'Bpk. Antonius Ngganggu (Orang Tua Yohanes Ndau)',
         identifier: username || '0078129011',
         token: 'token_ortu_auth',
         childNisn: '0078129011',
+        className: 'X-MIPA 1',
       });
       onClose();
       return;
@@ -103,7 +118,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
             Pilih Peran Pengguna:
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button
               type="button"
               onClick={() => handleRoleSelect('admin')}
@@ -127,7 +142,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               }`}
             >
               <UserCheck className="w-4 h-4 text-purple-700" />
-              <span className="text-xs">Guru / Staf</span>
+              <span className="text-xs">Guru Pendidik</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleRoleSelect('siswa')}
+              className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                selectedRole === 'siswa'
+                  ? 'border-purple-700 bg-purple-50 text-purple-950 font-bold shadow-sm'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <GraduationCap className="w-4 h-4 text-purple-700" />
+              <span className="text-xs">Siswa</span>
             </button>
 
             <button
@@ -158,7 +186,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <label className="block text-xs font-bold text-slate-700 mb-1">
               {selectedRole === 'admin' && 'Username Admin'}
               {selectedRole === 'guru' && 'NIP / NUPTK Guru'}
-              {selectedRole === 'orangtua' && 'NISN Siswa (10 Digit)'}
+              {selectedRole === 'siswa' && 'NISN Siswa (10 Digit)'}
+              {selectedRole === 'orangtua' && 'NISN Siswa (Anak Anda)'}
             </label>
             <div className="relative">
               <input
@@ -170,7 +199,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   selectedRole === 'admin'
                     ? 'admin'
                     : selectedRole === 'guru'
-                    ? '19750812...'
+                    ? '19881120...'
                     : '0078129011'
                 }
                 className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-purple-600 focus:outline-none font-mono"
@@ -200,19 +229,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             {selectedRole === 'admin' && (
               <p className="text-slate-600">
                 User: <code className="font-bold text-purple-800 font-mono">admin</code> | Sandi:{' '}
-                <code className="font-bold text-purple-800 font-mono">admin123</code> (Akses Penuh Input Siswa & Konten)
+                <code className="font-bold text-purple-800 font-mono">admin123</code> (Admin Utama - Kelola Data Siswa, Guru, Profil, Berita, Jurusan, Ekskul, Karya)
               </p>
             )}
             {selectedRole === 'guru' && (
               <p className="text-slate-600">
-                User: <code className="font-bold text-purple-800 font-mono">guru</code> | Sandi:{' '}
-                <code className="font-bold text-purple-800 font-mono">guru123</code> (Akses Nilai Rapor & Presensi)
+                User: <code className="font-bold text-purple-800 font-mono">guru</code> (atau NIP) | Sandi:{' '}
+                <code className="font-bold text-purple-800 font-mono">guru123</code> (Mode Wali Kelas & Guru Mapel: Nilai, Bahan Ajar, Tugas, Izin)
+              </p>
+            )}
+            {selectedRole === 'siswa' && (
+              <p className="text-slate-600">
+                User NISN: <code className="font-bold text-purple-800 font-mono">0078129011</code> | Sandi:{' '}
+                <code className="font-bold text-purple-800 font-mono">siswa123</code> (Unduh Bahan Ajar, Kumpul Tugas, Diskusi Guru & Catatan Wali)
               </p>
             )}
             {selectedRole === 'orangtua' && (
               <p className="text-slate-600">
-                User: <code className="font-bold text-purple-800 font-mono">0078129011</code> | Sandi:{' '}
-                <code className="font-bold text-purple-800 font-mono">ortu123</code> (Pantau Anak, Nilai, SPP)
+                User NISN: <code className="font-bold text-purple-800 font-mono">0078129011</code> | Sandi:{' '}
+                <code className="font-bold text-purple-800 font-mono">ortu123</code> (Pengumuman, Cek Kehadiran Anak, Ajukan Izin ke Wali Kelas)
               </p>
             )}
           </div>
