@@ -28,7 +28,7 @@ interface HeaderProps {
   onOpenEncryptionModal?: () => void;
   notifications?: PushNotification[];
   onSearch?: (query: string) => void;
-  onNavigateTab?: (tab: string) => void;
+  onNavigateTab?: (tab: string, subTab?: string) => void;
   activeTab?: string;
 }
 
@@ -57,16 +57,28 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navMenuItems = [
     { id: 'beranda', label: 'BERANDA', hasDropdown: false },
-    { id: 'akademik', label: 'PROFIL KAMI', hasDropdown: false },
     {
-      id: 'courses',
+      id: 'profil',
+      label: 'PROFIL KAMI',
+      hasDropdown: true,
+      subItems: [
+        { label: 'Sambutan Kepala Sekolah', tab: 'profil', subTab: 'sambutan' },
+        { label: 'Sejarah & Kilas Balik', tab: 'profil', subTab: 'sejarah' },
+        { label: 'Visi, Misi & Karakter Kristiani', tab: 'profil', subTab: 'visi-misi' },
+        { label: 'Sarana & Prasarana Kampus', tab: 'profil', subTab: 'fasilitas' },
+        { label: 'Identitas & Legalitas Sekolah', tab: 'profil', subTab: 'identitas' },
+      ],
+    },
+    {
+      id: 'jurusan',
       label: 'JURUSAN & PROGRAM',
       hasDropdown: true,
       subItems: [
-        { label: 'Program Studi IPS (Sosial & Ekonomi)', tab: 'akademik' },
-        { label: 'Program Studi MIPA (Sains & Teknologi)', tab: 'akademik' },
-        { label: 'Program Studi Bahasa & Budaya Flores', tab: 'akademik' },
-        { label: 'Seni Budaya & Kriya Daerah', tab: 'akademik' },
+        { label: 'Peminatan MIPA (Sains & Riset)', tab: 'jurusan', subTab: 'mipa' },
+        { label: 'Peminatan IPS (Sosial & Humaniora)', tab: 'jurusan', subTab: 'ips' },
+        { label: 'Peminatan Bahasa & Budaya Flores', tab: 'jurusan', subTab: 'bahasa' },
+        { label: 'Prakarya, Kewirausahaan & Kriya', tab: 'jurusan', subTab: 'kriya' },
+        { label: 'Semua Peminatan & Kurikulum Merdeka', tab: 'jurusan', subTab: 'semua' },
       ],
     },
     {
@@ -74,10 +86,12 @@ export const Header: React.FC<HeaderProps> = ({
       label: 'INFORMASI PPDB',
       hasDropdown: true,
       subItems: [
-        { label: 'Pendaftaran Siswa Baru (PPDB 2026/2027)', tab: 'ppdb' },
-        { label: 'Biaya Pendidikan & Syarat Masuk', tab: 'ppdb' },
-        { label: 'Beasiswa Prestasi & Yayasan', tab: 'ppdb' },
-        { label: 'Jadwal & Pengumuman Seleksi', tab: 'ppdb' },
+        { label: 'Formulir Pendaftaran PPDB 2026/2027', tab: 'ppdb', subTab: 'daftar' },
+        { label: 'Syarat & Alur Pendaftaran', tab: 'ppdb', subTab: 'syarat' },
+        { label: 'Rincian Biaya Pendidikan & SPP', tab: 'ppdb', subTab: 'biaya' },
+        { label: 'Beasiswa Prestasi & Keringanan Yayasan', tab: 'ppdb', subTab: 'beasiswa' },
+        { label: 'Jadwal Pelaksanaan & Tes Seleksi', tab: 'ppdb', subTab: 'jadwal' },
+        { label: 'Cek Status Kelulusan Berkas', tab: 'ppdb', subTab: 'status' },
       ],
     },
     {
@@ -85,20 +99,26 @@ export const Header: React.FC<HeaderProps> = ({
       label: 'DEWAN GURU & STAF',
       hasDropdown: true,
       subItems: [
-        { label: 'Dewan Guru & Tenaga Pendidik', tab: 'guru' },
-        { label: 'Kepala Sekolah & Manajemen', tab: 'guru' },
-        { label: 'Staf Administrasi & Laboratorium', tab: 'guru' },
+        { label: 'Semua Dewan Guru & Tenaga Pendidik', tab: 'guru', subTab: 'Semua' },
+        { label: 'Kepala Sekolah & Manajemen', tab: 'guru', subTab: 'Pimpinan' },
+        { label: 'Guru Bidang Studi MIPA', tab: 'guru', subTab: 'MIPA' },
+        { label: 'Guru Bidang Studi IPS & Bahasa', tab: 'guru', subTab: 'IPS & Bahasa' },
+        { label: 'Guru Agama & Budi Pekerti', tab: 'guru', subTab: 'Agama & Budi Pekerti' },
+        { label: 'Kesiswaan & Bimbingan Konseling (BK)', tab: 'guru', subTab: 'Kesiswaan & BK' },
+        { label: 'Staf Administrasi & Laboratorium', tab: 'guru', subTab: 'Tata Usaha' },
       ],
     },
     { id: 'berita', label: 'WARTA & BERITA', hasDropdown: false },
     {
-      id: 'galeri',
+      id: 'kehidupan',
       label: 'KEHIDUPAN SISWA',
       hasDropdown: true,
       subItems: [
-        { label: 'Organisasi Siswa (OSIS) & Ekskul', tab: 'galeri' },
-        { label: 'Fasilitas Kampus & Asrama Putra/Putri', tab: 'galeri' },
-        { label: 'Galeri Dokumentasi & Video Kegiatan', tab: 'galeri' },
+        { label: 'Ekstrakurikuler Unggulan', tab: 'kehidupan', subTab: 'ekskul' },
+        { label: 'Karya Kreatif Siswa (Cerpen & Puisi)', tab: 'kehidupan', subTab: 'karya' },
+        { label: 'Organisasi Siswa (OSIS) & MPK', tab: 'kehidupan', subTab: 'osis' },
+        { label: 'Asrama Siswa & Lingkungan Sekolah', tab: 'kehidupan', subTab: 'asrama' },
+        { label: 'Galeri Foto & Dokumentasi Kegiatan', tab: 'kehidupan', subTab: 'galeri' },
       ],
     },
     {
@@ -106,8 +126,10 @@ export const Header: React.FC<HeaderProps> = ({
       label: 'STATISTIK & ALUMNI',
       hasDropdown: true,
       subItems: [
-        { label: 'Statistik Kelulusan & Alumni', tab: 'statistik' },
-        { label: 'Koperasi & Perlengkapan Sekolah', tab: 'statistik' },
+        { label: 'Statistik Kelulusan & Nilai Rata-rata', tab: 'statistik', subTab: 'kelulusan' },
+        { label: 'Sebaran Alumni di PTN/PTS & Karir', tab: 'statistik', subTab: 'alumni' },
+        { label: 'Data Demografi Siswa & Rombel', tab: 'statistik', subTab: 'demografi' },
+        { label: 'Koperasi & Perlengkapan Sekolah', tab: 'statistik', subTab: 'koperasi' },
       ],
     },
     { id: 'kontak', label: 'KONTAK KAMI', hasDropdown: false },
@@ -296,14 +318,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Horizontal Navigation Menu Links */}
           <nav className="flex items-center flex-wrap">
             {navMenuItems.map((item) => {
-              const isActive =
-                activeTab === item.id ||
-                (item.id === 'courses' && activeTab === 'akademik') ||
-                (item.id === 'ppdb' && activeTab === 'ppdb') ||
-                (item.id === 'galeri' && activeTab === 'galeri') ||
-                (item.id === 'guru' && activeTab === 'guru') ||
-                (item.id === 'statistik' && activeTab === 'statistik') ||
-                (item.id === 'berita' && activeTab === 'berita');
+              const isActive = activeTab === item.id;
 
               return (
                 <div
@@ -318,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
                         const footer = document.querySelector('footer');
                         if (footer) footer.scrollIntoView({ behavior: 'smooth' });
                       } else {
-                        onNavigateTab(item.id === 'courses' ? 'akademik' : item.id);
+                        onNavigateTab(item.id);
                       }
                     }}
                     className={`px-3.5 py-3 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer border-t-2 ${
@@ -333,12 +348,12 @@ export const Header: React.FC<HeaderProps> = ({
 
                   {/* Dropdown Menu */}
                   {item.hasDropdown && item.subItems && activeDropdown === item.id && (
-                    <div className="absolute left-0 top-full w-60 bg-white text-slate-800 shadow-xl border border-slate-200 py-2 rounded-b-md z-50">
+                    <div className="absolute left-0 top-full w-64 bg-white text-slate-800 shadow-xl border border-slate-200 py-1.5 rounded-b-md z-50">
                       {item.subItems.map((sub, idx) => (
                         <button
                           key={idx}
                           onClick={() => {
-                            onNavigateTab(sub.tab);
+                            onNavigateTab(sub.tab, sub.subTab);
                             setActiveDropdown(null);
                           }}
                           className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer block border-b border-slate-100 last:border-0"

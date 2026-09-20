@@ -4,7 +4,7 @@ import { UserSession } from '../types';
 
 interface NavbarProps {
   activeTab: string;
-  onSelectTab: (tab: string) => void;
+  onSelectTab: (tab: string, subTab?: string) => void;
   session: UserSession | null;
   onOpenLogin: () => void;
 }
@@ -19,12 +19,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'beranda', label: 'Beranda' },
-    { id: 'akademik', label: 'Akademik & Peminatan' },
+    { id: 'profil', label: 'Profil Kami' },
+    { id: 'jurusan', label: 'Jurusan & Program' },
     { id: 'ppdb', label: 'PPDB Online 2026/2027', highlight: true },
-    { id: 'galeri', label: 'Kehidupan Siswa & Ekskul' },
-    { id: 'guru', label: 'Guru & Staf Pengajar' },
-    { id: 'statistik', label: 'Statistik & Alumni' },
+    { id: 'guru', label: 'Dewan Guru & Staf' },
     { id: 'berita', label: 'Warta & Berita Sekolah' },
+    { id: 'kehidupan', label: 'Kehidupan Siswa & Ekskul' },
+    { id: 'statistik', label: 'Statistik & Alumni' },
     {
       id: 'portal',
       label: session ? `Dasbor (${session.role.toUpperCase()})` : 'Portal Login Masuk',

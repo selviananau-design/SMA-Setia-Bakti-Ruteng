@@ -13,6 +13,8 @@ import { StatsDashboard } from './components/StatsDashboard';
 import { PPDBOnline } from './components/PPDBOnline';
 import { TeacherStaffSection } from './components/TeacherStaffSection';
 import { StudentGallery } from './components/StudentGallery';
+import { SchoolProfileSection } from './components/SchoolProfileSection';
+import { AcademicProgramsFullPage } from './components/AcademicProgramsFullPage';
 import { LoginModal } from './components/LoginModal';
 import { PushNotificationBanner } from './components/PushNotificationBanner';
 import { DashboardView } from './components/DashboardView';
@@ -62,6 +64,14 @@ import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('beranda');
+  const [activeSubTab, setActiveSubTab] = useState<string | undefined>(undefined);
+
+  const handleNavigateTab = (tab: string, subTab?: string) => {
+    setActiveTab(tab);
+    setActiveSubTab(subTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [session, setSession] = useState<UserSession | null>(() => {
     const saved = localStorage.getItem('smak_user_session');
@@ -434,15 +444,15 @@ export default function App() {
       <Header
         session={session}
         notifications={notifications}
-        onNavigateTab={(tab) => setActiveTab(tab)}
+        onNavigateTab={handleNavigateTab}
         onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={() => {
           setSession(null);
-          setActiveTab('beranda');
+          handleNavigateTab('beranda');
         }}
         onOpenNotifications={() => {
           if (session) {
-            setActiveTab('dashboard');
+            handleNavigateTab('dashboard');
           } else {
             setIsLoginModalOpen(true);
           }
@@ -453,15 +463,15 @@ export default function App() {
       {/* 2. Top Navigation Bar with Distinct Tabs */}
       <Navbar
         activeTab={activeTab}
-        onSelectTab={(tab) => {
+        onSelectTab={(tab, subTab) => {
           if (tab === 'portal') {
             if (session) {
-              setActiveTab('dashboard');
+              handleNavigateTab('dashboard');
             } else {
               setIsLoginModalOpen(true);
             }
           } else {
-            setActiveTab(tab);
+            handleNavigateTab(tab, subTab);
           }
         }}
         session={session}
@@ -474,30 +484,31 @@ export default function App() {
         {activeTab === 'beranda' && (
           <div className="space-y-0">
             {/* 1. Grand Hero Slider with Overlapping Stats Ribbon (matches reference) */}
-            <HeroSlider onNavigateTab={(tab) => setActiveTab(tab)} />
+            <HeroSlider onNavigateTab={handleNavigateTab} />
 
             {/* 2. Academic Excellence: "Find the Program That Inspires You" (matches reference) */}
-            <AcademicProgramsSection onNavigateTab={(tab) => setActiveTab(tab)} />
+            <AcademicProgramsSection onNavigateTab={handleNavigateTab} />
 
             {/* 3. Vibrant Campus Life: "Experience More Than Education" Dark Navy Showcase + Karya Siswa & Ekskul */}
             <CampusLifeSection
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={handleNavigateTab}
+              initialSubTab="ekskul"
               extracurriculars={extracurriculars}
               studentWorks={studentWorks}
             />
 
             {/* 4. Why SMAK Setia Bakti: "A School That Supports You" 4-Pillars (matches reference) */}
-            <WhyChooseUsSection onNavigateTab={(tab) => setActiveTab(tab)} />
+            <WhyChooseUsSection onNavigateTab={handleNavigateTab} />
 
             {/* 5. Tri-Column Showcase: Student Voice + Latest News & Events + PPDB Next Step Callout (matches reference) */}
             <StudentVoiceAndNewsSection
               newsList={newsList}
               events={eventsList}
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={handleNavigateTab}
             />
 
             {/* 6. Quick Action Facility Modals (Athletics, Asrama, Kantin Sehat, Kalender Akademik) */}
-            <QuickActionRibbon onNavigateTab={(tab) => setActiveTab(tab)} />
+            <QuickActionRibbon onNavigateTab={handleNavigateTab} />
 
             {/* 7. Interactive Statistics & Alumni Tracker */}
             <StatsDashboard students={students} />
@@ -510,86 +521,62 @@ export default function App() {
           </div>
         )}
 
-        {/* PAGE 2: AKADEMIK (INFORMASI KURIKULUM & PRESTASI) */}
-        {activeTab === 'akademik' && (
-          <div className="max-w-7xl mx-auto px-4 py-10 space-y-8 animate-fadeIn">
-            <div className="text-center max-w-3xl mx-auto">
-              <span className="text-xs font-bold text-purple-700 uppercase tracking-widest bg-purple-100 px-3 py-1 rounded-full">
-                Keunggulan Pendidikan Katolik
-              </span>
-              <h2 className="text-3xl font-bold text-[#321759] font-serif mt-2">
-                Informasi Akademik & Kurikulum Merdeka
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-2">
-                Mengintegrasikan kecerdasan intelektual, keterampilan abad ke-21, penguasaan sains dan teknologi,
-                serta penanaman karakter Kristiani yang berakar kuat pada kearifan budaya Manggarai.
-              </p>
-            </div>
-
-            {/* 3 Pillars */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#432874] flex items-center justify-center">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">MIPA (Matematika & Ilmu Alam)</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Fokus pada penguatan Fisika, Kimia, Biologi, dan Matematika Tingkat Lanjut dengan praktikum
-                  laboratorium sains modern dan riset keanekaragaman hayati Flores.
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">IPS (Ilmu Pengetahuan Sosial)</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Pendalaman Sosiologi masyarakat Manggarai, Ekonomi terapan, Geografi kepulauan, dan Sejarah Nusantara
-                  untuk mencetak calon pemimpin daerah yang berjiwa sosial dan berintegritas.
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
-                  <Award className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">Bahasa & Budaya</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Laboratorium multimedia bahasa modern. Penekanan pada penguasaan Bahasa Inggris aktif, Bahasa Jerman,
-                  serta pemajuan sastra nusantara dan pelestarian seni budaya tarian Manggarai.
-                </p>
-              </div>
-            </div>
-
-            {/* Interactive Stats embedded */}
-            <StatsDashboard students={students} />
-          </div>
+        {/* PAGE 2: PROFIL KAMI (TERPISAH SEBAGAI HALAMAN MANDIRI DENGAN SUB-MENU LENGKAP) */}
+        {activeTab === 'profil' && (
+          <SchoolProfileSection
+            profile={schoolProfile}
+            initialSubTab={activeSubTab}
+            onNavigateTab={handleNavigateTab}
+          />
         )}
 
-        {/* PAGE 3: PPDB DARING (ONLINE REGISTRATION & STATUS) */}
+        {/* PAGE 3: JURUSAN & PROGRAM (TERPISAH SEBAGAI HALAMAN MANDIRI DENGAN SUB-MENU PEMINATAN) */}
+        {(activeTab === 'jurusan' || activeTab === 'akademik') && (
+          <AcademicProgramsFullPage
+            majors={majors}
+            initialMajor={activeSubTab}
+            onNavigateTab={handleNavigateTab}
+          />
+        )}
+
+        {/* PAGE 4: INFORMASI PPDB (ONLINE REGISTRATION & STATUS DENGAN SUB-MENU LENGKAP) */}
         {activeTab === 'ppdb' && (
-          <PPDBOnline ppdbList={ppdbList} onAddRegistration={handleAddPPDB} />
+          <PPDBOnline
+            ppdbList={ppdbList}
+            onAddRegistration={handleAddPPDB}
+            initialSubTab={activeSubTab}
+          />
         )}
 
-        {/* PAGE 4: STATISTIK LENGKAP SISWA & ALUMNI */}
+        {/* PAGE 5: DEWAN GURU & STAF (DENGAN FILTER DEPARTEMEN / SUB-MENU) */}
+        {activeTab === 'guru' && (
+          <TeacherStaffSection
+            teachers={teachers}
+            initialDept={activeSubTab}
+          />
+        )}
+
+        {/* PAGE 6: KEHIDUPAN SISWA (EKSKUL, KARYA SASTRA & JURNALISTIK, OSIS, ASRAMA, GALERI) */}
+        {(activeTab === 'kehidupan' || activeTab === 'galeri') && (
+          <CampusLifeSection
+            onNavigateTab={handleNavigateTab}
+            initialSubTab={activeSubTab}
+            extracurriculars={extracurriculars}
+            studentWorks={studentWorks}
+          />
+        )}
+
+        {/* PAGE 7: STATISTIK LENGKAP SISWA, KELULUSAN, ALUMNI & KOPERASI */}
         {activeTab === 'statistik' && (
           <div className="py-6">
-            <StatsDashboard students={students} />
+            <StatsDashboard
+              students={students}
+              initialSubTab={activeSubTab}
+            />
           </div>
         )}
 
-        {/* PAGE 5: PROFIL GURU & PEGAWAI */}
-        {activeTab === 'guru' && (
-          <TeacherStaffSection teachers={teachers} />
-        )}
-
-        {/* PAGE 6: GALERI KEGIATAN SISWA */}
-        {activeTab === 'galeri' && (
-          <StudentGallery items={galleryList} />
-        )}
-
-        {/* PAGE 7: BERITA & PENGUMUMAN */}
+        {/* PAGE 8: BERITA & PENGUMUMAN */}
         {activeTab === 'berita' && (
           <div className="max-w-7xl mx-auto px-4 py-10 space-y-8 animate-fadeIn">
             <div className="border-b border-slate-200 pb-4">
@@ -602,10 +589,10 @@ export default function App() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <DistrictNews newsList={newsList} onNavigateTab={(tab) => setActiveTab(tab)} />
+                <DistrictNews newsList={newsList} onNavigateTab={handleNavigateTab} />
               </div>
               <div>
-                <UpcomingEvents events={eventsList} onNavigateTab={(tab) => setActiveTab(tab)} />
+                <UpcomingEvents events={eventsList} onNavigateTab={handleNavigateTab} />
               </div>
             </div>
           </div>

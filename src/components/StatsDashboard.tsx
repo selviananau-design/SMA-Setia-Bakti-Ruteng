@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   GraduationCap,
@@ -12,6 +12,10 @@ import {
   Building,
   Award,
   BookOpen,
+  ShoppingBag,
+  CheckCircle2,
+  Sparkles,
+  Star,
 } from 'lucide-react';
 import { Student } from '../types';
 import { exportStudentReportPDF } from '../services/pdfExport';
@@ -23,12 +27,23 @@ import {
 
 interface StatsDashboardProps {
   students: Student[];
+  initialSubTab?: string;
 }
 
-export const StatsDashboard: React.FC<StatsDashboardProps> = ({ students }) => {
-  const [activeTab, setActiveTab] = useState<'aktif' | 'alumni'>('aktif');
+export const StatsDashboard: React.FC<StatsDashboardProps> = ({
+  students,
+  initialSubTab = 'kelulusan',
+}) => {
+  const [activeTab, setActiveTab] = useState<'kelulusan' | 'alumni' | 'demografi' | 'koperasi'>('kelulusan');
   const [selectedYear, setSelectedYear] = useState<string>('2026');
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      if (initialSubTab === 'aktif') setActiveTab('demografi');
+      else setActiveTab(initialSubTab as any);
+    }
+  }, [initialSubTab]);
 
   // Split Active vs Alumni as explicitly instructed!
   const activeStudents = students.filter((s) => s.status === 'aktif');
@@ -154,36 +169,185 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({ students }) => {
           </div>
         </div>
 
-        {/* Primary Toggle: Siswa Aktif vs Alumni (Separated Display!) */}
+        {/* Navigation Tabs for Statistik & Alumni */}
         <div className="flex items-center justify-center my-6">
-          <div className="bg-slate-200/80 p-1.5 rounded-xl flex items-center shadow-inner border border-slate-300">
+          <div className="bg-slate-200/80 p-1.5 rounded-xl flex flex-wrap items-center justify-center gap-1 shadow-inner border border-slate-300">
             <button
-              onClick={() => setActiveTab('aktif')}
-              className={`px-6 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                activeTab === 'aktif'
+              onClick={() => setActiveTab('kelulusan')}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'kelulusan'
                   ? 'bg-[#432874] text-white shadow-md'
                   : 'text-slate-700 hover:text-purple-900'
               }`}
             >
-              <Users className="w-4 h-4" />
-              <span>Siswa Aktif ({totalActive} Orang)</span>
+              <Award className="w-4 h-4" />
+              <span>Statistik Kelulusan & Nilai</span>
             </button>
             <button
               onClick={() => setActiveTab('alumni')}
-              className={`px-6 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'alumni'
                   ? 'bg-[#432874] text-white shadow-md'
                   : 'text-slate-700 hover:text-purple-900'
               }`}
             >
               <GraduationCap className="w-4 h-4" />
-              <span>Alumni ({totalAlumni.toLocaleString('id-ID')} Orang)</span>
+              <span>Sebaran Alumni ({totalAlumni.toLocaleString('id-ID')} Orang)</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('demografi')}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'demografi'
+                  ? 'bg-[#432874] text-white shadow-md'
+                  : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Data Demografi Siswa ({totalActive})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('koperasi')}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'koperasi'
+                  ? 'bg-[#432874] text-white shadow-md'
+                  : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Koperasi & Perlengkapan</span>
             </button>
           </div>
         </div>
 
-        {/* VIEW 1: SISWA AKTIF */}
-        {activeTab === 'aktif' && (
+        {/* VIEW 1: STATISTIK KELULUSAN & NILAI */}
+        {activeTab === 'kelulusan' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* KPI Kelulusan */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <Award className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase">Tingkat Kelulusan</p>
+                  <p className="text-xl sm:text-2xl font-black text-emerald-700">100%</p>
+                  <span className="text-[10px] text-slate-500 font-bold">10 Tahun Berturut-turut</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#432874] flex items-center justify-center font-bold">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase">Lanjut Perguruan Tinggi</p>
+                  <p className="text-xl sm:text-2xl font-black text-slate-900">89.4%</p>
+                  <span className="text-[10px] text-purple-700 font-bold">SNBP, SNBT & Kedinasan</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase">Rata-rata Nilai Asesmen</p>
+                  <p className="text-xl sm:text-2xl font-black text-[#005fb8]">88.6</p>
+                  <span className="text-[10px] text-emerald-600 font-bold">Kategori Mahir (Kemdikbud)</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  <Star className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase">Nilai Tertinggi Sekolah</p>
+                  <p className="text-xl sm:text-2xl font-black text-amber-800">98.5</p>
+                  <span className="text-[10px] text-slate-500 font-bold">Peminatan MIPA 2025</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Rekapitulasi Rata-rata per Peminatan */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase bg-blue-100 text-blue-900 px-2 py-0.5 rounded">
+                    Peminatan MIPA
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">Lulus 100%</span>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Rerata Nilai: 91.2</h3>
+                <ul className="text-xs text-slate-600 space-y-2">
+                  <li className="flex justify-between">
+                    <span>Matematika Peminatan:</span>
+                    <strong className="text-slate-800">92.4</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Fisika & Kimia:</span>
+                    <strong className="text-slate-800">89.8</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Biologi Eksperimen:</span>
+                    <strong className="text-slate-800">91.5</strong>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded">
+                    Peminatan IPS
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">Lulus 100%</span>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Rerata Nilai: 88.9</h3>
+                <ul className="text-xs text-slate-600 space-y-2">
+                  <li className="flex justify-between">
+                    <span>Ekonomi & Akuntansi:</span>
+                    <strong className="text-slate-800">89.7</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Sosiologi & Geografi:</span>
+                    <strong className="text-slate-800">88.2</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Sejarah Kritis:</span>
+                    <strong className="text-slate-800">88.8</strong>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded">
+                    Peminatan Bahasa
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">Lulus 100%</span>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Rerata Nilai: 90.4</h3>
+                <ul className="text-xs text-slate-600 space-y-2">
+                  <li className="flex justify-between">
+                    <span>Bahasa Inggris Akademis:</span>
+                    <strong className="text-slate-800">93.1</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Bahasa Jerman Komunikasi:</span>
+                    <strong className="text-slate-800">88.5</strong>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Sastra & Budaya Daerah:</span>
+                    <strong className="text-slate-800">89.6</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 2: SISWA AKTIF & DEMOGRAFI */}
+        {activeTab === 'demografi' && (
           <div className="space-y-6 animate-fadeIn">
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -540,6 +704,131 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({ students }) => {
                     Perbarui Data &gt;
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 4: KOPERASI & PERLENGKAPAN SEKOLAH */}
+        {activeTab === 'koperasi' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">
+                    Layanan Siswa & Kesejahteraan
+                  </span>
+                  <h2 className="text-2xl font-serif font-bold text-slate-900 mt-1">
+                    Koperasi Siswa "Setia Usaha" Ruteng
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                    Penyedia resmi seragam sekolah, modul pembelajaran, atribut khas Setia Bakti, dan perlengkapan asrama.
+                  </p>
+                </div>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                  Buka Senin - Sabtu (07.00 - 15.00 WITA)
+                </span>
+              </div>
+
+              {/* Produk & Perlengkapan List */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {[
+                  {
+                    name: 'Setel Seragam Putih Abu & Pramuka',
+                    price: 'Rp 220.000',
+                    desc: 'Bahan tebal katun oxfort adem, jahitan rapi berstandar nasional.',
+                    category: 'Seragam Resmi',
+                    badge: 'Wajib',
+                  },
+                  {
+                    name: 'Batik Khas Motif Flores Setia Bakti',
+                    price: 'Rp 145.000',
+                    desc: 'Kain batik tenun printing motif khas Manggarai edisi khusus sekolah.',
+                    category: 'Seragam Batik',
+                    badge: 'Wajib',
+                  },
+                  {
+                    name: 'Kaos & Celana Olahraga Santu Paulus',
+                    price: 'Rp 125.000',
+                    desc: 'Bahan dry-fit elastis untuk kegiatan kebugaran jasmani dan Porseni.',
+                    category: 'Olahraga',
+                    badge: 'Wajib',
+                  },
+                  {
+                    name: 'Paket Atribut (Dasi, Topi, Sabuk & Badge)',
+                    price: 'Rp 65.000',
+                    desc: 'Logo bordir resmi SMAK Setia Bakti dan lokasi Kabupaten Manggarai.',
+                    category: 'Atribut Resmi',
+                    badge: 'Lengkap',
+                  },
+                  {
+                    name: 'Modul Digital & Buku Cetak Kurikulum Merdeka',
+                    price: 'Rp 35.000 / mapel',
+                    desc: 'Modul belajar ringkas terstandar MGMP sekolah untuk X, XI, XII.',
+                    category: 'Bahan Ajar',
+                    badge: 'Akademik',
+                  },
+                  {
+                    name: 'Buku Ibadat Madah Bakti & Rosario Kayu',
+                    price: 'Rp 75.000',
+                    desc: 'Buku panduan misa mingguan dan rosario kayu khas kota sejuk Ruteng.',
+                    category: 'Spiritualitas',
+                    badge: 'Ibadat',
+                  },
+                  {
+                    name: 'Jas Almamater Ungu Khas Setia Bakti',
+                    price: 'Rp 185.000',
+                    desc: 'Jas resmi untuk acara wisuda, kunjungan studi, dan kompetisi luar sekolah.',
+                    category: 'Almamater',
+                    badge: 'Identitas',
+                  },
+                  {
+                    name: 'Tumbler Ramah Lingkungan Setia Bakti',
+                    price: 'Rp 50.000',
+                    desc: 'Gerakan sekolah bersih tanpa plastik; dapat diisi ulang gratis di galon sekolah.',
+                    category: 'Perlengkapan',
+                    badge: 'Eco-School',
+                  },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-purple-300 hover:bg-purple-50/20 transition-all"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-900">
+                          {item.category}
+                        </span>
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                          {item.badge}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-sm">{item.name}</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 mt-3 flex items-center justify-between">
+                      <span className="text-sm font-bold text-[#432874]">{item.price}</span>
+                      <span className="text-[10px] text-emerald-600 font-semibold">Tersedia di Toko</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Informational Callout */}
+              <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <ShoppingBag className="w-5 h-5 text-[#432874] flex-shrink-0" />
+                  <span>
+                    Pembelian seragam bagi calon siswa baru PPDB 2026/2027 dapat dilakukan langsung di loket koperasi sekolah saat daftar ulang fisik.
+                  </span>
+                </div>
+                <button
+                  onClick={() => alert('Informasi loket Koperasi: Gedung Penunjang Lantai 1 SMAK Setia Bakti Ruteng.')}
+                  className="px-4 py-2 bg-[#432874] hover:bg-[#321759] text-white font-bold rounded-lg cursor-pointer whitespace-nowrap"
+                >
+                  Panduan Ukuran Seragam
+                </button>
               </div>
             </div>
           </div>

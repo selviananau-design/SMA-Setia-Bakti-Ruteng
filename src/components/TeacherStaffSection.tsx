@@ -17,12 +17,22 @@ import { downloadTeacherTemplate } from '../services/excelTemplate';
 
 interface TeacherStaffSectionProps {
   teachers: TeacherStaff[];
+  initialDept?: string;
 }
 
-export const TeacherStaffSection: React.FC<TeacherStaffSectionProps> = ({ teachers }) => {
-  const [selectedDept, setSelectedDept] = useState<string>('Semua');
+export const TeacherStaffSection: React.FC<TeacherStaffSectionProps> = ({
+  teachers,
+  initialDept = 'Semua',
+}) => {
+  const [selectedDept, setSelectedDept] = useState<string>(initialDept || 'Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherStaff | null>(null);
+
+  React.useEffect(() => {
+    if (initialDept) {
+      setSelectedDept(initialDept);
+    }
+  }, [initialDept]);
 
   const departments = ['Semua', 'Pimpinan', 'MIPA', 'IPS & Bahasa', 'Agama & Budi Pekerti', 'Kesiswaan & BK', 'Tata Usaha'];
 

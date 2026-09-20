@@ -22,10 +22,24 @@ import { simulateAesEncrypt } from '../services/encryption';
 interface PPDBOnlineProps {
   ppdbList: PPDBRegistration[];
   onAddRegistration: (newReg: PPDBRegistration) => void;
+  initialSubTab?: string;
 }
 
-export const PPDBOnline: React.FC<PPDBOnlineProps> = ({ ppdbList, onAddRegistration }) => {
-  const [activeTab, setActiveTab] = useState<'form' | 'status' | 'info'>('form');
+export const PPDBOnline: React.FC<PPDBOnlineProps> = ({
+  ppdbList,
+  onAddRegistration,
+  initialSubTab = 'daftar',
+}) => {
+  const [activeTab, setActiveTab] = useState<'daftar' | 'syarat' | 'biaya' | 'beasiswa' | 'jadwal' | 'status'>('daftar');
+
+  React.useEffect(() => {
+    if (initialSubTab) {
+      if (initialSubTab === 'form') setActiveTab('daftar');
+      else if (initialSubTab === 'info') setActiveTab('jadwal');
+      else setActiveTab(initialSubTab as any);
+    }
+  }, [initialSubTab]);
+
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [searchRegNo, setSearchRegNo] = useState<string>('');
   const [searchedResult, setSearchedResult] = useState<PPDBRegistration | null>(null);
@@ -166,36 +180,60 @@ export const PPDBOnline: React.FC<PPDBOnlineProps> = ({ ppdbList, onAddRegistrat
           </div>
 
           {/* Navigation Sub-Tabs */}
-          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 overflow-x-auto scrollbar-none">
             <button
-              onClick={() => setActiveTab('form')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === 'form' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
+              onClick={() => setActiveTab('daftar')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'daftar' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
               }`}
             >
               Formulir Pendaftaran
             </button>
             <button
+              onClick={() => setActiveTab('syarat')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'syarat' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              Syarat & Berkas Masuk
+            </button>
+            <button
+              onClick={() => setActiveTab('biaya')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'biaya' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              Rincian Biaya & SPP
+            </button>
+            <button
+              onClick={() => setActiveTab('beasiswa')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'beasiswa' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              Beasiswa & Yayasan
+            </button>
+            <button
+              onClick={() => setActiveTab('jadwal')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'jadwal' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
+              }`}
+            >
+              Jadwal & Seleksi
+            </button>
+            <button
               onClick={() => setActiveTab('status')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'status' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
               }`}
             >
               Cek Status & Unduh Bukti
             </button>
-            <button
-              onClick={() => setActiveTab('info')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === 'info' ? 'bg-[#432874] text-white shadow-sm' : 'text-slate-700 hover:text-purple-900'
-              }`}
-            >
-              Alur & Jadwal
-            </button>
           </div>
         </div>
 
         {/* TAB 1: FORMULIR PENDAFTARAN (WIZARD MULTI-STEP) */}
-        {activeTab === 'form' && (
+        {activeTab === 'daftar' && (
           <div className="mt-8 max-w-3xl mx-auto">
             {lastSubmitted ? (
               /* Success Confirmation Banner */
@@ -735,38 +773,267 @@ export const PPDBOnline: React.FC<PPDBOnlineProps> = ({ ppdbList, onAddRegistrat
           </div>
         )}
 
-        {/* TAB 3: ALUR & JADWAL */}
-        {activeTab === 'info' && (
-          <div className="mt-8 max-w-4xl mx-auto space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
-                <span className="w-8 h-8 rounded-full bg-purple-100 text-[#432874] font-bold flex items-center justify-center mx-auto mb-2 text-sm">
-                  1
+        {/* TAB: SYARAT PENDAFTARAN & BERKAS */}
+        {activeTab === 'syarat' && (
+          <div className="mt-8 max-w-4xl mx-auto space-y-6 animate-fadeIn">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div>
+                <span className="text-xs font-bold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">
+                  Ketentuan Resmi PPDB 2026/2027
                 </span>
-                <h4 className="font-bold text-sm text-slate-900">Pendaftaran Daring</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Pengisian formulir biodata dan upload kelengkapan dokumen melalui portal ini.
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                  Syarat Pendaftaran & Kelengkapan Berkas
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Seluruh calon peserta didik wajib memenuhi persyaratan umum dan melampirkan berkas dokumen asli/legalisir.
                 </p>
               </div>
 
-              <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
-                <span className="w-8 h-8 rounded-full bg-purple-100 text-[#432874] font-bold flex items-center justify-center mx-auto mb-2 text-sm">
-                  2
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-purple-700" />
+                    <span>Persyaratan Umum Calon Siswa</span>
+                  </h4>
+                  <ul className="text-xs text-slate-600 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>Telah lulus SMP/MTs atau sederajat dengan Surat Keterangan Lulus (SKL) / Ijazah.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>Berusia setinggi-tingginya 21 tahun pada tanggal 1 Juli 2026.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>Memiliki Nomor Induk Siswa Nasional (NISN) aktif yang terdaftar di Pusdatin Kemdikbudristek.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>Berkelakuan baik, tidak terlibat narkoba atau tindak pidana, serta sanggup menaati tata tertib sekolah.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-purple-700" />
+                    <span>Berkas Dokumen Yang Dilampirkan</span>
+                  </h4>
+                  <ul className="text-xs text-slate-600 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                      <span>Fotokopi Ijazah / SKL SMP yang telah dilegalisir (2 lembar).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                      <span>Fotokopi Kartu Keluarga (KK) & Akta Kelahiran (2 lembar).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                      <span>Surat Permandian / Baptis bagi yang beragama Katolik (atau surat keterangan bagi yang bukan).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+                      <span>Pasfoto terbaru ukuran 3x4 berwarna latar belakang merah (4 lembar).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span>
+                      <span>Piagam/Sertifikat prestasi akademik atau seni/olahraga (jika ada).</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => setActiveTab('daftar')}
+                  className="px-6 py-2.5 bg-[#432874] hover:bg-[#341b5e] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-md inline-flex items-center gap-2"
+                >
+                  <span>Mulai Isi Formulir Pendaftaran Daring</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: RINCIAN BIAYA PENDIDIKAN & SPP */}
+        {activeTab === 'biaya' && (
+          <div className="mt-8 max-w-4xl mx-auto space-y-6 animate-fadeIn">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div>
+                <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded">
+                  Transparansi Pembiayaan
                 </span>
-                <h4 className="font-bold text-sm text-slate-900">Verifikasi & Wawancara</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Pengecekan keaslian berkas dan tes bakat minat peminatan MIPA/IPS/Bahasa.
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                  Rincian Biaya Pendidikan & SPP Tahun Ajaran 2026/2027
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  SMA Katolik Setia Bakti berkomitmen menyediakan pendidikan unggul dengan biaya terjangkau serta skema cicilan bagi orang tua.
                 </p>
               </div>
 
-              <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
-                <span className="w-8 h-8 rounded-full bg-purple-100 text-[#432874] font-bold flex items-center justify-center mx-auto mb-2 text-sm">
-                  3
-                </span>
-                <h4 className="font-bold text-sm text-slate-900">Daftar Ulang & MPLS</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Registrasi ulang, pembagian seragam, dan masa pengenalan lingkungan sekolah.
+              {/* Table of fees */}
+              <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                      <th className="p-3.5">Komponen Biaya</th>
+                      <th className="p-3.5">Keterangan / Fasilitas</th>
+                      <th className="p-3.5 text-right">Nominal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">Uang Pangkal / Pembangunan Gedung</td>
+                      <td className="p-3.5 text-slate-600">Dibayar 1x selama menempuh pendidikan (dapat diangsur 3 tahap).</td>
+                      <td className="p-3.5 text-right font-mono font-bold text-slate-900">Rp 2.500.000</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">SPP Bulanan (Iuran Pendidikan)</td>
+                      <td className="p-3.5 text-slate-600">Termasuk praktikum lab, ujian CBT, dan akses e-learning portal.</td>
+                      <td className="p-3.5 text-right font-mono font-bold text-purple-900">Rp 275.000 / bln</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">Paket Seragam Sekolah (4 Stel Lengkap)</td>
+                      <td className="p-3.5 text-slate-600">Putih-Abu, Batik Khas Setia Bakti, Pramuka Lengkap, dan Kaos Olahraga.</td>
+                      <td className="p-3.5 text-right font-mono font-bold text-slate-900">Rp 850.000</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">Asuransi Siswa & OSIS Tahunan</td>
+                      <td className="p-3.5 text-slate-600">Perlindungan kecelakaan 24 jam dan iuran kegiatan kesiswaan.</td>
+                      <td className="p-3.5 text-right font-mono font-bold text-slate-900">Rp 120.000 / thn</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">Buku Paket Kurikulum Merdeka</td>
+                      <td className="p-3.5 text-slate-600">Dipinjamkan gratis dari Perpustakaan St. Agustinus selama 1 tahun.</td>
+                      <td className="p-3.5 text-right font-mono font-bold text-emerald-600">GRATIS (BOS)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
+                <span className="font-bold block">Catatan Bantuan Keuangan:</span>
+                <p>
+                  Bagi calon siswa dari keluarga prasejahtera atau memiliki saudara kandung aktif di SMAK Setia Bakti, tersedia keringanan uang gedung hingga 40% melalui rekomendasi Pastor Paroki atau Tim Yayasan Sukma.
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: BEASISWA PRESTASI & YAYASAN */}
+        {activeTab === 'beasiswa' && (
+          <div className="mt-8 max-w-4xl mx-auto space-y-6 animate-fadeIn">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div>
+                <span className="text-xs font-bold text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">
+                  Dukungan & Apresiasi Bakat
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                  Program Beasiswa Prestasi & Bantuan Sosial
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Kami membuka pintu seluas-luasnya bagi siswa berprestasi tinggi dan mereka yang membutuhkan bantuan biaya.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="p-5 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-purple-200 text-purple-900 px-2 py-0.5 rounded">
+                      Kategori 1
+                    </span>
+                    <h4 className="font-bold text-slate-900 text-base">Beasiswa Juara Rapor SMP</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Diberikan kepada lulusan SMP yang meraih peringkat 1, 2, atau 3 umum di sekolah asalnya.
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-purple-100">
+                    <span className="text-xs font-black text-purple-900 block">Bebas SPP 6 - 12 Bulan</span>
+                  </div>
+                </div>
+
+                <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded">
+                      Kategori 2
+                    </span>
+                    <h4 className="font-bold text-slate-900 text-base">Beasiswa Talenta Seni & Olahraga</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Bagi peraih medali/juara 1-3 OSN, O2SN, FLS2N tingkat Kabupaten, Provinsi NTT, maupun Nasional.
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-amber-100">
+                    <span className="text-xs font-black text-amber-900 block">Potongan 50% Uang Gedung</span>
+                  </div>
+                </div>
+
+                <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded">
+                      Kategori 3
+                    </span>
+                    <h4 className="font-bold text-slate-900 text-base">Beasiswa Afirmasi Gereja & Yayasan</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Bantuan kemitraan Yayasan Persekolahan St. Paulus dan Keuskupan Ruteng untuk anak yatim/piatu dan pra-sejahtera.
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-100">
+                    <span className="text-xs font-black text-emerald-900 block">Bantuan Penuh & Asrama</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: JADWAL SELEKSI & ALUR */}
+        {activeTab === 'jadwal' && (
+          <div className="mt-8 max-w-4xl mx-auto space-y-6 animate-fadeIn">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div>
+                <span className="text-xs font-bold text-blue-700 uppercase tracking-widest bg-blue-50 px-2.5 py-1 rounded">
+                  Agenda Tahunan
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                  Jadwal & Agenda Penting PPDB 2026/2027
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 bg-blue-50/50 rounded-xl border border-blue-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-800 uppercase">Gelombang I (Jalur Prestasi & Reguler)</span>
+                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">Buka</span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">1 Maret – 30 April 2026</p>
+                  <p className="text-xs text-slate-600">Pendaftaran daring, tes peminatan, dan wawancara orang tua.</p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 uppercase">Gelombang II (Jalur Reguler Umum)</span>
+                    <span className="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded">Segera</span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">2 Mei – 25 Juni 2026</p>
+                  <p className="text-xs text-slate-600">Pendaftaran lanjutan jika kuota rombel masih tersedia.</p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-100 rounded-xl flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Sudah mendaftar sebelumnya?</h4>
+                  <p className="text-[11px] text-slate-500">Gunakan nomor pendaftaran untuk mengecek status verifikasi berkas.</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('status')}
+                  className="px-4 py-2 bg-[#432874] text-white text-xs font-bold rounded-lg hover:bg-[#341b5e] transition-colors cursor-pointer"
+                >
+                  Cek Status Registrasi
+                </button>
               </div>
             </div>
           </div>
