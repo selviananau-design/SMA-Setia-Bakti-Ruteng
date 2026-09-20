@@ -56,61 +56,61 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const navMenuItems = [
-    { id: 'beranda', label: 'HOME', hasDropdown: false },
-    { id: 'akademik', label: 'ABOUT US', hasDropdown: false },
+    { id: 'beranda', label: 'BERANDA', hasDropdown: false },
+    { id: 'akademik', label: 'PROFIL KAMI', hasDropdown: false },
     {
       id: 'courses',
-      label: 'OUR COURSES',
+      label: 'JURUSAN & PROGRAM',
       hasDropdown: true,
       subItems: [
-        { label: 'Business Courses (IPS & Ekonomi)', tab: 'akademik' },
-        { label: 'Science & Tech (MIPA & Fisika)', tab: 'akademik' },
-        { label: 'Travel & Tourism (Bahasa & Budaya)', tab: 'akademik' },
-        { label: 'Fashion & Art Courses', tab: 'akademik' },
+        { label: 'Program Studi IPS (Sosial & Ekonomi)', tab: 'akademik' },
+        { label: 'Program Studi MIPA (Sains & Teknologi)', tab: 'akademik' },
+        { label: 'Program Studi Bahasa & Budaya Flores', tab: 'akademik' },
+        { label: 'Seni Budaya & Kriya Daerah', tab: 'akademik' },
       ],
     },
     {
       id: 'ppdb',
-      label: 'PAGE LAYOUTS',
+      label: 'INFORMASI PPDB',
       hasDropdown: true,
       subItems: [
-        { label: 'PPDB Online 2026/2027', tab: 'ppdb' },
-        { label: 'Biaya & Persyaratan Masuk', tab: 'ppdb' },
-        { label: 'Jalur Beasiswa Prestasi', tab: 'ppdb' },
-        { label: 'Pengumuman Kelulusan', tab: 'ppdb' },
+        { label: 'Pendaftaran Siswa Baru (PPDB 2026/2027)', tab: 'ppdb' },
+        { label: 'Biaya Pendidikan & Syarat Masuk', tab: 'ppdb' },
+        { label: 'Beasiswa Prestasi & Yayasan', tab: 'ppdb' },
+        { label: 'Jadwal & Pengumuman Seleksi', tab: 'ppdb' },
       ],
     },
     {
       id: 'guru',
-      label: 'OUR TEAM',
+      label: 'DEWAN GURU & STAF',
       hasDropdown: true,
       subItems: [
-        { label: 'Dewan Guru & Pendidik', tab: 'guru' },
+        { label: 'Dewan Guru & Tenaga Pendidik', tab: 'guru' },
         { label: 'Kepala Sekolah & Manajemen', tab: 'guru' },
         { label: 'Staf Administrasi & Laboratorium', tab: 'guru' },
       ],
     },
-    { id: 'berita', label: 'BLOGS', hasDropdown: false },
+    { id: 'berita', label: 'WARTA & BERITA', hasDropdown: false },
     {
       id: 'galeri',
-      label: 'SHORTCODES',
+      label: 'KEHIDUPAN SISWA',
       hasDropdown: true,
       subItems: [
-        { label: 'Kehidupan Siswa & Ekskul', tab: 'galeri' },
-        { label: 'Fasilitas & Asrama Putra/Putri', tab: 'galeri' },
-        { label: 'Galeri Foto & Video Kampus', tab: 'galeri' },
+        { label: 'Organisasi Siswa (OSIS) & Ekskul', tab: 'galeri' },
+        { label: 'Fasilitas Kampus & Asrama Putra/Putri', tab: 'galeri' },
+        { label: 'Galeri Dokumentasi & Video Kegiatan', tab: 'galeri' },
       ],
     },
     {
       id: 'statistik',
-      label: 'SHOP',
+      label: 'STATISTIK & ALUMNI',
       hasDropdown: true,
       subItems: [
-        { label: 'Statistik & Data Alumni', tab: 'statistik' },
-        { label: 'Koperasi & Seragam Sekolah', tab: 'statistik' },
+        { label: 'Statistik Kelulusan & Alumni', tab: 'statistik' },
+        { label: 'Koperasi & Perlengkapan Sekolah', tab: 'statistik' },
       ],
     },
-    { id: 'kontak', label: 'CONTACT US', hasDropdown: false },
+    { id: 'kontak', label: 'KONTAK KAMI', hasDropdown: false },
   ];
 
   return (
@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Left Ribbon / Slanted Badge */}
           <div className="flex items-center">
             <div className="bg-[#0074d9] text-white text-[11px] font-bold px-4 py-1 relative flex items-center shadow-inner tracking-wide clip-ribbon">
-              <span>Join with us and be a part of the success</span>
+              <span>Mari bergabung bersama kami dan raih masa depan gemilang</span>
             </div>
           </div>
 
@@ -236,53 +236,53 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right: 3 Contact Columns with Circular Icons */}
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-6 sm:gap-8">
-            {/* 1. CALL US */}
+            {/* 1. HUBUNGI KAMI */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
                 <Phone className="w-4 h-4 text-slate-700" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-                  CALL US
+                  HUBUNGI KAMI
                 </span>
                 <a
                   href="tel:038521455"
                   className="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
                 >
-                  +01 (213) 471-7207
+                  +62 (0385) 21455
                 </a>
               </div>
             </div>
 
-            {/* 2. EMAIL US */}
+            {/* 2. EMAIL KAMI */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
                 <Mail className="w-4 h-4 text-slate-700" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-                  EMAIL US
+                  EMAIL RESMI
                 </span>
                 <a
-                  href="mailto:support@offshorethemes.com"
+                  href="mailto:info@smaksetiabaktirtg.sch.id"
                   className="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
                 >
-                  support@offshorethemes.com
+                  info@smaksetiabaktirtg.sch.id
                 </a>
               </div>
             </div>
 
-            {/* 3. LOCATE US */}
+            {/* 3. LOKASI KAMI */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
                 <MapPin className="w-4 h-4 text-slate-700" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-                  LOCATE US
+                  LOKASI KAMI
                 </span>
                 <span className="text-xs font-semibold text-slate-800 block leading-tight">
-                  210 Wells Fargo Drive, Houston
+                  Jl. Komodo No. 1, Ruteng, Flores NTT
                 </span>
               </div>
             </div>
@@ -363,7 +363,7 @@ export const Header: React.FC<HeaderProps> = ({
                   autoFocus
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Cari program, berita, tim..."
+                  placeholder="Cari jurusan, berita, guru..."
                   className="w-44 text-xs py-1 pl-3 pr-7 bg-white text-slate-900 rounded focus:outline-none"
                 />
                 <button
@@ -421,7 +421,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenLogin}
                 className="bg-[#004d99] hover:bg-[#003d7a] text-white text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 cursor-pointer"
               >
-                <span>LOGIN</span>
+                <span>MASUK</span>
               </button>
             )}
           </div>

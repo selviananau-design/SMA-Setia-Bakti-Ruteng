@@ -7,29 +7,29 @@ interface AcademicProgramsSectionProps {
 export const AcademicProgramsSection: React.FC<AcademicProgramsSectionProps> = ({
   onNavigateTab,
 }) => {
-  // Exact 3 cards matching the reference image layout
+  // 3 Program unggulan dalam Bahasa Indonesia
   const featuredCourses = [
     {
-      id: 'mba',
-      title: 'Master Of Business Administration (CMI)',
-      schoolLabel: 'Peminatan IPS & Kewirausahaan',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
+      id: 'ips',
+      title: 'Peminatan Ilmu Pengetahuan Sosial (IPS)',
+      schoolLabel: 'Ekonomi, Sosiologi, Geografi & Kewirausahaan',
+      desc: 'Membekali peserta didik dengan pemahaman analisis sosial, literasi finansial, kepemimpinan, dan etika berwirausaha untuk menjawab dinamika kemasyarakatan dan ekonomi modern.',
       image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=700&q=80',
       tab: 'akademik',
     },
     {
-      id: 'hrm',
-      title: 'Human Resource Management',
-      schoolLabel: 'Pendidikan Karakter & Manajemen',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
+      id: 'mipa',
+      title: 'Peminatan Matematika & Ilmu Pengetahuan Alam (MIPA)',
+      schoolLabel: 'Fisika, Kimia, Biologi & Riset Teknologi',
+      desc: 'Mengembangkan kecakapan berpikir kritis, metodologi riset ilmiah, serta penalaran teknologi sains modern sebagai pijakan unggul menuju perguruan tinggi teknik dan kesehatan.',
       image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=700&q=80',
       tab: 'akademik',
     },
     {
-      id: 'telecom',
-      title: 'MSc Telecommunications Management',
-      schoolLabel: 'Peminatan MIPA & Teknologi Sains',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
+      id: 'bahasa',
+      title: 'Peminatan Bahasa & Kebudayaan Nusantara',
+      schoolLabel: 'Bahasa Inggris, Jerman & Budaya Manggarai',
+      desc: 'Mengasah kemampuan diplomasi komunikasi multibahasa, apresiasi sastra, pariwisata berakar budaya Flores, serta kesiapan generasi berwawasan global yang tetap berakar tradisi.',
       image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=700&q=80',
       tab: 'akademik',
     },
@@ -70,13 +70,13 @@ export const AcademicProgramsSection: React.FC<AcademicProgramsSectionProps> = (
                 </div>
               </div>
 
-              {/* Blue Action Button (Matches Learn More > in reference) */}
+              {/* Blue Action Button (Matches Pelajari Selengkapnya >) */}
               <div className="px-6 pb-6 pt-0">
                 <button
                   onClick={() => onNavigateTab(course.tab)}
                   className="bg-[#0074d9] hover:bg-[#005fb8] text-white font-semibold text-xs uppercase tracking-wide px-5 py-2.5 rounded-none transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
-                  <span>Learn More</span>
+                  <span>Pelajari Selengkapnya</span>
                   <span className="text-[11px] font-bold">&gt;</span>
                 </button>
               </div>

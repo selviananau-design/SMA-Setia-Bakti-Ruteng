@@ -64,13 +64,13 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
           <div className="max-w-2xl space-y-4">
             {/* Eyebrow in uppercase bold white font */}
             <p className="text-sm sm:text-base font-bold uppercase tracking-[0.2em] text-white/90 drop-shadow-sm">
-              DO YOU NEED ANY HELP?
+              BUTUH INFORMASI & BANTUAN?
             </p>
 
-            {/* Huge bold headline: WELCOME TO OUR UNIVERSITY */}
+            {/* Huge bold headline: SELAMAT DATANG DI SMAK SETIA BAKTI */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight uppercase leading-[1.05] drop-shadow-md">
-              WELCOME TO OUR <br />
-              <span className="text-white">UNIVERSITY</span>
+              SELAMAT DATANG DI <br />
+              <span className="text-white">KAMPUS KAMI</span>
             </h1>
 
             {/* School subtitle for context */}
@@ -78,13 +78,13 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
               SMA KATOLIK SETIA BAKTI RUTENG — MENGINSPIRASI MASA DEPAN
             </p>
 
-            {/* Blue Action Button (Matches REAM MORE ▶ in the picture) */}
+            {/* Blue Action Button (Matches BACA SELENGKAPNYA ▶) */}
             <div className="pt-4">
               <button
                 onClick={() => onNavigateTab('akademik')}
                 className="bg-[#0074d9] hover:bg-[#005fb8] text-white font-bold text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-none shadow-md inline-flex items-center gap-2.5 transition-all cursor-pointer hover:shadow-lg"
               >
-                <span>READ MORE</span>
+                <span>BACA SELENGKAPNYA</span>
                 <span className="text-[11px] leading-none">▶</span>
               </button>
             </div>
@@ -94,7 +94,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
         {/* 2. THREE TRANSLUCENT BOTTOM CARDS (Exact match to 3 horizontal cards in reference picture) */}
         <div className="relative z-30 w-full bg-black/60 backdrop-blur-md border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/15">
-            {/* Card 1: BUSINESS COURSES */}
+            {/* Card 1: JURUSAN IPS & BISNIS */}
             <button
               onClick={() => onNavigateTab('akademik')}
               className="py-5 px-6 flex items-center gap-4 text-left hover:bg-white/10 transition-colors group cursor-pointer"
@@ -104,16 +104,16 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
               </div>
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-white group-hover:text-[#00a8ff] transition-colors">
-                  BUSINESS COURSES
+                  JURUSAN IPS & BISNIS
                 </h3>
                 <span className="text-xs text-slate-300 group-hover:text-white flex items-center gap-1 mt-0.5">
-                  <span>Read More</span>
+                  <span>Pelajari Selengkapnya</span>
                   <span className="text-[10px]">&gt;</span>
                 </span>
               </div>
             </button>
 
-            {/* Card 2: TRAVEL & TOURISM */}
+            {/* Card 2: BAHASA & PARIWISATA */}
             <button
               onClick={() => onNavigateTab('akademik')}
               className="py-5 px-6 flex items-center gap-4 text-left hover:bg-white/10 transition-colors group cursor-pointer"
@@ -123,16 +123,16 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
               </div>
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-white group-hover:text-[#00a8ff] transition-colors">
-                  TRAVEL & TOURISM
+                  BAHASA & PARIWISATA
                 </h3>
                 <span className="text-xs text-slate-300 group-hover:text-white flex items-center gap-1 mt-0.5">
-                  <span>Read More</span>
+                  <span>Pelajari Selengkapnya</span>
                   <span className="text-[10px]">&gt;</span>
                 </span>
               </div>
             </button>
 
-            {/* Card 3: FASHION COURSES */}
+            {/* Card 3: MIPA & SAINS TEKNOLOGI */}
             <button
               onClick={() => onNavigateTab('akademik')}
               className="py-5 px-6 flex items-center gap-4 text-left hover:bg-white/10 transition-colors group cursor-pointer"
@@ -142,10 +142,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigateTab }) => {
               </div>
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-white group-hover:text-[#00a8ff] transition-colors">
-                  FASHION COURSES
+                  MIPA & SAINS RISET
                 </h3>
                 <span className="text-xs text-slate-300 group-hover:text-white flex items-center gap-1 mt-0.5">
-                  <span>Read More</span>
+                  <span>Pelajari Selengkapnya</span>
                   <span className="text-[10px]">&gt;</span>
                 </span>
               </div>
