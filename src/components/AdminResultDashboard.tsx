@@ -88,16 +88,22 @@ interface AdminResultDashboardProps {
   teacherAdminDocs?: TeacherAdministrationDoc[];
   subjectAttendanceSessions?: SubjectAttendanceSession[];
   onAddStudent: (student: Student) => void;
+  onUpdateStudent?: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onAddTeacher: (teacher: TeacherStaff) => void;
+  onUpdateTeacher?: (teacher: TeacherStaff) => void;
   onDeleteTeacher: (id: string) => void;
   onAddNews: (news: NewsItem) => void;
+  onUpdateNews?: (news: NewsItem) => void;
   onDeleteNews: (id: string) => void;
   onAddEvent: (event: SchoolEvent) => void;
+  onUpdateEvent?: (event: SchoolEvent) => void;
   onDeleteEvent: (id: string) => void;
   onAddGallery: (item: GalleryItem) => void;
+  onUpdateGallery?: (item: GalleryItem) => void;
   onDeleteGallery: (id: string) => void;
   onAddPPDB: (reg: PPDBRegistration) => void;
+  onUpdatePPDB?: (reg: PPDBRegistration) => void;
   onUpdatePPDBStatus: (id: string, status: PPDBRegistration['status'], notes?: string) => void;
   onSendPushNotification: (
     title: string,
@@ -122,10 +128,13 @@ interface AdminResultDashboardProps {
   onDeleteTeacherAdminDoc?: (id: string) => void;
   onUpdateSchoolProfile?: (profile: SchoolProfile) => void;
   onAddMajor?: (major: MajorProgram) => void;
+  onUpdateMajor?: (major: MajorProgram) => void;
   onDeleteMajor?: (id: string) => void;
   onAddExtracurricular?: (eskul: Extracurricular) => void;
+  onUpdateExtracurricular?: (eskul: Extracurricular) => void;
   onDeleteExtracurricular?: (id: string) => void;
   onAddStudentWork?: (work: StudentWork) => void;
+  onUpdateStudentWork?: (work: StudentWork) => void;
   onDeleteStudentWork?: (id: string) => void;
   homepageConfig?: HomepageConfig;
   onUpdateHomepageConfig?: (updated: HomepageConfig) => void;
@@ -157,16 +166,22 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onResetHomepageConfig,
   initialActiveMenu,
   onAddStudent,
+  onUpdateStudent,
   onDeleteStudent,
   onAddTeacher,
+  onUpdateTeacher,
   onDeleteTeacher,
   onAddNews,
+  onUpdateNews,
   onDeleteNews,
   onAddEvent,
+  onUpdateEvent,
   onDeleteEvent,
   onAddGallery,
+  onUpdateGallery,
   onDeleteGallery,
   onAddPPDB,
+  onUpdatePPDB,
   onUpdatePPDBStatus,
   onSendPushNotification,
   onUpdateTeacherAdminDoc,
@@ -174,10 +189,13 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onDeleteTeacherAdminDoc = () => {},
   onUpdateSchoolProfile = () => {},
   onAddMajor = () => {},
+  onUpdateMajor = () => {},
   onDeleteMajor = () => {},
   onAddExtracurricular = () => {},
+  onUpdateExtracurricular = () => {},
   onDeleteExtracurricular = () => {},
   onAddStudentWork = () => {},
+  onUpdateStudentWork = () => {},
   onDeleteStudentWork = () => {},
   onBackToPortal,
   onLogout,
@@ -469,6 +487,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
             <AdminMajorsTab
               majors={majors}
               onAddMajor={onAddMajor}
+              onUpdateMajor={onUpdateMajor}
               onDeleteMajor={onDeleteMajor}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
@@ -480,8 +499,10 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               extracurriculars={extracurriculars}
               studentWorks={studentWorks}
               onAddExtracurricular={onAddExtracurricular}
+              onUpdateExtracurricular={onUpdateExtracurricular}
               onDeleteExtracurricular={onDeleteExtracurricular}
               onAddStudentWork={onAddStudentWork}
+              onUpdateStudentWork={onUpdateStudentWork}
               onDeleteStudentWork={onDeleteStudentWork}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
@@ -493,8 +514,10 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               newsList={newsList}
               eventsList={eventsList}
               onAddNews={onAddNews}
+              onUpdateNews={onUpdateNews}
               onDeleteNews={onDeleteNews}
               onAddEvent={onAddEvent}
+              onUpdateEvent={onUpdateEvent}
               onDeleteEvent={onDeleteEvent}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
@@ -506,6 +529,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               session={session}
               students={students}
               onAddStudent={onAddStudent}
+              onUpdateStudent={onUpdateStudent}
               onDeleteStudent={onDeleteStudent}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
               onNavigateToAlumni={() => setActiveMenu('alumni')}
@@ -532,6 +556,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
             <AdminPPDBTab
               ppdbList={ppdbList}
               onAddPPDB={onAddPPDB}
+              onUpdatePPDB={onUpdatePPDB}
               onUpdatePPDBStatus={onUpdatePPDBStatus}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
@@ -542,6 +567,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
             <AdminTeachersTab
               teachers={teachers}
               onAddTeacher={onAddTeacher}
+              onUpdateTeacher={onUpdateTeacher}
               onDeleteTeacher={onDeleteTeacher}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
@@ -569,6 +595,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
             <AdminGalleryTab
               galleryList={galleryList}
               onAddGallery={onAddGallery}
+              onUpdateGallery={onUpdateGallery}
               onDeleteGallery={onDeleteGallery}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />

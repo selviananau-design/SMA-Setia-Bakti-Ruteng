@@ -393,6 +393,9 @@ export default function App() {
   const handleAddStudent = (newStudent: Student) => {
     setStudents((prev) => [newStudent, ...prev]);
   };
+  const handleUpdateStudent = (updatedStudent: Student) => {
+    setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+  };
   const handleDeleteStudent = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data siswa ini dari sistem?')) {
       setStudents((prev) => prev.filter((s) => s.id !== id));
@@ -403,6 +406,9 @@ export default function App() {
   const handleAddTeacher = (newTeacher: TeacherStaff) => {
     setTeachers((prev) => [newTeacher, ...prev]);
   };
+  const handleUpdateTeacher = (updatedTeacher: TeacherStaff) => {
+    setTeachers((prev) => prev.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t)));
+  };
   const handleDeleteTeacher = (id: string) => {
     setTeachers((prev) => prev.filter((t) => t.id !== id));
   };
@@ -410,6 +416,9 @@ export default function App() {
   // Handlers: News
   const handleAddNews = (newNews: NewsItem) => {
     setNewsList((prev) => [newNews, ...prev]);
+  };
+  const handleUpdateNews = (updatedNews: NewsItem) => {
+    setNewsList((prev) => prev.map((n) => (n.id === updatedNews.id ? updatedNews : n)));
   };
   const handleDeleteNews = (id: string) => {
     setNewsList((prev) => prev.filter((n) => n.id !== id));
@@ -419,6 +428,9 @@ export default function App() {
   const handleAddEvent = (newEvent: SchoolEvent) => {
     setEventsList((prev) => [newEvent, ...prev]);
   };
+  const handleUpdateEvent = (updatedEvent: SchoolEvent) => {
+    setEventsList((prev) => prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e)));
+  };
   const handleDeleteEvent = (id: string) => {
     setEventsList((prev) => prev.filter((e) => e.id !== id));
   };
@@ -427,6 +439,9 @@ export default function App() {
   const handleAddGallery = (newItem: GalleryItem) => {
     setGalleryList((prev) => [newItem, ...prev]);
   };
+  const handleUpdateGallery = (updatedGallery: GalleryItem) => {
+    setGalleryList((prev) => prev.map((g) => (g.id === updatedGallery.id ? updatedGallery : g)));
+  };
   const handleDeleteGallery = (id: string) => {
     setGalleryList((prev) => prev.filter((g) => g.id !== id));
   };
@@ -434,6 +449,9 @@ export default function App() {
   // Handlers: PPDB
   const handleAddPPDB = (newReg: PPDBRegistration) => {
     setPpdbList((prev) => [newReg, ...prev]);
+  };
+  const handleUpdatePPDB = (updatedPPDB: PPDBRegistration) => {
+    setPpdbList((prev) => prev.map((p) => (p.id === updatedPPDB.id ? updatedPPDB : p)));
   };
   const handleUpdatePPDBStatus = (id: string, status: PPDBRegistration['status'], notes?: string) => {
     setPpdbList((prev) =>
@@ -550,6 +568,9 @@ export default function App() {
   const handleAddMajor = (major: MajorProgram) => {
     setMajors((prev) => [major, ...prev]);
   };
+  const handleUpdateMajor = (updatedMajor: MajorProgram) => {
+    setMajors((prev) => prev.map((m) => (m.id === updatedMajor.id ? updatedMajor : m)));
+  };
   const handleDeleteMajor = (id: string) => {
     setMajors((prev) => prev.filter((m) => m.id !== id));
   };
@@ -558,6 +579,9 @@ export default function App() {
   const handleAddExtracurricular = (eskul: Extracurricular) => {
     setExtracurriculars((prev) => [eskul, ...prev]);
   };
+  const handleUpdateExtracurricular = (updatedEskul: Extracurricular) => {
+    setExtracurriculars((prev) => prev.map((e) => (e.id === updatedEskul.id ? updatedEskul : e)));
+  };
   const handleDeleteExtracurricular = (id: string) => {
     setExtracurriculars((prev) => prev.filter((e) => e.id !== id));
   };
@@ -565,6 +589,9 @@ export default function App() {
   // Handlers: Student Works (Cerita, Puisi, Jurnalistik)
   const handleAddStudentWork = (work: StudentWork) => {
     setStudentWorks((prev) => [work, ...prev]);
+  };
+  const handleUpdateStudentWork = (updatedWork: StudentWork) => {
+    setStudentWorks((prev) => prev.map((w) => (w.id === updatedWork.id ? updatedWork : w)));
   };
   const handleDeleteStudentWork = (id: string) => {
     setStudentWorks((prev) => prev.filter((w) => w.id !== id));
@@ -784,16 +811,22 @@ export default function App() {
             onVerifyTeacherAdminDoc={handleVerifyTeacherAdminDoc}
             onSaveSubjectAttendanceSession={handleSaveSubjectAttendanceSession}
             onAddStudent={handleAddStudent}
+            onUpdateStudent={handleUpdateStudent}
             onDeleteStudent={handleDeleteStudent}
             onAddTeacher={handleAddTeacher}
+            onUpdateTeacher={handleUpdateTeacher}
             onDeleteTeacher={handleDeleteTeacher}
             onAddNews={handleAddNews}
+            onUpdateNews={handleUpdateNews}
             onDeleteNews={handleDeleteNews}
             onAddEvent={handleAddEvent}
+            onUpdateEvent={handleUpdateEvent}
             onDeleteEvent={handleDeleteEvent}
             onAddGallery={handleAddGallery}
+            onUpdateGallery={handleUpdateGallery}
             onDeleteGallery={handleDeleteGallery}
             onAddPPDB={handleAddPPDB}
+            onUpdatePPDB={handleUpdatePPDB}
             onUpdatePPDBStatus={handleUpdatePPDBStatus}
             onSendPushNotification={handleSendPushNotification}
             onAddStudyMaterial={handleAddStudyMaterial}
@@ -810,10 +843,13 @@ export default function App() {
             onAddDiscussionReply={handleAddDiscussionReply}
             onUpdateSchoolProfile={handleUpdateSchoolProfile}
             onAddMajor={handleAddMajor}
+            onUpdateMajor={handleUpdateMajor}
             onDeleteMajor={handleDeleteMajor}
             onAddExtracurricular={handleAddExtracurricular}
+            onUpdateExtracurricular={handleUpdateExtracurricular}
             onDeleteExtracurricular={handleDeleteExtracurricular}
             onAddStudentWork={handleAddStudentWork}
+            onUpdateStudentWork={handleUpdateStudentWork}
             onDeleteStudentWork={handleDeleteStudentWork}
             homepageConfig={homepageConfig}
             onUpdateHomepageConfig={(updated) => setHomepageConfig(updated)}

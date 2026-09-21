@@ -4,6 +4,7 @@ import {
   Search,
   Plus,
   Trash2,
+  Edit2,
   ExternalLink,
   GraduationCap,
   BookOpen,
@@ -24,6 +25,7 @@ import { ExcelImportModal } from '../common/ExcelImportModal';
 interface AdminTeachersTabProps {
   teachers: TeacherStaff[];
   onAddTeacher: (teacher: TeacherStaff) => void;
+  onUpdateTeacher?: (teacher: TeacherStaff) => void;
   onDeleteTeacher: (id: string) => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
@@ -31,12 +33,14 @@ interface AdminTeachersTabProps {
 export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
   teachers,
   onAddTeacher,
+  onUpdateTeacher,
   onDeleteTeacher,
   onNavigateToWebsiteTab,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('Semua');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState<TeacherStaff | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
 
   // New teacher form state
@@ -232,17 +236,26 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
 
             <div className="p-4 pt-0 border-t border-slate-100 flex items-center justify-between">
               <span className="text-[11px] text-slate-400 truncate max-w-[200px]">{t.email}</span>
-              <button
-                onClick={() => {
-                  if (window.confirm(`Hapus data pendidik "${t.name}"?`)) {
-                    onDeleteTeacher(t.id);
-                  }
-                }}
-                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                title="Hapus Guru"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setEditingTeacher({ ...t })}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                  title="Edit Data Guru"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Hapus data pendidik "${t.name}"?`)) {
+                      onDeleteTeacher(t.id);
+                    }
+                  }}
+                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                  title="Hapus Guru"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -384,6 +397,188 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
                   className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
                 >
                   Simpan Profil Guru
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT GURU */}
+      {editingTeacher && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-blue-600" />
+                  <span>Edit Profil Pendidik / Pegawai</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Perbarui profil resmi pendidik: <strong className="text-slate-800">{editingTeacher.name}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingTeacher(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (onUpdateTeacher) {
+                  onUpdateTeacher(editingTeacher);
+                } else {
+                  onDeleteTeacher(editingTeacher.id);
+                  onAddTeacher(editingTeacher);
+                }
+                alert(`Data guru "${editingTeacher.name}" berhasil diperbarui!`);
+                setEditingTeacher(null);
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap & Gelar *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTeacher.name}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Jabatan / Role *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTeacher.role}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, role: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">NIP (Nomor Induk Pegawai)</label>
+                  <input
+                    type="text"
+                    value={editingTeacher.nip}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, nip: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">NUPTK</label>
+                  <input
+                    type="text"
+                    value={editingTeacher.nuptk || ''}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, nuptk: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mata Pelajaran yang Diampu *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTeacher.subject}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, subject: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kelompok Mapel / Departemen *</label>
+                  <select
+                    value={editingTeacher.department}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, department: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  >
+                    <option value="MIPA">MIPA</option>
+                    <option value="IPS">IPS</option>
+                    <option value="Bahasa">Bahasa</option>
+                    <option value="Agama & Karakter">Agama & Karakter</option>
+                    <option value="Umum / BK">Umum / BK</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Pendidikan Terakhir *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTeacher.education}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, education: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email Resmi</label>
+                  <input
+                    type="email"
+                    value={editingTeacher.email}
+                    onChange={(e) => setEditingTeacher({ ...editingTeacher, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp / HP</label>
+                <input
+                  type="text"
+                  value={editingTeacher.phone || ''}
+                  onChange={(e) => setEditingTeacher({ ...editingTeacher, phone: e.target.value })}
+                  placeholder="08..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              {/* Unggah / URL Foto Guru */}
+              <ImageUploadField
+                label="Foto Profil Guru (Upload dari Komputer atau Tempel URL Web)"
+                value={editingTeacher.photoUrl}
+                onChange={(newUrl) => setEditingTeacher({ ...editingTeacher, photoUrl: newUrl })}
+                placeholder="Pilih file gambar atau tempel URL foto"
+              />
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Kutipan / Profil Singkat</label>
+                <textarea
+                  rows={3}
+                  value={editingTeacher.bio}
+                  onChange={(e) => setEditingTeacher({ ...editingTeacher, bio: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setEditingTeacher(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+                >
+                  Simpan Perubahan Guru
                 </button>
               </div>
             </form>

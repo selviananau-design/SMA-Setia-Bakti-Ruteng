@@ -4,6 +4,7 @@ import {
   Calendar,
   Plus,
   Trash2,
+  Edit2,
   ExternalLink,
   Clock,
   MapPin,
@@ -18,8 +19,10 @@ interface AdminNewsEventsTabProps {
   newsList: NewsItem[];
   eventsList: SchoolEvent[];
   onAddNews: (news: NewsItem) => void;
+  onUpdateNews?: (news: NewsItem) => void;
   onDeleteNews: (id: string) => void;
   onAddEvent: (event: SchoolEvent) => void;
+  onUpdateEvent?: (event: SchoolEvent) => void;
   onDeleteEvent: (id: string) => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
@@ -28,14 +31,18 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
   newsList,
   eventsList,
   onAddNews,
+  onUpdateNews,
   onDeleteNews,
   onAddEvent,
+  onUpdateEvent,
   onDeleteEvent,
   onNavigateToWebsiteTab,
 }) => {
   const [subTab, setSubTab] = useState<'news' | 'events'>('news');
   const [showAddNewsModal, setShowAddNewsModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
+  const [editingEvent, setEditingEvent] = useState<SchoolEvent | null>(null);
 
   // New News form state
   const [newsTitle, setNewsTitle] = useState('');
@@ -219,17 +226,26 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
 
                 <div className="p-4 pt-0 border-t border-slate-100 mt-2 flex items-center justify-between">
                   <span className="text-[11px] font-medium text-slate-500">Oleh: {item.author || 'Admin'}</span>
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Hapus berita "${item.title}"?`)) {
-                        onDeleteNews(item.id);
-                      }
-                    }}
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                    title="Hapus Berita"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setEditingNews({ ...item })}
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                      title="Edit Berita"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Hapus berita "${item.title}"?`)) {
+                          onDeleteNews(item.id);
+                        }
+                      }}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Hapus Berita"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -275,17 +291,26 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => {
-                    if (window.confirm(`Hapus agenda "${ev.title}"?`)) {
-                      onDeleteEvent(ev.id);
-                    }
-                  }}
-                  className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer flex-shrink-0"
-                  title="Hapus Agenda Acara"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => setEditingEvent({ ...ev })}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                    title="Edit Agenda Acara"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Hapus agenda "${ev.title}"?`)) {
+                        onDeleteEvent(ev.id);
+                      }
+                    }}
+                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                    title="Hapus Agenda Acara"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -550,6 +575,292 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
                   className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
                 >
                   Simpan Agenda ke Website
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT NEWS */}
+      {editingNews && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-blue-600" />
+                  <span>Edit Warta Berita Sekolah</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Perbarui konten artikel warta berita: <strong className="text-slate-800">{editingNews.title}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingNews(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (onUpdateNews) {
+                  onUpdateNews(editingNews);
+                } else {
+                  onDeleteNews(editingNews.id);
+                  onAddNews(editingNews);
+                }
+                alert(`Berita "${editingNews.title}" berhasil diperbarui!`);
+                setEditingNews(null);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Judul Berita *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingNews.title}
+                  onChange={(e) => setEditingNews({ ...editingNews, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kategori Berita</label>
+                  <select
+                    value={editingNews.category}
+                    onChange={(e) => setEditingNews({ ...editingNews, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  >
+                    <option value="Prestasi Akademik">Prestasi Akademik</option>
+                    <option value="Kegiatan Rohani">Kegiatan Rohani</option>
+                    <option value="Pengembangan Karakter">Pengembangan Karakter</option>
+                    <option value="Seni & Budaya">Seni & Budaya</option>
+                    <option value="Pengumuman">Pengumuman Resmi</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Penulis / Humas</label>
+                  <input
+                    type="text"
+                    value={editingNews.author}
+                    onChange={(e) => setEditingNews({ ...editingNews, author: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Waktu Baca</label>
+                  <input
+                    type="text"
+                    value={editingNews.readTime}
+                    onChange={(e) => setEditingNews({ ...editingNews, readTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <ImageUploadField
+                label="Foto Banner Berita (Upload dari Komputer atau Tempel URL Web)"
+                value={editingNews.imageUrl}
+                onChange={(newUrl) => setEditingNews({ ...editingNews, imageUrl: newUrl })}
+                placeholder="Pilih file gambar atau tempel URL gambar"
+              />
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Ringkasan Berita *</label>
+                <textarea
+                  required
+                  rows={2}
+                  value={editingNews.excerpt}
+                  onChange={(e) => setEditingNews({ ...editingNews, excerpt: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Isi Lengkap Artikel *</label>
+                <textarea
+                  required
+                  rows={5}
+                  value={editingNews.content}
+                  onChange={(e) => setEditingNews({ ...editingNews, content: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setEditingNews(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+                >
+                  Simpan Perubahan Berita
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT EVENT */}
+      {editingEvent && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-indigo-600" />
+                  <span>Edit Agenda Acara Sekolah</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Perbarui jadwal agenda kegiatan: <strong className="text-slate-800">{editingEvent.title}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingEvent(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (onUpdateEvent) {
+                  onUpdateEvent(editingEvent);
+                } else {
+                  onDeleteEvent(editingEvent.id);
+                  onAddEvent(editingEvent);
+                }
+                alert(`Agenda "${editingEvent.title}" berhasil diperbarui!`);
+                setEditingEvent(null);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nama Agenda Acara *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingEvent.title}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tanggal (Hari) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingEvent.day}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, day: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-center"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Bulan *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingEvent.month}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, month: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs text-center font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tahun *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingEvent.year}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, year: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs text-center font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Waktu Pelaksanaan *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingEvent.time}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, time: e.target.value })}
+                    placeholder="Contoh: 08:00 - 12:00 WITA"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
+                  <select
+                    value={editingEvent.category}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-medium"
+                  >
+                    <option value="Akademik">Akademik</option>
+                    <option value="Keagamaan">Keagamaan</option>
+                    <option value="Kesiswaan">Kesiswaan</option>
+                    <option value="Rapat">Rapat / Orang Tua</option>
+                    <option value="Ujian">Ujian & Asesmen</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Lokasi Acara</label>
+                <input
+                  type="text"
+                  value={editingEvent.location}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                  placeholder="Contoh: Aula St. Fransiskus Asisi SMAK Setia Bakti"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Deskripsi Agenda *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={editingEvent.description}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setEditingEvent(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+                >
+                  Simpan Perubahan Agenda
                 </button>
               </div>
             </form>

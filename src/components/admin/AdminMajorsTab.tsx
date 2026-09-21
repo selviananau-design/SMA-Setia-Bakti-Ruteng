@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { BookOpen, Plus, Trash2, Edit3, CheckCircle2, GraduationCap, Award, Users } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Edit2, CheckCircle2, GraduationCap, Award, Users } from 'lucide-react';
 import { MajorProgram } from '../../types';
 
 interface AdminMajorsTabProps {
   majors: MajorProgram[];
   onAddMajor: (major: MajorProgram) => void;
+  onUpdateMajor?: (major: MajorProgram) => void;
   onDeleteMajor: (id: string) => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
@@ -12,10 +13,12 @@ interface AdminMajorsTabProps {
 export const AdminMajorsTab: React.FC<AdminMajorsTabProps> = ({
   majors,
   onAddMajor,
+  onUpdateMajor,
   onDeleteMajor,
   onNavigateToWebsiteTab,
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingMajor, setEditingMajor] = useState<MajorProgram | null>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState<'MIPA' | 'IPS' | 'BAHASA' | 'LAINNYA'>('MIPA');
   const [head, setHead] = useState('');

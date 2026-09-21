@@ -4,6 +4,7 @@ import {
   Search,
   Plus,
   Trash2,
+  Edit2,
   Lock,
   Unlock,
   FileSpreadsheet,
@@ -30,6 +31,7 @@ interface AdminStudentsTabProps {
   session: UserSession;
   students: Student[];
   onAddStudent: (student: Student) => void;
+  onUpdateStudent?: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
   onNavigateToAlumni?: () => void;
@@ -39,6 +41,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
   session,
   students,
   onAddStudent,
+  onUpdateStudent,
   onDeleteStudent,
   onNavigateToWebsiteTab,
   onNavigateToAlumni,
@@ -47,6 +50,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
   const [filterClass, setFilterClass] = useState<'semua' | 'X' | 'XI' | 'XII'>('semua');
   const [showDecryptedData, setShowDecryptedData] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
 
   // New student form state (default aktif)
@@ -355,13 +359,22 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <button
-                      onClick={() => onDeleteStudent(s.id)}
-                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                      title="Hapus Data Siswa"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => setEditingStudent({ ...s })}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Data Siswa"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteStudent(s.id)}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Hapus Data Siswa"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -549,6 +562,242 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                   className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
                 >
                   Simpan & Enkripsi Data Siswa
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT DATA SISWA */}
+      {editingStudent && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-blue-600" />
+                  <span>Edit Data Siswa</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Perbarui profil dan catatan akademik siswa: <strong className="text-slate-800">{editingStudent.name}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingStudent(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (onUpdateStudent) {
+                  onUpdateStudent(editingStudent);
+                } else {
+                  onDeleteStudent(editingStudent.id);
+                  onAddStudent(editingStudent);
+                }
+                logAuditEvent(
+                  session.username,
+                  'UPDATE',
+                  `Memperbarui data siswa: ${editingStudent.name} (${editingStudent.nisn})`
+                );
+                alert(`Data siswa "${editingStudent.name}" berhasil diperbarui!`);
+                setEditingStudent(null);
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.name}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin *</label>
+                  <select
+                    value={editingStudent.gender}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, gender: e.target.value as 'L' | 'P' })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  >
+                    <option value="L">Laki-laki (L)</option>
+                    <option value="P">Perempuan (P)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">NISN (10 Digit) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.nisn}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, nisn: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">NIK Siswa (16 Digit) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.nik}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, nik: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tingkat Kelas</label>
+                  <select
+                    value={editingStudent.classLevel || 'X'}
+                    onChange={(e) =>
+                      setEditingStudent({ ...editingStudent, classLevel: e.target.value as 'X' | 'XI' | 'XII' })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  >
+                    <option value="X">Kelas X</option>
+                    <option value="XI">Kelas XI</option>
+                    <option value="XII">Kelas XII</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Rombel / Kelas *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingStudent.className}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, className: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Jurusan / Peminatan</label>
+                  <select
+                    value={editingStudent.major}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        major: e.target.value as 'MIPA' | 'IPS' | 'Bahasa & Budaya',
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  >
+                    <option value="MIPA">MIPA</option>
+                    <option value="IPS">IPS</option>
+                    <option value="Bahasa & Budaya">Bahasa & Budaya</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Status Siswa</label>
+                  <select
+                    value={editingStudent.status}
+                    onChange={(e) =>
+                      setEditingStudent({ ...editingStudent, status: e.target.value as 'aktif' | 'alumni' })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  >
+                    <option value="aktif">Aktif</option>
+                    <option value="alumni">Alumni</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Rata-rata Nilai (GPA)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editingStudent.gpa}
+                    onChange={(e) =>
+                      setEditingStudent({ ...editingStudent, gpa: parseFloat(e.target.value) || 0 })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kehadiran (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editingStudent.attendanceRate}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        attendanceRate: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">No. HP / WhatsApp Siswa</label>
+                  <input
+                    type="text"
+                    value={editingStudent.phone || ''}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, phone: e.target.value })}
+                    placeholder="08..."
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nama Orang Tua / Wali</label>
+                  <input
+                    type="text"
+                    value={editingStudent.parentName || ''}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, parentName: e.target.value })}
+                    placeholder="Nama Orang Tua"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Alamat Domisili Siswa</label>
+                <input
+                  type="text"
+                  value={editingStudent.address || ''}
+                  onChange={(e) => setEditingStudent({ ...editingStudent, address: e.target.value })}
+                  placeholder="Contoh: Jl. Ahmad Yani No. 12, Ruteng"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setEditingStudent(null)}
+                  className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+                >
+                  Simpan Perubahan Siswa
                 </button>
               </div>
             </form>

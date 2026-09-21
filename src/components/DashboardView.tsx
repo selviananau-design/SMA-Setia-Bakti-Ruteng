@@ -143,16 +143,22 @@ export interface DashboardViewProps {
   onVerifyTeacherAdminDoc?: (id: string, status: TeacherAdminDocument['status'], score?: number, notes?: string, verifierName?: string) => void;
   onSaveSubjectAttendanceSession?: (session: SubjectAttendanceSession) => void;
   onAddStudent: (student: Student) => void;
+  onUpdateStudent?: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onAddTeacher: (teacher: TeacherStaff) => void;
+  onUpdateTeacher?: (teacher: TeacherStaff) => void;
   onDeleteTeacher: (id: string) => void;
   onAddNews: (news: NewsItem) => void;
+  onUpdateNews?: (news: NewsItem) => void;
   onDeleteNews: (id: string) => void;
   onAddEvent: (event: SchoolEvent) => void;
+  onUpdateEvent?: (event: SchoolEvent) => void;
   onDeleteEvent: (id: string) => void;
   onAddGallery: (item: GalleryItem) => void;
+  onUpdateGallery?: (item: GalleryItem) => void;
   onDeleteGallery: (id: string) => void;
   onAddPPDB: (reg: PPDBRegistration) => void;
+  onUpdatePPDB?: (reg: PPDBRegistration) => void;
   onUpdatePPDBStatus: (id: string, status: PPDBRegistration['status'], notes?: string) => void;
   onSendPushNotification: (
     title: string,
@@ -174,10 +180,13 @@ export interface DashboardViewProps {
   onAddDiscussionReply: (discussionId: string, reply: DiscussionReply) => void;
   onUpdateSchoolProfile: (profile: SchoolProfile) => void;
   onAddMajor: (major: MajorProgram) => void;
+  onUpdateMajor?: (major: MajorProgram) => void;
   onDeleteMajor: (id: string) => void;
   onAddExtracurricular: (eskul: Extracurricular) => void;
+  onUpdateExtracurricular?: (eskul: Extracurricular) => void;
   onDeleteExtracurricular: (id: string) => void;
   onAddStudentWork: (work: StudentWork) => void;
+  onUpdateStudentWork?: (work: StudentWork) => void;
   onDeleteStudentWork: (id: string) => void;
   homepageConfig?: HomepageConfig;
   onUpdateHomepageConfig?: (updated: HomepageConfig) => void;
@@ -218,16 +227,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onVerifyTeacherAdminDoc,
   onSaveSubjectAttendanceSession,
   onAddStudent,
+  onUpdateStudent,
   onDeleteStudent,
   onAddTeacher,
+  onUpdateTeacher,
   onDeleteTeacher,
   onAddNews,
+  onUpdateNews,
   onDeleteNews,
   onAddEvent,
+  onUpdateEvent,
   onDeleteEvent,
   onAddGallery,
+  onUpdateGallery,
   onDeleteGallery,
   onAddPPDB,
+  onUpdatePPDB,
   onUpdatePPDBStatus,
   onSendPushNotification,
   onAddStudyMaterial,
@@ -244,10 +259,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onAddDiscussionReply,
   onUpdateSchoolProfile,
   onAddMajor,
+  onUpdateMajor,
   onDeleteMajor,
   onAddExtracurricular,
+  onUpdateExtracurricular,
   onDeleteExtracurricular,
   onAddStudentWork,
+  onUpdateStudentWork,
   onDeleteStudentWork,
   onBackToPortal,
   onLogout,
@@ -271,24 +289,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         extracurriculars={extracurriculars}
         studentWorks={studentWorks}
         onAddStudent={onAddStudent}
+        onUpdateStudent={onUpdateStudent}
         onDeleteStudent={onDeleteStudent}
         onAddTeacher={onAddTeacher}
+        onUpdateTeacher={onUpdateTeacher}
         onDeleteTeacher={onDeleteTeacher}
         onAddNews={onAddNews}
+        onUpdateNews={onUpdateNews}
         onDeleteNews={onDeleteNews}
         onAddEvent={onAddEvent}
+        onUpdateEvent={onUpdateEvent}
         onDeleteEvent={onDeleteEvent}
         onAddGallery={onAddGallery}
+        onUpdateGallery={onUpdateGallery}
         onDeleteGallery={onDeleteGallery}
         onAddPPDB={onAddPPDB}
+        onUpdatePPDB={onUpdatePPDB}
         onUpdatePPDBStatus={onUpdatePPDBStatus}
         onSendPushNotification={onSendPushNotification}
         onUpdateSchoolProfile={onUpdateSchoolProfile}
         onAddMajor={onAddMajor}
+        onUpdateMajor={onUpdateMajor}
         onDeleteMajor={onDeleteMajor}
         onAddExtracurricular={onAddExtracurricular}
+        onUpdateExtracurricular={onUpdateExtracurricular}
         onDeleteExtracurricular={onDeleteExtracurricular}
         onAddStudentWork={onAddStudentWork}
+        onUpdateStudentWork={onUpdateStudentWork}
         onDeleteStudentWork={onDeleteStudentWork}
         teacherAdminDocs={teacherAdminDocs}
         subjectAttendanceSessions={subjectAttendanceSessions}
