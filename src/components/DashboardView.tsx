@@ -22,6 +22,7 @@ import {
   SchoolProfile,
   TeacherAdminDocument,
   SubjectAttendanceSession,
+  HomepageConfig,
 } from '../types';
 import { AdminResultDashboard } from './AdminResultDashboard';
 import { TeacherDashboard } from './dashboard/TeacherDashboard';
@@ -178,6 +179,10 @@ export interface DashboardViewProps {
   onDeleteExtracurricular: (id: string) => void;
   onAddStudentWork: (work: StudentWork) => void;
   onDeleteStudentWork: (id: string) => void;
+  homepageConfig?: HomepageConfig;
+  onUpdateHomepageConfig?: (updated: HomepageConfig) => void;
+  onResetHomepageConfig?: () => void;
+  initialAdminMenu?: string;
   onBackToPortal?: () => void;
   onLogout?: () => void;
   onOpenProfile?: () => void;
@@ -205,6 +210,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   schoolProfile,
   teacherAdminDocs = [],
   subjectAttendanceSessions = [],
+  homepageConfig,
+  onUpdateHomepageConfig,
+  onResetHomepageConfig,
+  initialAdminMenu,
   onUploadTeacherAdminDoc,
   onVerifyTeacherAdminDoc,
   onSaveSubjectAttendanceSession,
@@ -284,6 +293,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         teacherAdminDocs={teacherAdminDocs}
         subjectAttendanceSessions={subjectAttendanceSessions}
         onVerifyTeacherAdminDoc={onVerifyTeacherAdminDoc}
+        homepageConfig={homepageConfig}
+        onUpdateHomepageConfig={onUpdateHomepageConfig}
+        onResetHomepageConfig={onResetHomepageConfig}
+        initialActiveMenu={initialAdminMenu}
         onBackToPortal={onBackToPortal}
         onLogout={onLogout || onBackToPortal}
         onOpenProfile={onOpenProfile}

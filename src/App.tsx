@@ -5,6 +5,7 @@ import { HeroSlider } from './components/HeroSlider';
 import { AcademicProgramsSection } from './components/AcademicProgramsSection';
 import { CampusLifeSection } from './components/CampusLifeSection';
 import { WhyChooseUsSection } from './components/WhyChooseUsSection';
+import { HomepageWelcomeSection } from './components/HomepageWelcomeSection';
 import { StudentVoiceAndNewsSection } from './components/StudentVoiceAndNewsSection';
 import { QuickActionRibbon } from './components/QuickActionRibbon';
 import { UpcomingEvents } from './components/UpcomingEvents';
@@ -42,6 +43,7 @@ import {
   INITIAL_SCHOOL_PROFILE,
   INITIAL_TEACHER_ADMIN_DOCS,
   INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
+  DEFAULT_HOMEPAGE_CONFIG,
 } from './data/mockData';
 import {
   Student,
@@ -65,6 +67,7 @@ import {
   SchoolProfile,
   TeacherAdminDocument,
   SubjectAttendanceSession,
+  HomepageConfig,
 } from './types';
 import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
@@ -199,6 +202,19 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_SUBJECT_ATTENDANCE_SESSIONS;
   });
 
+  // Homepage Config state (Kustomisasi Gambar & Tulisan Halaman Utama Website)
+  const [homepageConfig, setHomepageConfig] = useState<HomepageConfig>(() => {
+    try {
+      const saved = localStorage.getItem('smak_homepage_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return DEFAULT_HOMEPAGE_CONFIG;
+  });
+
+  const [adminInitialMenu, setAdminInitialMenu] = useState<string>('overview');
+
   // Muat data dari MySQL Database Server saat aplikasi pertama kali dimuat
   useEffect(() => {
     dbService.loadAllData().then((serverData) => {
@@ -222,6 +238,7 @@ export default function App() {
         if (serverData.schoolProfile) setSchoolProfile(serverData.schoolProfile);
         if (serverData.teacherAdminDocs?.length) setTeacherAdminDocs(serverData.teacherAdminDocs);
         if (serverData.subjectAttendance?.length) setSubjectAttendanceSessions(serverData.subjectAttendance);
+        if (serverData.homepageConfig) setHomepageConfig(serverData.homepageConfig);
       }
     });
   }, []);
@@ -321,6 +338,11 @@ export default function App() {
     localStorage.setItem('smak_subject_attendance', JSON.stringify(subjectAttendanceSessions));
     dbService.syncEntity('subjectAttendance', subjectAttendanceSessions);
   }, [subjectAttendanceSessions]);
+
+  useEffect(() => {
+    localStorage.setItem('smak_homepage_config', JSON.stringify(homepageConfig));
+    dbService.syncEntity('homepageConfig', homepageConfig);
+  }, [homepageConfig]);
 
   useEffect(() => {
     if (session) {
@@ -604,7 +626,21 @@ export default function App() {
         {activeTab === 'beranda' && (
           <div className="space-y-0">
             {/* 1. Grand Hero Slider with Overlapping Stats Ribbon (matches reference) */}
-            <HeroSlider onNavigateTab={handleNavigateTab} />
+            <HeroSlider
+              onNavigateTab={handleNavigateTab}
+              config={homepageConfig}
+              isAdmin={session?.role === 'admin'}
+              onOpenCustomizer={() => {
+                setAdminInitialMenu('homepage');
+                setActiveTab('dashboard');
+              }}
+            />
+
+            {/* 1B. Sambutan Resmi Kepala Sekolah (Dinamis dari Kustomisasi Beranda) */}
+            <HomepageWelcomeSection
+              welcome={homepageConfig.welcomeSection}
+              onNavigateTab={handleNavigateTab}
+            />
 
             {/* 2. Academic Excellence: "Find the Program That Inspires You" (matches reference) */}
             <AcademicProgramsSection onNavigateTab={handleNavigateTab} />
@@ -618,7 +654,10 @@ export default function App() {
             />
 
             {/* 4. Why SMAK Setia Bakti: "A School That Supports You" 4-Pillars (matches reference) */}
-            <WhyChooseUsSection onNavigateTab={handleNavigateTab} />
+            <WhyChooseUsSection
+              onNavigateTab={handleNavigateTab}
+              config={homepageConfig.whyChooseUs}
+            />
 
             {/* 5. Tri-Column Showcase: Student Voice + Latest News & Events + PPDB Next Step Callout (matches reference) */}
             <StudentVoiceAndNewsSection
@@ -776,6 +815,10 @@ export default function App() {
             onDeleteExtracurricular={handleDeleteExtracurricular}
             onAddStudentWork={handleAddStudentWork}
             onDeleteStudentWork={handleDeleteStudentWork}
+            homepageConfig={homepageConfig}
+            onUpdateHomepageConfig={(updated) => setHomepageConfig(updated)}
+            onResetHomepageConfig={() => setHomepageConfig(DEFAULT_HOMEPAGE_CONFIG)}
+            initialAdminMenu={adminInitialMenu}
             onBackToPortal={handleLogout}
             onLogout={handleLogout}
             onOpenProfile={() => setIsProfileModalOpen(true)}

@@ -18,6 +18,7 @@ import {
   SchoolProfile,
   TeacherAdministrationDoc,
   SubjectAttendanceSession,
+  HomepageConfig,
 } from '../types';
 import { simulateAesEncrypt } from '../services/encryption';
 
@@ -1498,4 +1499,162 @@ export const INITIAL_SUBJECT_ATTENDANCE_SESSIONS: SubjectAttendanceSession[] = [
     createdAt: '2026-08-18 09:05 WITA',
   },
 ];
+
+// ==========================================
+// 12. KONFIGURASI DEFAULT GAMBAR & TULISAN HALAMAN UTAMA (BERANDA)
+// ==========================================
+export const HOMEPAGE_PRESET_IMAGES = [
+  {
+    title: 'Gedung Utama Kampus Ruteng',
+    url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=2000&q=80',
+    description: 'Arsitektur megah kampus bernuansa klasik berpadu pohon rindang sejuk',
+  },
+  {
+    title: 'Gedung Perpustakaan & Riset Digital',
+    url: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=2000&q=80',
+    description: 'Pusat sains dan teknologi modern SMA Katolik Setia Bakti',
+  },
+  {
+    title: 'Laboratorium Terpadu & Bioteknologi',
+    url: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=2000&q=80',
+    description: 'Fasilitas praktikum kimia, fisika, dan biologi terakreditasi',
+  },
+  {
+    title: 'Suasana Upacara & Kapela Sekolah',
+    url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=2000&q=80',
+    description: 'Pembinaan karakter dan spiritualitas iman Kristiani berasrama',
+  },
+  {
+    title: 'Aktivitas Belajar Kolaboratif Siswa',
+    url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=2000&q=80',
+    description: 'Interaksi aktif guru dan peserta didik dalam Kurikulum Merdeka',
+  },
+];
+
+export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
+  heroEyebrow: 'BUTUH INFORMASI & BANTUAN?',
+  heroHeadline: 'SELAMAT DATANG DI',
+  heroHeadlineHighlight: 'KAMPUS KAMI',
+  heroSubtitle: 'SMA KATOLIK SETIA BAKTI RUTENG — MENGINSPIRASI MASA DEPAN',
+  heroCtaText: 'BACA SELENGKAPNYA',
+  heroCtaTab: 'akademik',
+  heroSlides: [
+    {
+      id: 'slide-1',
+      url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=2000&q=80',
+      title: 'Kampus Utama SMA Katolik Setia Bakti',
+      caption: 'Membentuk Generasi Beriman, Cerdas, dan Berbudi Luhur di Bumi Manggarai',
+    },
+    {
+      id: 'slide-2',
+      url: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=2000&q=80',
+      title: 'Pusat Keunggulan Riset & Akademik',
+      caption: 'Fasilitas Modern Berstandar Nasional Mendukung Kurikulum Merdeka',
+    },
+  ],
+  featureCards: [
+    {
+      id: 'fc-1',
+      title: 'JURUSAN IPS & BISNIS',
+      subtitle: 'Pelajari Selengkapnya',
+      iconType: 'briefcase',
+      targetTab: 'akademik',
+    },
+    {
+      id: 'fc-2',
+      title: 'BAHASA & PARIWISATA',
+      subtitle: 'Pelajari Selengkapnya',
+      iconType: 'plane',
+      targetTab: 'akademik',
+    },
+    {
+      id: 'fc-3',
+      title: 'MIPA & SAINS RISET',
+      subtitle: 'Pelajari Selengkapnya',
+      iconType: 'user',
+      targetTab: 'akademik',
+    },
+  ],
+  quickStats: [
+    {
+      id: 'qs-1',
+      value: '1.250+ Siswa',
+      label: 'Siswa Aktif',
+      sublabel: 'Aktif & Berprestasi',
+      iconType: 'users',
+    },
+    {
+      id: 'qs-2',
+      value: '3 Jurusan',
+      label: 'Program Peminatan',
+      sublabel: 'MIPA, IPS, Bahasa',
+      iconType: 'book',
+    },
+    {
+      id: 'qs-3',
+      value: '42+ Pendidik',
+      label: 'Dewan Guru',
+      sublabel: 'Guru Bersertifikasi',
+      iconType: 'grad',
+    },
+    {
+      id: 'qs-4',
+      value: 'Akreditasi A',
+      label: 'Status Sekolah',
+      sublabel: 'Unggul Nasional',
+      iconType: 'award',
+    },
+  ],
+  welcomeSection: {
+    enabled: true,
+    badge: 'SAMBUTAN RESMI',
+    title: 'Membangun Manusia Seutuhnya Berlandaskan Iman & Ilmu',
+    quote:
+      'Selamat datang di portal resmi SMA Katolik Setia Bakti Ruteng. Kami berkomitmen menyelenggarakan pendidikan Katolik yang berkarakter, mengakar pada budaya Manggarai, serta siap bersaing di panggung nasional dan global.',
+    principalName: 'Drs. Petrus Kanisius Dadi',
+    principalRole: 'Kepala Sekolah SMAK Setia Bakti Ruteng',
+    principalPhotoUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&q=80',
+  },
+  whyChooseUs: {
+    eyebrow: 'MENGAPA SMAK SETIA BAKTI?',
+    title: 'Sekolah Katolik yang Membimbing Masa Depanmu',
+    description:
+      'Lebih dari enam dekade mengabdi di tanah Manggarai, melahirkan ribuan alumni yang kini berkiprah sebagai akademisi, dokter, rohaniwan, wirausahawan, dan abdi negara.',
+    ctaText: 'TENTANG SEKOLAH KAMI',
+    ctaTab: 'akademik',
+    pillars: [
+      {
+        id: 'p-1',
+        title: 'Pembelajaran Inovatif',
+        desc: 'Praktik riset sains langsung dengan guru berpengalaman dan fasilitas Kurikulum Merdeka modern.',
+        iconType: 'lightbulb',
+      },
+      {
+        id: 'p-2',
+        title: 'Wawasan Masa Depan',
+        desc: 'Mempersiapkan siswa bersaing di universitas favorit nasional maupun kancah internasional.',
+        iconType: 'globe',
+      },
+      {
+        id: 'p-3',
+        title: 'Kesiapan Studi & Karier',
+        desc: 'Bimbingan intensif UTBK/SNBT, pemetaan minat bakat, dan kolaborasi jejaring alumni berprestasi.',
+        iconType: 'compass',
+      },
+      {
+        id: 'p-4',
+        title: 'Komunitas Kasih & Suportif',
+        desc: 'Pendidikan berasrama Katolik yang aman, penuh persaudaraan, dan menumbuhkan karakter mulia.',
+        iconType: 'heart',
+      },
+    ],
+  },
+  announcementBar: {
+    enabled: true,
+    badgeText: 'PENGUMUMAN UTAMA',
+    message: 'Penerimaan Peserta Didik Baru (PPDB) Gelombang I Tahun Ajaran 2026/2027 Telah Resmi Dibuka!',
+    linkText: 'Daftar Sekarang Online',
+    targetTab: 'ppdb',
+  },
+};
 

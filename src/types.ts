@@ -401,3 +401,83 @@ export interface AdminSidebarConfig {
   themeAccent?: 'indigo' | 'blue' | 'purple' | 'emerald' | 'amber';
 }
 
+// 12. Konfigurasi Kustomisasi Gambar & Tulisan Halaman Utama Website (Beranda)
+export interface HeroSlide {
+  id: string;
+  url: string;
+  title: string;
+  caption?: string;
+}
+
+export interface QuickFeatureCard {
+  id: string;
+  title: string;
+  subtitle: string;
+  iconType: 'briefcase' | 'plane' | 'user' | 'book' | 'award' | 'grad';
+  targetTab: string;
+}
+
+export interface QuickStatItem {
+  id: string;
+  value: string;
+  label: string;
+  sublabel: string;
+  iconType: 'users' | 'book' | 'grad' | 'award';
+}
+
+export interface WhyChooseUsPillar {
+  id: string;
+  title: string;
+  desc: string;
+  iconType: 'lightbulb' | 'globe' | 'compass' | 'heart' | 'book' | 'award';
+}
+
+export interface HomepageWelcomeSection {
+  enabled: boolean;
+  badge: string;
+  title: string;
+  quote: string;
+  principalName: string;
+  principalRole: string;
+  principalPhotoUrl?: string;
+}
+
+export interface HomepageConfig {
+  // 1. Hero Banner Utama
+  heroEyebrow: string;
+  heroHeadline: string;
+  heroHeadlineHighlight?: string;
+  heroSubtitle: string;
+  heroCtaText: string;
+  heroCtaTab: string;
+  heroSlides: HeroSlide[];
+
+  // 2. Tiga Kartu Peminatan Cepat di Bawah Hero
+  featureCards: QuickFeatureCard[];
+
+  // 3. Empat Baris Statistik Singkat
+  quickStats: QuickStatItem[];
+
+  // 4. Sambutan Kepala Sekolah di Halaman Utama
+  welcomeSection: HomepageWelcomeSection;
+
+  // 5. Bagian Mengapa SMAK Setia Bakti (Why Choose Us)
+  whyChooseUs: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    ctaText: string;
+    ctaTab: string;
+    pillars: WhyChooseUsPillar[];
+  };
+
+  // 6. Running Announcement Bar di Beranda
+  announcementBar: {
+    enabled: boolean;
+    badgeText: string;
+    message: string;
+    linkText?: string;
+    targetTab?: string;
+  };
+}
+

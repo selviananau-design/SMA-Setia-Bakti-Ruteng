@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   LayoutGrid,
+  LayoutTemplate,
   Users,
   Newspaper,
   BookOpen,
@@ -39,6 +40,7 @@ import {
   TeacherAdministrationDoc,
   SubjectAttendanceSession,
   AdminSidebarConfig,
+  HomepageConfig,
 } from '../types';
 import {
   INITIAL_SCHOOL_PROFILE,
@@ -47,6 +49,7 @@ import {
   INITIAL_STUDENT_WORKS,
   INITIAL_TEACHER_ADMIN_DOCS,
   INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
+  DEFAULT_HOMEPAGE_CONFIG,
 } from '../data/mockData';
 
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
@@ -67,6 +70,7 @@ import {
   AdminSidebarCustomizerTab,
   DEFAULT_SIDEBAR_CONFIG,
 } from './admin/AdminSidebarCustomizerTab';
+import { AdminHomepageCustomizerTab } from './admin/AdminHomepageCustomizerTab';
 
 interface AdminResultDashboardProps {
   session: UserSession;
@@ -123,6 +127,10 @@ interface AdminResultDashboardProps {
   onDeleteExtracurricular?: (id: string) => void;
   onAddStudentWork?: (work: StudentWork) => void;
   onDeleteStudentWork?: (id: string) => void;
+  homepageConfig?: HomepageConfig;
+  onUpdateHomepageConfig?: (updated: HomepageConfig) => void;
+  onResetHomepageConfig?: () => void;
+  initialActiveMenu?: string;
   onBackToPortal?: () => void;
   onLogout?: () => void;
   onOpenProfile?: () => void;
@@ -144,6 +152,10 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   studentWorks = INITIAL_STUDENT_WORKS,
   teacherAdminDocs = INITIAL_TEACHER_ADMIN_DOCS,
   subjectAttendanceSessions = INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
+  homepageConfig,
+  onUpdateHomepageConfig,
+  onResetHomepageConfig,
+  initialActiveMenu,
   onAddStudent,
   onDeleteStudent,
   onAddTeacher,
@@ -174,6 +186,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
 }) => {
   const [activeMenu, setActiveMenu] = useState<
     | 'overview'
+    | 'homepage'
     | 'profil'
     | 'jurusan'
     | 'guru'
@@ -188,7 +201,18 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     | 'laporan'
     | 'keamanan'
     | 'sidebar'
-  >('overview');
+  >((initialActiveMenu as any) || 'overview');
+
+  const [currentHomepageConfig, setCurrentHomepageConfig] = useState<HomepageConfig>(() => {
+    if (homepageConfig) return homepageConfig;
+    try {
+      const saved = localStorage.getItem('smak_homepage_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return DEFAULT_HOMEPAGE_CONFIG;
+  });
 
   const [sidebarConfig, setSidebarConfig] = useState<AdminSidebarConfig>(() => {
     try {
@@ -202,6 +226,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
 
   const menuItems = [
     { id: 'overview', label: 'Ringkasan Kinerja', icon: LayoutGrid, sub: 'Ikhtisar & Statistik' },
+    { id: 'homepage', label: 'Kustomisasi Halaman Utama', icon: LayoutTemplate, sub: 'Ganti Gambar & Tulisan Beranda' },
     { id: 'profil', label: 'Profil Sekolah', icon: School, sub: 'Visi, Misi & Legalitas' },
     { id: 'jurusan', label: 'Jurusan & Peminatan', icon: GraduationCap, sub: 'MIPA, IPS, Bahasa' },
     { id: 'guru', label: 'Profil Guru & Pegawai', icon: UserCheck, sub: 'Direktori Pendidik' },
@@ -410,6 +435,22 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               galleryList={galleryList}
               ppdbList={ppdbList}
               onNavigateToTab={(id) => setActiveMenu(id as any)}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+            />
+          )}
+
+          {/* TAB: KUSTOMISASI HALAMAN UTAMA WEBSITE (GANTI GAMBAR & TULISAN BERANDA) */}
+          {activeMenu === 'homepage' && (
+            <AdminHomepageCustomizerTab
+              config={currentHomepageConfig}
+              onSaveConfig={(newCfg) => {
+                setCurrentHomepageConfig(newCfg);
+                onUpdateHomepageConfig?.(newCfg);
+              }}
+              onResetDefault={() => {
+                setCurrentHomepageConfig(DEFAULT_HOMEPAGE_CONFIG);
+                onResetHomepageConfig?.();
+              }}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
           )}
