@@ -16,6 +16,7 @@ import {
   School,
   Sparkles,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import {
   Student,
@@ -114,6 +115,7 @@ interface AdminResultDashboardProps {
   onDeleteStudentWork?: (id: string) => void;
   onBackToPortal?: () => void;
   onLogout?: () => void;
+  onOpenProfile?: () => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
 
@@ -157,6 +159,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onDeleteStudentWork = () => {},
   onBackToPortal,
   onLogout,
+  onOpenProfile,
   onNavigateToWebsiteTab,
 }) => {
   const [activeMenu, setActiveMenu] = useState<
@@ -187,7 +190,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
         <aside className="w-full lg:w-72 bg-[#0a1124] text-slate-300 flex flex-col justify-between border-r border-slate-800/60 p-5 flex-shrink-0">
           <div>
             {/* Logo / Brand matching the screenshot */}
-            <div className="flex items-center gap-3 pb-6 border-b border-slate-800/80">
+            <div className="flex items-center gap-3 pb-4 border-b border-slate-800/80">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
                 <GraduationCap className="w-6 h-6" />
               </div>
@@ -199,6 +202,33 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                   SMAK SETIA BAKTI
                 </p>
               </div>
+            </div>
+
+            {/* Profile Quick Widget */}
+            <div className="mt-3 p-2.5 rounded-2xl bg-[#131c38] border border-slate-700/60 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 truncate">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
+                  AD
+                </div>
+                <div className="truncate">
+                  <div className="text-xs font-bold text-white truncate">Admin Utama</div>
+                  <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    MySQL Aktif
+                  </div>
+                </div>
+              </div>
+              {onOpenProfile && (
+                <button
+                  type="button"
+                  onClick={onOpenProfile}
+                  className="px-2 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                  title="Buka Pengaturan Profil Admin"
+                >
+                  <Settings className="w-3 h-3" />
+                  <span>Profil</span>
+                </button>
+              )}
             </div>
 
             {/* Navigation Menu Items */}

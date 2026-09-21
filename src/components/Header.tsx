@@ -15,7 +15,9 @@ import {
   Instagram,
   Linkedin,
   Youtube,
-  Share2,
+  Settings,
+  Lock,
+  Menu,
 } from 'lucide-react';
 import { SCHOOL_INFO } from '../data/mockData';
 import { UserSession, PushNotification } from '../types';
@@ -25,7 +27,7 @@ interface HeaderProps {
   onOpenLogin: () => void;
   onLogout: () => void;
   onOpenNotifications: () => void;
-  onOpenEncryptionModal?: () => void;
+  onOpenProfile?: () => void;
   notifications?: PushNotification[];
   onSearch?: (query: string) => void;
   onNavigateTab?: (tab: string, subTab?: string) => void;
@@ -37,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenLogin,
   onLogout,
   onOpenNotifications,
+  onOpenProfile,
   notifications = [],
   onSearch,
   onNavigateTab = () => {},
@@ -45,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [searchInput, setSearchInput] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -59,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'beranda', label: 'BERANDA', hasDropdown: false },
     {
       id: 'profil',
-      label: 'PROFIL KAMI',
+      label: 'PROFIL SEKOLAH',
       hasDropdown: true,
       subItems: [
         { label: 'Sambutan Kepala Sekolah', tab: 'profil', subTab: 'sambutan' },
@@ -71,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
     },
     {
       id: 'jurusan',
-      label: 'JURUSAN & PROGRAM',
+      label: 'JURUSAN & AKADEMIK',
       hasDropdown: true,
       subItems: [
         { label: 'Peminatan MIPA (Sains & Riset)', tab: 'jurusan', subTab: 'mipa' },
@@ -83,7 +87,8 @@ export const Header: React.FC<HeaderProps> = ({
     },
     {
       id: 'ppdb',
-      label: 'INFORMASI PPDB',
+      label: 'PPDB 2026/2027',
+      isHighlight: true,
       hasDropdown: true,
       subItems: [
         { label: 'Formulir Pendaftaran PPDB 2026/2027', tab: 'ppdb', subTab: 'daftar' },
@@ -108,12 +113,12 @@ export const Header: React.FC<HeaderProps> = ({
         { label: 'Staf Administrasi & Laboratorium', tab: 'guru', subTab: 'Tata Usaha' },
       ],
     },
-    { id: 'berita', label: 'WARTA & BERITA', hasDropdown: false },
     {
       id: 'kehidupan',
-      label: 'KEHIDUPAN SISWA',
+      label: 'WARTA & KESISWAAN',
       hasDropdown: true,
       subItems: [
+        { label: 'Warta & Berita Resmi Sekolah', tab: 'berita', subTab: '' },
         { label: 'Ekstrakurikuler Unggulan', tab: 'kehidupan', subTab: 'ekskul' },
         { label: 'Karya Kreatif Siswa (Cerpen & Puisi)', tab: 'kehidupan', subTab: 'karya' },
         { label: 'Organisasi Siswa (OSIS) & MPK', tab: 'kehidupan', subTab: 'osis' },
@@ -132,23 +137,28 @@ export const Header: React.FC<HeaderProps> = ({
         { label: 'Koperasi & Perlengkapan Sekolah', tab: 'statistik', subTab: 'koperasi' },
       ],
     },
-    { id: 'kontak', label: 'KONTAK KAMI', hasDropdown: false },
+    { id: 'kontak', label: 'KONTAK', hasDropdown: false },
   ];
 
   return (
     <header className="w-full bg-white z-50 shadow-sm">
-      {/* 1. TOP BLUE BAR WITH ANGLE RIBBON & SOCIAL ICONS (Exact match to reference image) */}
+      {/* 1. TOP BLUE BAR DENGAN MOTTO PENDIDIKAN & SOSIAL MEDIA RESMI */}
       <div className="w-full bg-[#083b7e] text-white text-xs py-1.5 px-4 relative overflow-hidden border-b border-[#052b5e]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Ribbon / Slanted Badge */}
+          {/* Sisi Kiri: Pita Motto Pendidikan Kristiani */}
           <div className="flex items-center">
-            <div className="bg-[#0074d9] text-white text-[11px] font-bold px-4 py-1 relative flex items-center shadow-inner tracking-wide clip-ribbon">
-              <span>Mari bergabung bersama kami dan raih masa depan gemilang</span>
+            <div className="bg-[#0074d9] text-white text-[11px] font-bold px-3 py-0.5 rounded flex items-center gap-1.5 shadow-inner tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Membentuk Insan Berkarakter Kristiani, Cerdas & Berintegritas Sejak 1968</span>
             </div>
           </div>
 
-          {/* Right Social Icons matching reference: Facebook, Twitter, Google+, Instagram, Pinterest, LinkedIn, YouTube */}
-          <div className="flex items-center space-x-3 text-slate-200">
+          {/* Sisi Kanan: Tautan Sosial Media Resmi & Status Sistem */}
+          <div className="hidden sm:flex items-center space-x-3 text-slate-200">
+            <span className="text-[10px] text-sky-200 bg-white/10 px-2 py-0.5 rounded font-mono">
+              Database MySQL Hostinger Ready
+            </span>
+            <div className="h-3 w-px bg-white/20" />
             <a
               href="#facebook"
               onClick={(e) => {
@@ -172,17 +182,6 @@ export const Header: React.FC<HeaderProps> = ({
               <Twitter className="w-3.5 h-3.5" />
             </a>
             <a
-              href="#googleplus"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Google+: Official Education Web Network');
-              }}
-              className="hover:text-white transition-colors font-bold text-[11px] leading-none"
-              title="Google+"
-            >
-              G+
-            </a>
-            <a
               href="#instagram"
               onClick={(e) => {
                 e.preventDefault();
@@ -192,28 +191,6 @@ export const Header: React.FC<HeaderProps> = ({
               title="Instagram"
             >
               <Instagram className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href="#pinterest"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Pinterest: Galeri Kreatif Siswa');
-              }}
-              className="hover:text-white transition-colors font-serif font-black text-[11px] leading-none"
-              title="Pinterest"
-            >
-              P
-            </a>
-            <a
-              href="#linkedin"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('LinkedIn: Alumni SMA Katolik Setia Bakti');
-              }}
-              className="hover:text-white transition-colors"
-              title="LinkedIn"
-            >
-              <Linkedin className="w-3.5 h-3.5" />
             </a>
             <a
               href="#youtube"
@@ -230,81 +207,81 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 2. MIDDLE HEADER ROW: LOGO & 3 CONTACT CIRCLES (Exact match to reference image) */}
-      <div className="w-full bg-white py-4 px-4 border-b border-slate-100">
+      {/* 2. MIDDLE ROW: LOGO RESMI SEKOLAH & 3 KOLOM KONTAK RAPI */}
+      <div className="w-full bg-white py-3.5 px-4 border-b border-slate-100">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Logo with Cap & Diploma Icon */}
+          {/* Logo Resmi Sekolah Terverifikasi (Bukan Education Web generic) */}
           <div
             onClick={() => onNavigateTab('beranda')}
-            className="flex items-center gap-3.5 cursor-pointer group"
+            className="flex items-center gap-3.5 cursor-pointer group select-none"
           >
-            <div className="w-12 h-12 rounded-lg bg-[#0060b8] text-white flex items-center justify-center shadow-md shadow-blue-500/10 group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-7 h-7" />
+            <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-[#005fb8] to-[#173e75] text-white flex items-center justify-center shadow-md shadow-blue-900/15 group-hover:scale-105 transition-transform border-2 border-amber-300/40">
+              <GraduationCap className="w-7 h-7 text-amber-300" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-bold tracking-tight text-[#0060b8] font-sans">
-                  Education
+              <div className="flex items-center gap-2">
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-[#005fb8] font-sans">
+                  SMA KATOLIK SETIA BAKTI
                 </span>
-                <span className="text-2xl font-bold tracking-tight text-slate-800 font-sans">
-                  Web
+                <span className="hidden sm:inline-block text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300">
+                  AKREDITASI A
                 </span>
               </div>
-              <p className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                SMAK SETIA BAKTI RUTENG — FLORES NTT
+              <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">
+                RUTENG — MANGGARAI — NUSA TENGGARA TIMUR | NPSN: 50302830
               </p>
             </div>
           </div>
 
-          {/* Right: 3 Contact Columns with Circular Icons */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-6 sm:gap-8">
-            {/* 1. HUBUNGI KAMI */}
+          {/* 3 Kolom Kontak Cepat: Rapi, Teratur & Simetris */}
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+            {/* 1. Hubungi Kami */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
-                <Phone className="w-4 h-4 text-slate-700" />
+              <div className="w-10 h-10 rounded-full border border-blue-200 flex items-center justify-center text-blue-700 bg-blue-50/60 shadow-xs">
+                <Phone className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight">
                   HUBUNGI KAMI
                 </span>
                 <a
                   href="tel:038521455"
-                  className="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
+                  className="text-xs font-bold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
                 >
                   +62 (0385) 21455
                 </a>
               </div>
             </div>
 
-            {/* 2. EMAIL KAMI */}
+            {/* 2. Email Resmi */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
-                <Mail className="w-4 h-4 text-slate-700" />
+              <div className="w-10 h-10 rounded-full border border-blue-200 flex items-center justify-center text-blue-700 bg-blue-50/60 shadow-xs">
+                <Mail className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight">
                   EMAIL RESMI
                 </span>
                 <a
                   href="mailto:info@smaksetiabaktirtg.sch.id"
-                  className="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
+                  className="text-xs font-bold text-slate-800 hover:text-blue-600 transition-colors block leading-tight"
                 >
                   info@smaksetiabaktirtg.sch.id
                 </a>
               </div>
             </div>
 
-            {/* 3. LOKASI KAMI */}
+            {/* 3. Lokasi Kampus */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-slate-700 bg-slate-50/50">
-                <MapPin className="w-4 h-4 text-slate-700" />
+              <div className="w-10 h-10 rounded-full border border-blue-200 flex items-center justify-center text-blue-700 bg-blue-50/60 shadow-xs">
+                <MapPin className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-                  LOKASI KAMI
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight">
+                  LOKASI SEKOLAH
                 </span>
-                <span className="text-xs font-semibold text-slate-800 block leading-tight">
-                  Jl. Komodo No. 1, Ruteng, Flores NTT
+                <span className="text-xs font-bold text-slate-800 block leading-tight">
+                  Jl. Komodo No. 1, Ruteng, NTT
                 </span>
               </div>
             </div>
@@ -312,11 +289,51 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 3. SOLID ROYAL BLUE NAVIGATION BAR WITH DROPDOWNS (Exact match to reference image) */}
+      {/* 3. MAIN SOLID BLUE NAVIGATION BAR WITH CLEAN DROPDOWNS & PORTAL ACCESS */}
       <div className="w-full bg-[#005fb8] text-white sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          {/* Horizontal Navigation Menu Links */}
-          <nav className="flex items-center flex-wrap">
+          {/* Hamburger Menu Toggle on Mobile */}
+          <div className="lg:hidden py-2 flex items-center justify-between w-full">
+            <button
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-[#004d99] px-3 py-1.5 rounded text-white cursor-pointer"
+            >
+              {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <span>Menu Navigasi</span>
+            </button>
+
+            {session ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigateTab('dashboard')}
+                  className="bg-amber-400 text-slate-950 text-[11px] font-bold px-2.5 py-1.5 rounded flex items-center gap-1"
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Dasbor</span>
+                </button>
+                {onOpenProfile && (
+                  <button
+                    onClick={onOpenProfile}
+                    className="bg-[#004d99] p-1.5 rounded text-white"
+                    title="Pengaturan Profil"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={onOpenLogin}
+                className="bg-white text-[#005fb8] text-[11px] font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm"
+              >
+                <Lock className="w-3 h-3" />
+                <span>Masuk Portal</span>
+              </button>
+            )}
+          </div>
+
+          {/* Desktop Horizontal Navigation Links */}
+          <nav className="hidden lg:flex items-center flex-wrap">
             {navMenuItems.map((item) => {
               const isActive = activeTab === item.id;
 
@@ -343,12 +360,17 @@ export const Header: React.FC<HeaderProps> = ({
                     }`}
                   >
                     <span>{item.label}</span>
+                    {item.isHighlight && (
+                      <span className="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
+                        Buka
+                      </span>
+                    )}
                     {item.hasDropdown && <ChevronDown className="w-3 h-3 opacity-80" />}
                   </button>
 
                   {/* Dropdown Menu */}
                   {item.hasDropdown && item.subItems && activeDropdown === item.id && (
-                    <div className="absolute left-0 top-full w-64 bg-white text-slate-800 shadow-xl border border-slate-200 py-1.5 rounded-b-md z-50">
+                    <div className="absolute left-0 top-full w-64 bg-white text-slate-800 shadow-2xl border border-slate-200 py-1.5 rounded-b-xl z-50 animate-fadeIn">
                       {item.subItems.map((sub, idx) => (
                         <button
                           key={idx}
@@ -356,7 +378,7 @@ export const Header: React.FC<HeaderProps> = ({
                             onNavigateTab(sub.tab, sub.subTab);
                             setActiveDropdown(null);
                           }}
-                          className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer block border-b border-slate-100 last:border-0"
+                          className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer block border-b border-slate-100 last:border-0"
                         >
                           {sub.label}
                         </button>
@@ -369,8 +391,8 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Right Action Controls: Search, Notification Bell, Portal */}
-          <div className="flex items-center space-x-2 py-1.5">
-            {/* Search Button */}
+          <div className="hidden lg:flex items-center space-x-2 py-1.5">
+            {/* Search Toggle */}
             {searchOpen ? (
               <form onSubmit={handleSearchSubmit} className="flex items-center relative">
                 <input
@@ -379,7 +401,7 @@ export const Header: React.FC<HeaderProps> = ({
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Cari jurusan, berita, guru..."
-                  className="w-44 text-xs py-1 pl-3 pr-7 bg-white text-slate-900 rounded focus:outline-none"
+                  className="w-48 text-xs py-1.5 pl-3 pr-7 bg-white text-slate-900 rounded-full focus:outline-none shadow-inner"
                 />
                 <button
                   type="button"
@@ -392,7 +414,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-8 h-8 rounded hover:bg-[#004d99] flex items-center justify-center text-white transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full hover:bg-[#004d99] flex items-center justify-center text-white transition-colors cursor-pointer"
                 title="Pencarian"
                 aria-label="Cari"
               >
@@ -403,30 +425,41 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Notification Bell */}
             <button
               onClick={onOpenNotifications}
-              className="relative w-8 h-8 rounded hover:bg-[#004d99] flex items-center justify-center text-white transition-colors cursor-pointer"
+              className="relative w-8 h-8 rounded-full hover:bg-[#004d99] flex items-center justify-center text-white transition-colors cursor-pointer"
               title="Notifikasi"
               aria-label="Notifikasi"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full animate-ping" />
               )}
             </button>
 
-            {/* Portal Login / Session */}
+            {/* Session / Portal Login CTA */}
             {session ? (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 pl-2 border-l border-white/20">
                 <button
                   onClick={() => onNavigateTab('dashboard')}
-                  className="bg-[#004d99] hover:bg-[#003d7a] text-white text-[11px] font-bold px-2.5 py-1.5 rounded flex items-center gap-1 cursor-pointer"
+                  className="bg-[#004d99] hover:bg-[#003d7a] text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer border border-white/30"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-amber-300" />
                   <span>{session.name.split(' ')[0]}</span>
                 </button>
+
+                {onOpenProfile && (
+                  <button
+                    onClick={onOpenProfile}
+                    className="p-1.5 rounded-full bg-[#004d99] hover:bg-[#003d7a] text-white cursor-pointer"
+                    title="Pengaturan Profil Saya"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-sky-200" />
+                  </button>
+                )}
+
                 <button
                   onClick={onLogout}
-                  className="p-1.5 text-white/80 hover:text-white cursor-pointer"
-                  title="Keluar"
+                  className="p-1.5 rounded-full hover:bg-red-600/60 text-white/90 hover:text-white cursor-pointer transition-colors"
+                  title="Keluar Sesi"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -434,15 +467,68 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={onOpenLogin}
-                className="bg-[#004d99] hover:bg-[#003d7a] text-white text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-[#005fb8] text-xs font-black px-4 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95"
               >
-                <span>MASUK</span>
+                <Lock className="w-3.5 h-3.5 text-[#005fb8]" />
+                <span>PORTAL MASUK</span>
               </button>
             )}
           </div>
         </div>
+
+        {/* Mobile Accordion Navigation Menu */}
+        {mobileNavOpen && (
+          <div className="lg:hidden bg-[#004d99] border-t border-[#003d7a] px-4 py-3 space-y-1 animate-fadeIn">
+            {navMenuItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <div key={item.id} className="border-b border-blue-800/50 last:border-0 pb-1">
+                  <button
+                    onClick={() => {
+                      if (!item.hasDropdown) {
+                        onNavigateTab(item.id);
+                        setMobileNavOpen(false);
+                      } else {
+                        setActiveDropdown(activeDropdown === item.id ? null : item.id);
+                      }
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-between cursor-pointer ${
+                      isActive ? 'bg-white text-[#005fb8]' : 'text-white hover:bg-[#003d7a]'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    {item.hasDropdown && (
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform ${
+                          activeDropdown === item.id ? 'rotate-180' : ''
+                        }`}
+                      />
+                    )}
+                  </button>
+
+                  {/* Sub items for mobile */}
+                  {item.hasDropdown && activeDropdown === item.id && item.subItems && (
+                    <div className="pl-4 pr-2 py-1 space-y-1 bg-[#003d7a] rounded-lg mt-1">
+                      {item.subItems.map((sub, sIdx) => (
+                        <button
+                          key={sIdx}
+                          onClick={() => {
+                            onNavigateTab(sub.tab, sub.subTab);
+                            setMobileNavOpen(false);
+                          }}
+                          className="w-full text-left px-2 py-1.5 text-[11px] text-slate-200 hover:text-white block font-medium"
+                        >
+                          • {sub.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </header>
   );
 };
-

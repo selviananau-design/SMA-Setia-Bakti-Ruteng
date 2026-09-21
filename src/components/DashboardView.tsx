@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, GraduationCap } from 'lucide-react';
+import { LogOut, GraduationCap, Settings } from 'lucide-react';
 import {
   Student,
   PPDBRegistration,
@@ -34,7 +34,8 @@ import { ParentDashboard } from './dashboard/ParentDashboard';
 const DashboardPortalHeader: React.FC<{
   session: UserSession;
   onLogout?: () => void;
-}> = ({ session, onLogout }) => {
+  onOpenProfile?: () => void;
+}> = ({ session, onLogout, onOpenProfile }) => {
   const getRoleBadge = () => {
     switch (session.role) {
       case 'admin':
@@ -79,15 +80,26 @@ const DashboardPortalHeader: React.FC<{
           </div>
         </div>
 
-        {/* Right: User Profile & Logout Button */}
-        <div className="flex items-center gap-3">
+        {/* Right: User Profile, Profile Settings & Logout Button */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-bold text-white leading-tight">{session.name}</span>
             <span className="text-[10px] text-emerald-400 font-medium flex items-center justify-end gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-              Sesi Aktif
+              MySQL Hostinger Ready
             </span>
           </div>
+
+          {onOpenProfile && (
+            <button
+              onClick={onOpenProfile}
+              className="px-2.5 sm:px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white rounded-xl border border-indigo-400/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Pengaturan Profil Pengguna"
+            >
+              <Settings className="w-3.5 h-3.5 text-sky-300" />
+              <span className="hidden sm:inline">Pengaturan Profil</span>
+            </button>
+          )}
 
           {onLogout && (
             <button
@@ -168,6 +180,7 @@ export interface DashboardViewProps {
   onDeleteStudentWork: (id: string) => void;
   onBackToPortal?: () => void;
   onLogout?: () => void;
+  onOpenProfile?: () => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
 
@@ -229,6 +242,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onDeleteStudentWork,
   onBackToPortal,
   onLogout,
+  onOpenProfile,
   onNavigateToWebsiteTab,
 }) => {
   // 1. ADMIN UTAMA DASHBOARD
@@ -272,6 +286,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         onVerifyTeacherAdminDoc={onVerifyTeacherAdminDoc}
         onBackToPortal={onBackToPortal}
         onLogout={onLogout || onBackToPortal}
+        onOpenProfile={onOpenProfile}
         onNavigateToWebsiteTab={onNavigateToWebsiteTab}
       />
     );
@@ -284,7 +299,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   ) {
     return (
       <div className="w-full bg-slate-100 min-h-screen">
-        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} />
+        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} onOpenProfile={onOpenProfile} />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <WaliKelasDashboard
             session={session}
@@ -319,7 +334,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   ) {
     return (
       <div className="w-full bg-slate-100 min-h-screen">
-        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} />
+        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} onOpenProfile={onOpenProfile} />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <GuruMapelDashboard
             session={session}
@@ -355,7 +370,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   if (session.role === 'guru') {
     return (
       <div className="w-full bg-slate-100 min-h-screen">
-        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} />
+        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} onOpenProfile={onOpenProfile} />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <TeacherDashboard
             session={session}
@@ -401,7 +416,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
     return (
       <div className="w-full bg-slate-100 min-h-screen">
-        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} />
+        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} onOpenProfile={onOpenProfile} />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <StudentDashboard
             session={session}
@@ -436,7 +451,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
     return (
       <div className="w-full bg-slate-100 min-h-screen">
-        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} />
+        <DashboardPortalHeader session={session} onLogout={onLogout || onBackToPortal} onOpenProfile={onOpenProfile} />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <ParentDashboard
             session={session}
