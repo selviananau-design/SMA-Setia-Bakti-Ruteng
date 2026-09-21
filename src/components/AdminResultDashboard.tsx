@@ -17,6 +17,11 @@ import {
   Sparkles,
   LogOut,
   Settings,
+  Palette,
+  Edit3,
+  Cross,
+  Award,
+  FolderCheck,
 } from 'lucide-react';
 import {
   Student,
@@ -33,6 +38,7 @@ import {
   StudentWork,
   TeacherAdministrationDoc,
   SubjectAttendanceSession,
+  AdminSidebarConfig,
 } from '../types';
 import {
   INITIAL_SCHOOL_PROFILE,
@@ -56,7 +62,10 @@ import { AdminProfileTab } from './admin/AdminProfileTab';
 import { AdminMajorsTab } from './admin/AdminMajorsTab';
 import { AdminCampusLifeTab } from './admin/AdminCampusLifeTab';
 import { AdminTeacherAdminTab } from './admin/AdminTeacherAdminTab';
-import { FolderCheck } from 'lucide-react';
+import {
+  AdminSidebarCustomizerTab,
+  DEFAULT_SIDEBAR_CONFIG,
+} from './admin/AdminSidebarCustomizerTab';
 
 interface AdminResultDashboardProps {
   session: UserSession;
@@ -163,8 +172,31 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onNavigateToWebsiteTab,
 }) => {
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'profil' | 'jurusan' | 'guru' | 'administrasi' | 'siswa' | 'berita' | 'kehidupan' | 'ppdb' | 'galeri' | 'akademik' | 'laporan' | 'keamanan'
+    | 'overview'
+    | 'profil'
+    | 'jurusan'
+    | 'guru'
+    | 'administrasi'
+    | 'siswa'
+    | 'berita'
+    | 'kehidupan'
+    | 'ppdb'
+    | 'galeri'
+    | 'akademik'
+    | 'laporan'
+    | 'keamanan'
+    | 'sidebar'
   >('overview');
+
+  const [sidebarConfig, setSidebarConfig] = useState<AdminSidebarConfig>(() => {
+    try {
+      const saved = localStorage.getItem('smak_sidebar_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return DEFAULT_SIDEBAR_CONFIG;
+  });
 
   const menuItems = [
     { id: 'overview', label: 'Ringkasan Kinerja', icon: LayoutGrid, sub: 'Ikhtisar & Statistik' },
@@ -180,7 +212,37 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     { id: 'akademik', label: 'Kurikulum & Mapel', icon: BookOpen, sub: 'Kurikulum Merdeka' },
     { id: 'laporan', label: 'Statistik & Laporan', icon: FileDown, sub: 'Unduh PDF & Excel' },
     { id: 'keamanan', label: 'Notifikasi & Keamanan', icon: ShieldCheck, sub: 'Push & AES-256' },
+    { id: 'sidebar', label: 'Kustomisasi Sidebar', icon: Palette, sub: 'Ganti Foto & Tulisan' },
   ];
+
+  // Helper untuk warna aksen sidebar
+  const getSidebarAccentGradient = () => {
+    switch (sidebarConfig.themeAccent) {
+      case 'purple':
+        return 'from-purple-600 to-fuchsia-600';
+      case 'blue':
+        return 'from-sky-500 to-blue-600';
+      case 'emerald':
+        return 'from-emerald-500 to-teal-600';
+      case 'amber':
+        return 'from-amber-500 to-orange-600';
+      case 'indigo':
+      default:
+        return 'from-blue-600 to-indigo-500';
+    }
+  };
+
+  const getLogoShapeRadius = () => {
+    switch (sidebarConfig.logoShape) {
+      case 'circle':
+        return 'rounded-full';
+      case 'square':
+        return 'rounded-lg';
+      case 'rounded':
+      default:
+        return 'rounded-xl';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0d1527] p-2 sm:p-4 lg:p-6 font-sans antialiased text-slate-800">
@@ -189,19 +251,54 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
         {/* ================= LEFT SIDEBAR ================= */}
         <aside className="w-full lg:w-72 bg-[#0a1124] text-slate-300 flex flex-col justify-between border-r border-slate-800/60 p-5 flex-shrink-0">
           <div>
-            {/* Logo / Brand matching the screenshot */}
-            <div className="flex items-center gap-3 pb-4 border-b border-slate-800/80">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                <GraduationCap className="w-6 h-6" />
+            {/* Logo / Brand with edit shortcut */}
+            <div className="flex items-center justify-between gap-2 pb-4 border-b border-slate-800/80 group">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={`w-10 h-10 ${getLogoShapeRadius()} bg-gradient-to-tr ${getSidebarAccentGradient()} flex items-center justify-center text-white shadow-lg overflow-hidden flex-shrink-0 border border-white/10`}
+                >
+                  {sidebarConfig.logoType === 'image' && sidebarConfig.logoUrl ? (
+                    <img
+                      src={sidebarConfig.logoUrl}
+                      alt="Logo Sidebar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : sidebarConfig.presetIcon === 'cross' ? (
+                    <Cross className="w-5 h-5" />
+                  ) : sidebarConfig.presetIcon === 'book' ? (
+                    <BookOpen className="w-5 h-5" />
+                  ) : sidebarConfig.presetIcon === 'shield' ? (
+                    <ShieldCheck className="w-5 h-5" />
+                  ) : sidebarConfig.presetIcon === 'award' ? (
+                    <Award className="w-5 h-5" />
+                  ) : (
+                    <GraduationCap className="w-6 h-6" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-xs font-black text-white tracking-wider leading-tight truncate uppercase">
+                    {sidebarConfig.title || 'DASBOR ADMINISTRATOR'}
+                  </h1>
+                  <p className="text-[11px] font-bold text-sky-400 tracking-widest uppercase truncate">
+                    {sidebarConfig.subtitle || 'SMAK SETIA BAKTI'}
+                  </p>
+                  {sidebarConfig.tagline && (
+                    <p className="text-[10px] text-slate-400 truncate leading-none mt-0.5">
+                      {sidebarConfig.tagline}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <h1 className="text-sm font-black text-white tracking-wider leading-tight">
-                  DASBOR ADMINISTRATOR
-                </h1>
-                <p className="text-[11px] font-bold text-sky-400 tracking-widest uppercase">
-                  SMAK SETIA BAKTI
-                </p>
-              </div>
+
+              {/* Quick shortcut to customize sidebar */}
+              <button
+                type="button"
+                onClick={() => setActiveMenu('sidebar')}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0"
+                title="Kustomisasi Foto, Logo & Tulisan Sidebar"
+              >
+                <Palette className="w-4 h-4 text-sky-400" />
+              </button>
             </div>
 
             {/* Profile Quick Widget */}
@@ -211,24 +308,36 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                   AD
                 </div>
                 <div className="truncate">
-                  <div className="text-xs font-bold text-white truncate">Admin Utama</div>
+                  <div className="text-xs font-bold text-white truncate">
+                    {sidebarConfig.adminRoleLabel || 'Admin Utama'}
+                  </div>
                   <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    MySQL Aktif
+                    {sidebarConfig.statusBadgeText || 'MySQL Aktif'}
                   </div>
                 </div>
               </div>
-              {onOpenProfile && (
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={onOpenProfile}
-                  className="px-2 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                  title="Buka Pengaturan Profil Admin"
+                  onClick={() => setActiveMenu('sidebar')}
+                  className="p-1 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-md cursor-pointer transition-colors"
+                  title="Ganti Foto & Tulisan Sidebar"
                 >
-                  <Settings className="w-3 h-3" />
-                  <span>Profil</span>
+                  <Edit3 className="w-3.5 h-3.5" />
                 </button>
-              )}
+                {onOpenProfile && (
+                  <button
+                    type="button"
+                    onClick={onOpenProfile}
+                    className="px-2 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                    title="Buka Pengaturan Profil Admin"
+                  >
+                    <Settings className="w-3 h-3" />
+                    <span>Profil</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Navigation Menu Items */}
@@ -425,6 +534,14 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               session={session}
               notifications={notifications}
               onSendPushNotification={onSendPushNotification}
+            />
+          )}
+
+          {/* TAB 10: KUSTOMISASI SIDEBAR (FOTO & TULISAN) */}
+          {activeMenu === 'sidebar' && (
+            <AdminSidebarCustomizerTab
+              config={sidebarConfig}
+              onSaveConfig={(newCfg) => setSidebarConfig(newCfg)}
             />
           )}
         </main>

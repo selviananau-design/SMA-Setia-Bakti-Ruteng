@@ -9,9 +9,17 @@ import {
   BookOpen,
   Mail,
   Phone,
+  FileSpreadsheet,
+  FileDown,
+  Upload,
 } from 'lucide-react';
 import { TeacherStaff } from '../../types';
 import { ImageUploadField } from '../common/ImageUploadField';
+import {
+  exportTeachersToExcelTemplate,
+  downloadTeacherTemplate,
+} from '../../services/excelTemplate';
+import { ExcelImportModal } from '../common/ExcelImportModal';
 
 interface AdminTeachersTabProps {
   teachers: TeacherStaff[];
@@ -29,6 +37,7 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('Semua');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // New teacher form state
   const [name, setName] = useState('');
@@ -101,7 +110,37 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => exportTeachersToExcelTemplate(teachers)}
+            className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+            title="Ekspor Seluruh Data Guru & Pegawai ke Excel (Format Template Resmi)"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Ekspor ke Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={downloadTeacherTemplate}
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Unduh Format Template Excel Kosong untuk Guru/Pegawai"
+          >
+            <FileDown className="w-4 h-4 text-indigo-600" />
+            <span>Template Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowImportModal(true)}
+            className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold rounded-xl border border-indigo-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Impor Data Guru dari Template Excel / CSV"
+          >
+            <Upload className="w-4 h-4 text-indigo-600" />
+            <span>Impor dari Excel</span>
+          </button>
+
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
@@ -350,6 +389,18 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal Impor Excel Guru */}
+      {showImportModal && (
+        <ExcelImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          type="teachers"
+          onImportTeachers={(importedList) => {
+            importedList.forEach((t) => onAddTeacher(t));
+          }}
+        />
       )}
     </div>
   );

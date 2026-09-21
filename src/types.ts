@@ -386,3 +386,18 @@ export interface SchoolProfile {
   heroImageUrl?: string;
   principalPhotoUrl?: string;
 }
+
+// 11. Konfigurasi Kustomisasi Sidebar Admin Utama
+export interface AdminSidebarConfig {
+  logoType: 'icon' | 'image';
+  logoUrl?: string;
+  presetIcon?: 'graduation' | 'cross' | 'book' | 'shield' | 'award';
+  logoShape?: 'rounded' | 'circle' | 'square';
+  title: string;
+  subtitle: string;
+  tagline?: string;
+  adminRoleLabel?: string;
+  statusBadgeText?: string;
+  themeAccent?: 'indigo' | 'blue' | 'purple' | 'emerald' | 'amber';
+}
+

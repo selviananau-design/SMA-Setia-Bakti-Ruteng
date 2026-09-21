@@ -11,11 +11,17 @@ import {
   ExternalLink,
   ShieldCheck,
   CheckCircle2,
+  Upload,
 } from 'lucide-react';
 import { Student, UserSession } from '../../types';
 import { exportStudentReportPDF } from '../../services/pdfExport';
-import { downloadStudentTemplate, exportStudentsToCSV } from '../../services/excelTemplate';
+import {
+  downloadStudentTemplate,
+  exportStudentsToCSV,
+  exportStudentsToExcelTemplate,
+} from '../../services/excelTemplate';
 import { simulateAesEncrypt, logAuditEvent } from '../../services/encryption';
+import { ExcelImportModal } from '../common/ExcelImportModal';
 
 interface AdminStudentsTabProps {
   session: UserSession;
@@ -36,6 +42,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
   const [filterStatus, setFilterStatus] = useState<'semua' | 'aktif' | 'alumni'>('semua');
   const [showDecryptedData, setShowDecryptedData] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // New student form state
   const [newStudent, setNewStudent] = useState({
@@ -133,6 +140,36 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <button
+            type="button"
+            onClick={() => exportStudentsToExcelTemplate(students, filterStatus)}
+            className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+            title="Ekspor Seluruh Data Siswa ke Excel (Sesuai Format Template Resmi 14 Kolom)"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Ekspor ke Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={downloadStudentTemplate}
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Unduh Format Template Excel Kosong untuk Siswa"
+          >
+            <FileDown className="w-4 h-4 text-indigo-600" />
+            <span>Template Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowImportModal(true)}
+            className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold rounded-xl border border-indigo-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Impor Data Siswa dari Template Excel / CSV"
+          >
+            <Upload className="w-4 h-4 text-indigo-600" />
+            <span>Impor dari Excel</span>
+          </button>
+
+          <button
             onClick={() => setShowAddStudentModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
@@ -188,12 +225,12 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
           </button>
 
           <button
-            onClick={() => exportStudentsToCSV(students, filterStatus)}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Ekspor Data Siswa ke CSV/Excel"
+            onClick={() => exportStudentsToExcelTemplate(students, filterStatus)}
+            className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Ekspor Seluruh Data Siswa ke Excel Sesuai Template Lengkap"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            <span>Ekspor CSV</span>
+            <span>Ekspor Excel</span>
           </button>
 
           <button
@@ -479,6 +516,18 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal Impor Excel Siswa */}
+      {showImportModal && (
+        <ExcelImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          type="students"
+          onImportStudents={(importedList) => {
+            importedList.forEach((s) => onAddStudent(s));
+          }}
+        />
       )}
     </div>
   );
