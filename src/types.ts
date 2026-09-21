@@ -1,4 +1,4 @@
-export type UserRole = 'public' | 'admin' | 'guru' | 'siswa' | 'orangtua';
+export type UserRole = 'public' | 'admin' | 'guru' | 'guru_mapel' | 'wali_kelas' | 'siswa' | 'orangtua';
 
 export interface NewsItem {
   id: string;
@@ -112,6 +112,8 @@ export interface UserSession {
   email?: string;
   childNisn?: string; // for parent
   className?: string; // for student or wali kelas
+  subject?: string; // for guru mapel
+  teacherType?: 'guru_mapel' | 'wali_kelas';
 }
 
 export interface GalleryItem {
@@ -172,6 +174,7 @@ export interface TeacherAdministrationDoc {
   verifiedAt?: string;
   feedbackNotes?: string;
   supervisionScore?: number; // Skala 1-100
+  score?: number;
 }
 
 export type TeacherAdminDocument = TeacherAdministrationDoc;

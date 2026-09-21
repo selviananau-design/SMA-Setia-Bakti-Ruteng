@@ -24,6 +24,8 @@ import {
 } from '../types';
 import { AdminResultDashboard } from './AdminResultDashboard';
 import { TeacherDashboard } from './dashboard/TeacherDashboard';
+import { WaliKelasDashboard } from './dashboard/WaliKelasDashboard';
+import { GuruMapelDashboard } from './dashboard/GuruMapelDashboard';
 import { StudentDashboard } from './dashboard/StudentDashboard';
 import { ParentDashboard } from './dashboard/ParentDashboard';
 
@@ -196,7 +198,79 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     );
   }
 
-  // 2. GURU DASHBOARD (WALI KELAS & GURU MAPEL)
+  // 2A. WALI KELAS DASHBOARD (EKSKLUSIF)
+  if (
+    session.role === 'wali_kelas' ||
+    (session.role === 'guru' && session.teacherType === 'wali_kelas')
+  ) {
+    return (
+      <div className="w-full py-8 bg-slate-100 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4">
+          <WaliKelasDashboard
+            session={session}
+            students={students}
+            waliNotes={waliNotes}
+            leaveRequests={leaveRequests}
+            discussions={discussions}
+            onAddWaliNote={onAddWaliNote}
+            onReviewLeaveRequest={(reqId, status, notes) =>
+              onReviewLeaveRequest(reqId, status, notes, session.name)
+            }
+            onAddDiscussionMessage={(discId, replyText) =>
+              onAddDiscussionReply(discId, {
+                id: `reply-${Date.now()}`,
+                authorRole: 'guru',
+                authorName: session.name,
+                createdAt: 'Baru Saja',
+                content: replyText,
+              })
+            }
+            onNewDiscussionTopic={onAddDiscussion}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 2B. GURU MATA PELAJARAN DASHBOARD (EKSKLUSIF)
+  if (
+    session.role === 'guru_mapel' ||
+    (session.role === 'guru' && session.teacherType === 'guru_mapel')
+  ) {
+    return (
+      <div className="w-full py-8 bg-slate-100 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4">
+          <GuruMapelDashboard
+            session={session}
+            students={students}
+            studyMaterials={studyMaterials}
+            assignments={assignments}
+            submissions={submissions}
+            discussions={discussions}
+            teacherAdminDocs={teacherAdminDocs}
+            subjectAttendanceSessions={subjectAttendanceSessions}
+            onAddStudyMaterial={onAddStudyMaterial}
+            onAddAssignment={onAddAssignment}
+            onGradeSubmission={(subId, grade, feedback) => onGradeSubmission(subId, grade, feedback)}
+            onAddDiscussionMessage={(discId, replyText) =>
+              onAddDiscussionReply(discId, {
+                id: `reply-${Date.now()}`,
+                authorRole: 'guru',
+                authorName: session.name,
+                createdAt: 'Baru Saja',
+                content: replyText,
+              })
+            }
+            onNewDiscussionTopic={onAddDiscussion}
+            onUploadTeacherAdminDoc={onUploadTeacherAdminDoc}
+            onSaveSubjectAttendanceSession={onSaveSubjectAttendanceSession}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 2C. GURU DASHBOARD (FALLBACK JIKA ROLE GURU UMUM)
   if (session.role === 'guru') {
     return (
       <div className="w-full py-8 bg-slate-100 min-h-screen">

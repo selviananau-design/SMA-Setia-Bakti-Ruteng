@@ -28,7 +28,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'statistik', label: 'Statistik & Alumni' },
     {
       id: 'portal',
-      label: session ? `Dasbor (${session.role.toUpperCase()})` : 'Portal Login Masuk',
+      label: session
+        ? `Dasbor (${
+            session.role === 'wali_kelas'
+              ? 'WALI KELAS'
+              : session.role === 'guru_mapel'
+              ? 'GURU MAPEL'
+              : session.role.toUpperCase()
+          })`
+        : 'Portal Login Masuk',
       special: true,
     },
   ];
