@@ -43,6 +43,7 @@ import {
   SubjectAttendanceSession,
   SubjectAttendanceItem,
 } from '../../types';
+import { TeacherAdminPdfUpload } from '../common/TeacherAdminPdfUpload';
 import {
   INITIAL_TEACHER_ADMIN_DOCS,
   INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
@@ -151,8 +152,10 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [adminFilterStatus, setAdminFilterStatus] = useState<string>('Semua');
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
 
-  // Upload Form states
-  const [adminDocCategory, setAdminDocCategory] = useState<TeacherAdminCategory>('Modul Ajar / RPP Merdeka');
+  // Upload Form states (1 Berkas PDF Bundel Terpadu: CP s/d RPM)
+  const [adminDocCategory, setAdminDocCategory] = useState<TeacherAdminCategory>(
+    'Bundel Administrasi Lengkap (CP, ATP hingga RPM)'
+  );
   const [adminDocTitle, setAdminDocTitle] = useState('');
   const [adminDocTargetClass, setAdminDocTargetClass] = useState('Fase E (Kelas X)');
   const [adminDocAcademicYear, setAdminDocAcademicYear] = useState('2026/2027');
@@ -160,6 +163,15 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [adminDocFileType, setAdminDocFileType] = useState<'PDF' | 'DOCX' | 'XLSX' | 'ZIP'>('PDF');
   const [adminDocDescription, setAdminDocDescription] = useState('');
   const [adminDocFileName, setAdminDocFileName] = useState('');
+  const [adminDocFileSize, setAdminDocFileSize] = useState('5.8 MB');
+  const [adminDocBundleComponents, setAdminDocBundleComponents] = useState<string[]>([
+    'Capaian Pembelajaran (CP)',
+    'Alur Tujuan Pembelajaran (ATP)',
+    'Prota & Promes',
+    'Kriteria Ketercapaian (KKTP)',
+    'Rencana Pembelajaran Modul (RPM)',
+    'Instrumen Asesmen & Evaluasi',
+  ]);
   const [adminDocSuccessToast, setAdminDocSuccessToast] = useState<string | null>(null);
 
   // Presensi Mapel State
@@ -340,10 +352,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       return;
     }
 
-    const cleanCategorySlug = adminDocCategory.replace(/[\/\s]+/g, '_');
     const generatedFileName =
       adminDocFileName.trim() ||
-      `${cleanCategorySlug}_${mapelClass}_${adminDocSemester}_2026.pdf`;
+      `Bundel_Administrasi_${mapelSubject.replace(/[\/\s]+/g, '_')}_${adminDocTargetClass.replace(/[\/\s]+/g, '_')}_CP_s.d_RPM_2026.pdf`;
 
     const newDoc: TeacherAdministrationDoc = {
       id: `doc-${Date.now()}`,
@@ -353,18 +364,19 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       subject: mapelSubject,
       targetClass: adminDocTargetClass,
       category: adminDocCategory,
-      title: adminDocTitle.trim(),
+      title: adminDocTitle.trim() || `Bundel Administrasi Lengkap (CP, ATP s/d RPM) - ${mapelSubject}`,
       academicYear: adminDocAcademicYear,
       semester: adminDocSemester,
-      fileUrl: '#unduh-administrasi',
+      fileUrl: '#unduh-bundel-administrasi-pdf',
       fileName: generatedFileName,
-      fileSize: '2.4 MB',
-      fileType: adminDocFileType,
+      fileSize: adminDocFileSize || '5.8 MB',
+      fileType: 'PDF',
       uploadedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       status: 'Menunggu Verifikasi',
+      bundleComponents: adminDocBundleComponents,
       description:
         adminDocDescription.trim() ||
-        'Dokumen perangkat ajar Kurikulum Merdeka diajukan untuk supervisi akademik dan verifikasi Admin Utama.',
+        'Bundel 1 File PDF lengkap: mencakup Capaian Pembelajaran (CP), Alur Tujuan Pembelajaran (ATP), Prota, Promes, KKTP, sampai RPM Modul Ajar kurikulum merdeka.',
     };
 
     if (onUploadTeacherAdminDoc) {
@@ -2601,6 +2613,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   onChange={(e) => setAdminDocCategory(e.target.value as any)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
                 >
+                  <option value="Bundel Administrasi Lengkap (CP, ATP hingga RPM)">
+                    Bundel Administrasi Lengkap (CP, ATP, Prota, Promes, KKTP hingga RPM) - Wajib 1 File PDF
+                  </option>
                   <option value="Modul Ajar / RPP Merdeka">Modul Ajar / RPP Merdeka</option>
                   <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
                   <option value="Program Semester (Promes)">Program Semester (Promes)</option>
@@ -2621,7 +2636,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: Modul Ajar Bab 3: Metabolisme & Enzim Katalisator..."
+                  placeholder={`Contoh: Bundel Administrasi ${mapelSubject} (CP, ATP s/d RPM)...`}
                   value={adminDocTitle}
                   onChange={(e) => setAdminDocTitle(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600"
@@ -2670,59 +2685,35 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Format Berkas & Simulasi File Picker */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Format Berkas</label>
-                  <select
-                    value={adminDocFileType}
-                    onChange={(e) => setAdminDocFileType(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-800 focus:outline-none"
-                  >
-                    <option value="PDF">PDF (Dokumen Standar)</option>
-                    <option value="DOCX">DOCX (Microsoft Word)</option>
-                    <option value="XLSX">XLSX (Spreadsheet / Excel)</option>
-                    <option value="ZIP">ZIP (Paket Kompresi)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Nama Berkas</label>
-                  <input
-                    type="text"
-                    placeholder="RPP_Biologi_Bab3_Merdeka.pdf"
-                    value={adminDocFileName}
-                    onChange={(e) => setAdminDocFileName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Drag and drop simulation box */}
-              <div className="border-2 border-dashed border-sky-300 bg-sky-50/40 rounded-xl p-4 text-center">
-                <Upload className="w-6 h-6 text-sky-700 mx-auto mb-1.5" />
-                <p className="font-bold text-slate-800 text-xs">Pilih dokumen dari perangkat Anda</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Format didukung: PDF, DOCX, XLSX, ZIP (Maks. 25 MB)</p>
-                <input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setAdminDocFileName(file.name);
-                      if (!adminDocTitle) {
-                        setAdminDocTitle(file.name.replace(/\.[^/.]+$/, ''));
-                      }
-                    }
-                  }}
-                  className="mt-2 text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-900 file:text-white hover:file:bg-sky-950 cursor-pointer"
-                />
-              </div>
+              {/* Unggah 1 File PDF Terpadu (CP s/d RPM) */}
+              <TeacherAdminPdfUpload
+                fileName={adminDocFileName}
+                fileSize={adminDocFileSize}
+                bundleComponents={adminDocBundleComponents}
+                subjectName={mapelSubject}
+                classNameStr={adminDocTargetClass}
+                onFileSelect={(name, size) => {
+                  setAdminDocFileName(name);
+                  setAdminDocFileSize(size);
+                  if (!adminDocTitle) {
+                    setAdminDocTitle(`Bundel Administrasi ${mapelSubject} (CP s/d RPM) - ${adminDocTargetClass}`);
+                  }
+                }}
+                onBundleComponentsChange={(comps) => setAdminDocBundleComponents(comps)}
+                onUseSampleBundle={() => {
+                  setAdminDocFileName(`Bundel_Administrasi_${mapelSubject.replace(/[\/\s]+/g, '_')}_CP_sd_RPM_2026.pdf`);
+                  setAdminDocFileSize('5.8 MB');
+                  if (!adminDocTitle) {
+                    setAdminDocTitle(`Bundel Administrasi ${mapelSubject} (CP s/d RPM) - ${adminDocTargetClass}`);
+                  }
+                }}
+              />
 
               {/* Deskripsi / Catatan Pengantar */}
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Catatan Pengantar / Uraian Singkat</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Tuliskan catatan pengantar untuk Tim Kurikulum & Kepala Sekolah saat memverifikasi berkas..."
                   value={adminDocDescription}
                   onChange={(e) => setAdminDocDescription(e.target.value)}
@@ -2858,6 +2849,23 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   </p>
                 </div>
               </div>
+
+              {/* Komponen Bundel Terpadu 1 File PDF */}
+              {selectedAdminDocDetail.bundleComponents && selectedAdminDocDetail.bundleComponents.length > 0 && (
+                <div className="p-3 bg-sky-50 rounded-xl border border-sky-200">
+                  <span className="text-[11px] font-bold text-sky-950 block mb-1.5">
+                    Instrumen Terpadu dalam 1 Berkas PDF (CP hingga RPM):
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {selectedAdminDocDetail.bundleComponents.map((comp, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-[11px] text-sky-900 bg-white px-2 py-1 rounded border border-sky-100">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate font-medium">{comp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Description */}
               <div>

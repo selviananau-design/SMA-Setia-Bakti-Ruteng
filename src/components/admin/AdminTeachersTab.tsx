@@ -11,6 +11,7 @@ import {
   Phone,
 } from 'lucide-react';
 import { TeacherStaff } from '../../types';
+import { ImageUploadField } from '../common/ImageUploadField';
 
 interface AdminTeachersTabProps {
   teachers: TeacherStaff[];
@@ -311,15 +312,14 @@ export const AdminTeachersTab: React.FC<AdminTeachersTabProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">URL Foto Profil</label>
-                <input
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono"
-                />
-              </div>
+              <ImageUploadField
+                label="Unggah Pas Foto Profil Guru / Pegawai (Choose File)"
+                value={photoUrl}
+                onChange={(dataUrl) => setPhotoUrl(dataUrl)}
+                helperText="Pilih berkas foto resmi/formal dari perangkat (JPG, PNG, WEBP). Bukan berupa link URL."
+                aspectRatio="square"
+                placeholderText="Klik atau seret pas foto dari perangkat ke sini"
+              />
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Bio / Dedikasi Pendidik</label>

@@ -388,6 +388,23 @@ export const AdminTeacherAdminTab: React.FC<AdminTeacherAdminTabProps> = ({
                           {doc.category}
                         </span>
                         <div className="font-bold text-slate-900 leading-snug">{doc.title}</div>
+                        {doc.bundleComponents && doc.bundleComponents.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                            <span className="text-[9px] font-extrabold text-sky-800 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">
+                              1 File PDF Lengkap
+                            </span>
+                            {doc.bundleComponents.slice(0, 4).map((comp, idx) => (
+                              <span key={idx} className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                                {comp}
+                              </span>
+                            ))}
+                            {doc.bundleComponents.length > 4 && (
+                              <span className="text-[9px] text-slate-400 font-semibold">
+                                +{doc.bundleComponents.length - 4} lagi
+                              </span>
+                            )}
+                          </div>
+                        )}
                         {doc.description && (
                           <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{doc.description}</p>
                         )}
@@ -681,7 +698,33 @@ export const AdminTeacherAdminTab: React.FC<AdminTeacherAdminTabProps> = ({
                     {selectedDocForVerify.targetClass} (TP {selectedDocForVerify.academicYear} - {selectedDocForVerify.semester})
                   </span>
                 </div>
+                <div className="flex justify-between items-center pt-2 border-t border-slate-200">
+                  <span className="text-slate-500">Berkas PDF:</span>
+                  <span className="font-mono text-indigo-700 font-bold flex items-center gap-1.5">
+                    <FileCheck className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>{selectedDocForVerify.fileName}</span>
+                    <span className="text-[10px] text-slate-400">({selectedDocForVerify.fileSize})</span>
+                  </span>
+                </div>
               </div>
+
+              {/* Checklist Komponen Bundel 1 File PDF */}
+              {selectedDocForVerify.bundleComponents && selectedDocForVerify.bundleComponents.length > 0 && (
+                <div className="p-3.5 bg-sky-50 rounded-2xl border border-sky-200 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-sky-950 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Kelengkapan Berkas (1 File PDF Bundel: CP hingga RPM):</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {selectedDocForVerify.bundleComponents.map((comp, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-[11px] text-sky-900 bg-white/80 px-2 py-1 rounded-lg border border-sky-100">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span className="font-medium truncate">{comp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Status Selector */}
               <div>

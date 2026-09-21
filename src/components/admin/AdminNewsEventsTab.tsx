@@ -12,6 +12,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { NewsItem, SchoolEvent } from '../../types';
+import { ImageUploadField } from '../common/ImageUploadField';
 
 interface AdminNewsEventsTabProps {
   newsList: NewsItem[];
@@ -361,32 +362,14 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">URL Foto Sampul</label>
-                <input
-                  type="url"
-                  value={newsImageUrl}
-                  onChange={(e) => setNewsImageUrl(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono"
-                />
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] text-slate-400">Preset Foto:</span>
-                  {[
-                    { label: 'Prestasi Sains', url: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=80' },
-                    { label: 'Lab Komputer', url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80' },
-                    { label: 'Seni Budaya', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80' },
-                  ].map((p, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setNewsImageUrl(p.url)}
-                      className="px-2 py-0.5 bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-900 rounded text-[10px] font-semibold cursor-pointer"
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <ImageUploadField
+                label="Unggah Foto Sampul Berita (Choose File)"
+                value={newsImageUrl}
+                onChange={(dataUrl) => setNewsImageUrl(dataUrl)}
+                helperText="Pilih berkas foto langsung dari perangkat (JPG, PNG, WEBP). Bukan berupa link URL."
+                aspectRatio="video"
+                placeholderText="Klik untuk jelajahi file foto atau seret gambar ke sini"
+              />
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Ringkasan Berita (Excerpt) *</label>

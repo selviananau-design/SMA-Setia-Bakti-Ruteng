@@ -14,6 +14,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { Extracurricular, StudentWork } from '../../types';
+import { ImageUploadField } from '../common/ImageUploadField';
 
 interface AdminCampusLifeTabProps {
   extracurriculars: Extracurricular[];
@@ -441,14 +442,14 @@ export const AdminCampusLifeTab: React.FC<AdminCampusLifeTabProps> = ({
                     <option value="Karya Seni">Karya Seni / Lukisan</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">URL Foto Sampul (Opsional)</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
+                <div className="md:col-span-2">
+                  <ImageUploadField
+                    label="Foto Sampul Karya Siswa (Choose File)"
                     value={workCover}
-                    onChange={(e) => setWorkCover(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none"
+                    onChange={(dataUrl) => setWorkCover(dataUrl)}
+                    helperText="Pilih berkas foto sampul dari perangkat (JPG, PNG, WEBP). Bukan link URL."
+                    aspectRatio="wide"
+                    placeholderText="Klik atau seret foto sampul karya siswa ke sini"
                   />
                 </div>
               </div>

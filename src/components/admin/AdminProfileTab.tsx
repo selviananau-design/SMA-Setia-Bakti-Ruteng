@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { School, Save, CheckCircle2, Award, BookOpen, MapPin, Phone, Mail, FileText } from 'lucide-react';
+import { School, Save, CheckCircle2, Award, BookOpen, MapPin, Phone, Mail, FileText, Camera } from 'lucide-react';
 import { SchoolProfile } from '../../types';
+import { ImageUploadField } from '../common/ImageUploadField';
 
 interface AdminProfileTabProps {
   profile: SchoolProfile;
@@ -186,6 +187,48 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none font-mono"
             />
+          </div>
+
+          {/* Bagian Unggah Foto Resmi Sekolah (Choose File - Tanpa URL) */}
+          <div className="md:col-span-2 pt-4 border-t border-slate-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Camera className="w-4 h-4 text-blue-600" />
+              <h3 className="text-sm font-bold text-slate-800">
+                Foto Resmi & Identitas Visual Sekolah (Pilih Berkas / Choose File)
+              </h3>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-4">
+              Unggah foto langsung dari perangkat (komputer / ponsel). Seluruh gambar disimpan langsung ke sistem tanpa perlu memasukkan tautan URL eksternal.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ImageUploadField
+                label="Logo Resmi Sekolah / Lambang"
+                value={formData.logoUrl}
+                onChange={(dataUrl) => setFormData({ ...formData, logoUrl: dataUrl })}
+                helperText="Format transparan PNG disarankan (Max 5MB)"
+                aspectRatio="square"
+                placeholderText="Pilih berkas logo sekolah"
+              />
+
+              <ImageUploadField
+                label="Pas Foto Resmi Kepala Sekolah"
+                value={formData.principalPhotoUrl}
+                onChange={(dataUrl) => setFormData({ ...formData, principalPhotoUrl: dataUrl })}
+                helperText="Pas foto jas / seragam resmi formal"
+                aspectRatio="square"
+                placeholderText="Pilih foto kepala sekolah"
+              />
+
+              <ImageUploadField
+                label="Foto Gedung / Kampus Utama"
+                value={formData.heroImageUrl}
+                onChange={(dataUrl) => setFormData({ ...formData, heroImageUrl: dataUrl })}
+                helperText="Foto lanskap gerbang / gedung SMAK Setia Bakti"
+                aspectRatio="video"
+                placeholderText="Pilih foto gedung kampus"
+              />
+            </div>
           </div>
         </div>
 

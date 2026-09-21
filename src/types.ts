@@ -142,6 +142,7 @@ export interface StudyMaterial {
 
 // 1b. Dokumen Administrasi & Perangkat Ajar Guru (untuk diverifikasi Admin Utama / Kepala Sekolah)
 export type TeacherAdminCategory =
+  | 'Bundel Administrasi Lengkap (CP, ATP hingga RPM)'
   | 'Modul Ajar / RPP Merdeka'
   | 'Program Tahunan (Prota)'
   | 'Program Semester (Promes)'
@@ -175,6 +176,7 @@ export interface TeacherAdministrationDoc {
   feedbackNotes?: string;
   supervisionScore?: number; // Skala 1-100
   score?: number;
+  bundleComponents?: string[];
 }
 
 export type TeacherAdminDocument = TeacherAdministrationDoc;
@@ -380,4 +382,7 @@ export interface SchoolProfile {
   address: string;
   phone: string;
   email: string;
+  logoUrl?: string;
+  heroImageUrl?: string;
+  principalPhotoUrl?: string;
 }

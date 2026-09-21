@@ -36,6 +36,7 @@ import {
   INITIAL_TEACHER_ADMIN_DOCS,
   INITIAL_SUBJECT_ATTENDANCE_SESSIONS,
 } from '../../data/mockData';
+import { TeacherAdminPdfUpload } from '../common/TeacherAdminPdfUpload';
 
 interface GuruMapelDashboardProps {
   session: UserSession;
@@ -130,14 +131,25 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
   const [adminDocFilterStatus, setAdminDocFilterStatus] = useState<string>('Semua');
   const [adminDocSuccessToast, setAdminDocSuccessToast] = useState<string | null>(null);
 
-  // Form State for Uploading Admin Doc
-  const [adminDocCategory, setAdminDocCategory] = useState<TeacherAdminCategory>('Modul Ajar / RPP Merdeka');
+  // Form State for Uploading Admin Doc (1 File PDF Bundel Lengkap: CP s/d RPM)
+  const [adminDocCategory, setAdminDocCategory] = useState<TeacherAdminCategory>(
+    'Bundel Administrasi Lengkap (CP, ATP hingga RPM)'
+  );
   const [adminDocTitle, setAdminDocTitle] = useState('');
   const [adminDocTargetClass, setAdminDocTargetClass] = useState(mapelClass);
   const [adminDocAcademicYear, setAdminDocAcademicYear] = useState('2026/2027');
   const [adminDocSemester, setAdminDocSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
   const [adminDocFileType, setAdminDocFileType] = useState<'PDF' | 'DOCX' | 'XLSX'>('PDF');
   const [adminDocFileName, setAdminDocFileName] = useState('');
+  const [adminDocFileSize, setAdminDocFileSize] = useState('5.8 MB');
+  const [adminDocBundleComponents, setAdminDocBundleComponents] = useState<string[]>([
+    'Capaian Pembelajaran (CP)',
+    'Alur Tujuan Pembelajaran (ATP)',
+    'Prota & Promes',
+    'Kriteria Ketercapaian (KKTP)',
+    'Rencana Pembelajaran Modul (RPM)',
+    'Instrumen Asesmen & Evaluasi',
+  ]);
   const [adminDocDescription, setAdminDocDescription] = useState('');
 
   // Class & subject lists
@@ -279,10 +291,9 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
       return;
     }
 
-    const cleanCategorySlug = adminDocCategory.replace(/[\/\s]+/g, '_');
     const generatedFileName =
       adminDocFileName.trim() ||
-      `${cleanCategorySlug}_${mapelClass}_${adminDocSemester}_2026.pdf`;
+      `Bundel_Administrasi_${mapelSubject.replace(/[\/\s]+/g, '_')}_${adminDocTargetClass.replace(/[\/\s]+/g, '_')}_CP_s.d_RPM_2026.pdf`;
 
     const newDoc: TeacherAdministrationDoc = {
       id: `doc-${Date.now()}`,
@@ -292,18 +303,19 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
       subject: mapelSubject,
       targetClass: adminDocTargetClass,
       category: adminDocCategory,
-      title: adminDocTitle.trim(),
+      title: adminDocTitle.trim() || `Bundel Dokumen Administrasi Lengkap (CP, ATP s/d RPM) - ${mapelSubject}`,
       academicYear: adminDocAcademicYear,
       semester: adminDocSemester,
-      fileUrl: '#unduh-administrasi',
+      fileUrl: '#unduh-bundel-administrasi-pdf',
       fileName: generatedFileName,
-      fileSize: '2.4 MB',
-      fileType: adminDocFileType,
+      fileSize: adminDocFileSize || '5.8 MB',
+      fileType: 'PDF',
       uploadedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       status: 'Menunggu Verifikasi',
+      bundleComponents: adminDocBundleComponents,
       description:
         adminDocDescription.trim() ||
-        'Dokumen perangkat ajar Kurikulum Merdeka diajukan untuk supervisi akademik dan verifikasi Admin Utama.',
+        'Bundel 1 File PDF lengkap: mencakup Capaian Pembelajaran (CP), Alur Tujuan Pembelajaran (ATP), Prota, Promes, KKTP, sampai RPM Modul Ajar kurikulum merdeka.',
     };
 
     if (onUploadTeacherAdminDoc) {
@@ -1503,10 +1515,15 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200">
             <div className="bg-[#0e2a47] text-white p-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold flex items-center gap-2">
-                <FolderCheck className="w-4 h-4 text-sky-300" />
-                <span>Unggah Berkas Administrasi Mengajar Guru</span>
-              </h3>
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-sky-400 text-slate-950">
+                  1 Berkas PDF Terpadu (CP s/d RPM)
+                </span>
+                <h3 className="text-sm font-bold flex items-center gap-2 mt-1">
+                  <FolderCheck className="w-4 h-4 text-sky-300" />
+                  <span>Unggah Administrasi Guru ke Admin Utama</span>
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowUploadAdminDocModal(false)}
@@ -1515,7 +1532,7 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
                 ✕
               </button>
             </div>
-            <form onSubmit={handleUploadAdminDoc} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleUploadAdminDoc} className="p-5 space-y-3.5 text-xs max-h-[82vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Mata Pelajaran</label>
@@ -1544,21 +1561,23 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Kategori Perangkat Administrasi</label>
+                <label className="block font-bold text-slate-700 mb-1">Kategori Dokumen Administrasi</label>
                 <select
                   value={adminDocCategory}
                   onChange={(e) => setAdminDocCategory(e.target.value as TeacherAdminCategory)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none font-semibold text-slate-900"
                 >
+                  <option value="Bundel Administrasi Lengkap (CP, ATP hingga RPM)">
+                    Bundel Administrasi Lengkap (CP, ATP, Prota, Promes, KKTP hingga RPM) - Wajib 1 File PDF
+                  </option>
                   <option value="Modul Ajar / RPP Merdeka">Modul Ajar / RPP Kurikulum Merdeka</option>
                   <option value="Program Tahunan (Prota)">Program Tahunan (Prota)</option>
                   <option value="Program Semester (Promes)">Program Semester (Promes)</option>
                   <option value="Alur Tujuan Pembelajaran (ATP)">Alur Tujuan Pembelajaran (ATP)</option>
-                  <option value="Kriteria Ketercapaian (KKTP)">Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)</option>
+                  <option value="KKTP / Kriteria Ketuntasan">Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)</option>
                   <option value="Jurnal Mengajar Harian">Jurnal Mengajar Harian</option>
-                  <option value="Kisi-kisi & Rubrik Asesmen">Kisi-kisi & Rubrik Asesmen Sumatif/Formatif</option>
-                  <option value="Silabus Pembelajaran">Silabus Pembelajaran</option>
-                  <option value="Buku Kerja Guru">Buku Kerja Guru & Refleksi KBM</option>
+                  <option value="Kisi-kisi & Asesmen Sumatif">Kisi-kisi & Asesmen Sumatif</option>
+                  <option value="Buku Kerja Guru">Buku Kerja Guru</option>
                 </select>
               </div>
 
@@ -1567,14 +1586,14 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: Modul Ajar Biologi Fase E Bab Ekosistem Kelas X..."
+                  placeholder={`Contoh: Bundel Dokumen Administrasi ${mapelSubject} (CP, ATP sampai RPM)...`}
                   value={adminDocTitle}
                   onChange={(e) => setAdminDocTitle(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-indigo-600 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Tahun Ajaran</label>
                   <input
@@ -1595,37 +1614,37 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
                     <option value="Genap">Genap</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Format Berkas</label>
-                  <select
-                    value={adminDocFileType}
-                    onChange={(e) => setAdminDocFileType(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  >
-                    <option value="PDF">PDF (.pdf)</option>
-                    <option value="DOCX">Word (.docx)</option>
-                    <option value="XLSX">Excel (.xlsx)</option>
-                  </select>
-                </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Pilih Berkas Dokumen (Simulasi)</label>
-                <input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setAdminDocFileName(file.name);
-                  }}
-                  className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-800 file:font-bold"
-                />
-              </div>
+              {/* Komponen Unggah Bundel 1 File PDF */}
+              <TeacherAdminPdfUpload
+                fileName={adminDocFileName}
+                fileSize={adminDocFileSize}
+                bundleComponents={adminDocBundleComponents}
+                subjectName={mapelSubject}
+                classNameStr={adminDocTargetClass}
+                onFileSelect={(name, size) => {
+                  setAdminDocFileName(name);
+                  setAdminDocFileSize(size);
+                  if (!adminDocTitle) {
+                    setAdminDocTitle(`Bundel Administrasi ${mapelSubject} (CP s/d RPM) - Kelas ${adminDocTargetClass}`);
+                  }
+                }}
+                onBundleComponentsChange={(comps) => setAdminDocBundleComponents(comps)}
+                onUseSampleBundle={() => {
+                  setAdminDocFileName(`Bundel_Administrasi_${mapelSubject.replace(/[\/\s]+/g, '_')}_CP_sd_RPM_2026.pdf`);
+                  setAdminDocFileSize('5.8 MB');
+                  if (!adminDocTitle) {
+                    setAdminDocTitle(`Bundel Administrasi ${mapelSubject} (CP s/d RPM) - Kelas ${adminDocTargetClass}`);
+                  }
+                }}
+              />
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Keterangan / Catatan untuk Verifikator</label>
+                <label className="block font-bold text-slate-700 mb-1">Catatan Pengantar untuk Kepala Sekolah / Admin Utama</label>
                 <textarea
-                  rows={3}
-                  placeholder="Uraikan ringkasan materi, capaian pembelajaran, atau pengantar untuk Kepala Sekolah..."
+                  rows={2}
+                  placeholder="Tuliskan ringkasan materi, capaian pembelajaran, atau pengantar untuk verifikator..."
                   value={adminDocDescription}
                   onChange={(e) => setAdminDocDescription(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none"
@@ -1642,9 +1661,10 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-800 hover:bg-indigo-900 text-white rounded-lg font-bold shadow cursor-pointer"
+                  className="px-5 py-2.5 bg-indigo-800 hover:bg-indigo-900 text-white rounded-xl font-bold shadow cursor-pointer transition-all flex items-center gap-1.5"
                 >
-                  Unggah & Ajukan Supervisi
+                  <FolderCheck className="w-4 h-4 text-amber-300" />
+                  <span>Kirim Berkas PDF ke Admin Utama</span>
                 </button>
               </div>
             </form>
@@ -1747,6 +1767,23 @@ export const GuruMapelDashboard: React.FC<GuruMapelDashboardProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Komponen Bundel Terpadu 1 File PDF */}
+              {selectedAdminDocDetail.bundleComponents && selectedAdminDocDetail.bundleComponents.length > 0 && (
+                <div className="p-3 bg-sky-50 rounded-xl border border-sky-200">
+                  <span className="text-[11px] font-bold text-sky-950 block mb-1.5">
+                    Komponen Terangkum dalam 1 Berkas PDF (CP s/d RPM):
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {selectedAdminDocDetail.bundleComponents.map((comp, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-[11px] text-sky-900 bg-white px-2 py-1 rounded border border-sky-100">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate">{comp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                 <button
