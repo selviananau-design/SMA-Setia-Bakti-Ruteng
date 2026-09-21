@@ -18,6 +18,8 @@ import { AcademicProgramsFullPage } from './components/AcademicProgramsFullPage'
 import { LoginModal } from './components/LoginModal';
 import { PushNotificationBanner } from './components/PushNotificationBanner';
 import { DashboardView } from './components/DashboardView';
+import { ProfileSettingsModal } from './components/common/ProfileSettingsModal';
+import { dbService } from './services/dbSync';
 import { Footer } from './components/Footer';
 
 import {
@@ -77,6 +79,7 @@ export default function App() {
   };
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [session, setSession] = useState<UserSession | null>(() => {
     const saved = localStorage.getItem('smak_user_session');
     return saved ? JSON.parse(saved) : null;
@@ -196,81 +199,127 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_SUBJECT_ATTENDANCE_SESSIONS;
   });
 
-  // Sync state changes to localStorage
+  // Muat data dari MySQL Database Server saat aplikasi pertama kali dimuat
+  useEffect(() => {
+    dbService.loadAllData().then((serverData) => {
+      if (serverData && Object.keys(serverData).length > 0) {
+        if (serverData.students?.length) setStudents(serverData.students);
+        if (serverData.teachers?.length) setTeachers(serverData.teachers);
+        if (serverData.news?.length) setNewsList(serverData.news);
+        if (serverData.events?.length) setEventsList(serverData.events);
+        if (serverData.gallery?.length) setGalleryList(serverData.gallery);
+        if (serverData.ppdb?.length) setPpdbList(serverData.ppdb);
+        if (serverData.notifications?.length) setNotifications(serverData.notifications);
+        if (serverData.studyMaterials?.length) setStudyMaterials(serverData.studyMaterials);
+        if (serverData.assignments?.length) setAssignments(serverData.assignments);
+        if (serverData.submissions?.length) setSubmissions(serverData.submissions);
+        if (serverData.waliNotes?.length) setWaliNotes(serverData.waliNotes);
+        if (serverData.leaveRequests?.length) setLeaveRequests(serverData.leaveRequests);
+        if (serverData.discussions?.length) setDiscussions(serverData.discussions);
+        if (serverData.extracurriculars?.length) setExtracurriculars(serverData.extracurriculars);
+        if (serverData.studentWorks?.length) setStudentWorks(serverData.studentWorks);
+        if (serverData.majors?.length) setMajors(serverData.majors);
+        if (serverData.schoolProfile) setSchoolProfile(serverData.schoolProfile);
+        if (serverData.teacherAdminDocs?.length) setTeacherAdminDocs(serverData.teacherAdminDocs);
+        if (serverData.subjectAttendance?.length) setSubjectAttendanceSessions(serverData.subjectAttendance);
+      }
+    });
+  }, []);
+
+  // Sync state changes to localStorage and MySQL Database
   useEffect(() => {
     localStorage.setItem('smak_students', JSON.stringify(students));
+    dbService.syncEntity('students', students);
   }, [students]);
 
   useEffect(() => {
     localStorage.setItem('smak_teachers', JSON.stringify(teachers));
+    dbService.syncEntity('teachers', teachers);
   }, [teachers]);
 
   useEffect(() => {
     localStorage.setItem('smak_news', JSON.stringify(newsList));
+    dbService.syncEntity('news', newsList);
   }, [newsList]);
 
   useEffect(() => {
     localStorage.setItem('smak_events', JSON.stringify(eventsList));
+    dbService.syncEntity('events', eventsList);
   }, [eventsList]);
 
   useEffect(() => {
     localStorage.setItem('smak_gallery', JSON.stringify(galleryList));
+    dbService.syncEntity('gallery', galleryList);
   }, [galleryList]);
 
   useEffect(() => {
     localStorage.setItem('smak_ppdb', JSON.stringify(ppdbList));
+    dbService.syncEntity('ppdb', ppdbList);
   }, [ppdbList]);
 
   useEffect(() => {
     localStorage.setItem('smak_notifications', JSON.stringify(notifications));
+    dbService.syncEntity('notifications', notifications);
   }, [notifications]);
 
   useEffect(() => {
     localStorage.setItem('smak_materials', JSON.stringify(studyMaterials));
+    dbService.syncEntity('studyMaterials', studyMaterials);
   }, [studyMaterials]);
 
   useEffect(() => {
     localStorage.setItem('smak_assignments', JSON.stringify(assignments));
+    dbService.syncEntity('assignments', assignments);
   }, [assignments]);
 
   useEffect(() => {
     localStorage.setItem('smak_submissions', JSON.stringify(submissions));
+    dbService.syncEntity('submissions', submissions);
   }, [submissions]);
 
   useEffect(() => {
     localStorage.setItem('smak_wali_notes', JSON.stringify(waliNotes));
+    dbService.syncEntity('waliNotes', waliNotes);
   }, [waliNotes]);
 
   useEffect(() => {
     localStorage.setItem('smak_leave_requests', JSON.stringify(leaveRequests));
+    dbService.syncEntity('leaveRequests', leaveRequests);
   }, [leaveRequests]);
 
   useEffect(() => {
     localStorage.setItem('smak_discussions', JSON.stringify(discussions));
+    dbService.syncEntity('discussions', discussions);
   }, [discussions]);
 
   useEffect(() => {
     localStorage.setItem('smak_extracurriculars', JSON.stringify(extracurriculars));
+    dbService.syncEntity('extracurriculars', extracurriculars);
   }, [extracurriculars]);
 
   useEffect(() => {
     localStorage.setItem('smak_student_works', JSON.stringify(studentWorks));
+    dbService.syncEntity('studentWorks', studentWorks);
   }, [studentWorks]);
 
   useEffect(() => {
     localStorage.setItem('smak_majors', JSON.stringify(majors));
+    dbService.syncEntity('majors', majors);
   }, [majors]);
 
   useEffect(() => {
     localStorage.setItem('smak_school_profile', JSON.stringify(schoolProfile));
+    dbService.syncEntity('schoolProfile', schoolProfile);
   }, [schoolProfile]);
 
   useEffect(() => {
     localStorage.setItem('smak_teacher_admin_docs', JSON.stringify(teacherAdminDocs));
+    dbService.syncEntity('teacherAdminDocs', teacherAdminDocs);
   }, [teacherAdminDocs]);
 
   useEffect(() => {
     localStorage.setItem('smak_subject_attendance', JSON.stringify(subjectAttendanceSessions));
+    dbService.syncEntity('subjectAttendance', subjectAttendanceSessions);
   }, [subjectAttendanceSessions]);
 
   useEffect(() => {
@@ -517,6 +566,7 @@ export default function App() {
           onNavigateTab={handleNavigateTab}
           onOpenLogin={() => setIsLoginModalOpen(true)}
           onLogout={handleLogout}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
           onOpenNotifications={() => {
             if (session) {
               handleNavigateTab('dashboard');
@@ -728,6 +778,7 @@ export default function App() {
             onDeleteStudentWork={handleDeleteStudentWork}
             onBackToPortal={handleLogout}
             onLogout={handleLogout}
+            onOpenProfile={() => setIsProfileModalOpen(true)}
           />
         )}
       </main>
@@ -746,6 +797,17 @@ export default function App() {
         onLoginSuccess={(newSession) => {
           setSession(newSession);
           setActiveTab('dashboard');
+        }}
+      />
+
+      {/* 5b. Profile Settings Modal (Admin, Guru, Siswa, Orang Tua) */}
+      <ProfileSettingsModal
+        isOpen={isProfileModalOpen}
+        session={session}
+        onClose={() => setIsProfileModalOpen(false)}
+        onUpdateSession={(updatedSession: UserSession) => {
+          setSession(updatedSession);
+          localStorage.setItem('smak_user_session', JSON.stringify(updatedSession));
         }}
       />
 

@@ -26,8 +26,9 @@ import { dbService } from '../../services/dbSync';
 interface ProfileSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  session: UserSession;
-  onSaveProfile: (updatedSession: UserSession) => void;
+  session: UserSession | null;
+  onSaveProfile?: (updatedSession: UserSession) => void;
+  onUpdateSession?: (updatedSession: UserSession) => void;
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
@@ -35,8 +36,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   onClose,
   session,
   onSaveProfile,
+  onUpdateSession,
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen || !session) return null;
 
   // Basic Profile States
   const [name, setName] = useState(session.name || '');
@@ -144,7 +146,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         religion,
       });
 
-      onSaveProfile(updatedSession);
+      if (onSaveProfile) onSaveProfile(updatedSession);
+      if (onUpdateSession) onUpdateSession(updatedSession);
       setSuccessToast('Profil berhasil disimpan dan diperbarui ke Database MySQL!');
       setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
