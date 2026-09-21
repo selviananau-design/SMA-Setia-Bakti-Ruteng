@@ -12,6 +12,9 @@ import {
   ShieldCheck,
   CheckCircle2,
   Upload,
+  GraduationCap,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 import { Student, UserSession } from '../../types';
 import { exportStudentReportPDF } from '../../services/pdfExport';
@@ -29,6 +32,7 @@ interface AdminStudentsTabProps {
   onAddStudent: (student: Student) => void;
   onDeleteStudent: (id: string) => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
+  onNavigateToAlumni?: () => void;
 }
 
 export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
@@ -37,14 +41,15 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
   onAddStudent,
   onDeleteStudent,
   onNavigateToWebsiteTab,
+  onNavigateToAlumni,
 }) => {
   const [studentSearch, setStudentSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'semua' | 'aktif' | 'alumni'>('semua');
+  const [filterClass, setFilterClass] = useState<'semua' | 'X' | 'XI' | 'XII'>('semua');
   const [showDecryptedData, setShowDecryptedData] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
-  // New student form state
+  // New student form state (default aktif)
   const [newStudent, setNewStudent] = useState({
     name: '',
     nisn: '',
@@ -94,7 +99,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
       classLevel: newStudent.classLevel,
       className: newStudent.className,
       major: newStudent.major,
-      status: newStudent.status,
+      status: 'aktif',
       phone: newStudent.phone || '081234567890',
       parentName: newStudent.parentName || 'Orang Tua Siswa',
       parentPhone: newStudent.parentPhone || '081398765432',
@@ -103,7 +108,6 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
       attendanceRate: parseFloat(newStudent.attendanceRate) || 98.0,
       tuitionStatus: 'Lunas',
       encryptedHash: simulateAesEncrypt(`${newStudent.nik}:${newStudent.name}`),
-      graduationYear: newStudent.status === 'alumni' ? parseInt(newStudent.graduationYear) || 2024 : undefined,
     };
 
     onAddStudent(studentRecord);
@@ -112,13 +116,16 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
     alert(`Data siswa ${newStudent.name} berhasil disimpan dan dienkripsi dengan standar AES-256!`);
   };
 
-  const filteredStudents = students.filter((s) => {
-    const matchesStatus = filterStatus === 'semua' || s.status === filterStatus;
+  // Hanya ambil data siswa aktif
+  const activeStudents = students.filter((s) => s.status === 'aktif');
+
+  const filteredStudents = activeStudents.filter((s) => {
+    const matchesClass = filterClass === 'semua' || s.classLevel === filterClass;
     const matchesSearch =
       s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
       s.nisn.includes(studentSearch) ||
       s.className.toLowerCase().includes(studentSearch.toLowerCase());
-    return matchesStatus && matchesSearch;
+    return matchesClass && matchesSearch;
   });
 
   return (
@@ -132,18 +139,18 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
             </span>
             <span className="text-xs text-slate-400">• Terenkripsi AES-256</span>
           </div>
-          <h2 className="text-2xl font-black text-slate-900 mt-1">Data Siswa Aktif & Rekapitulasi Alumni</h2>
+          <h2 className="text-2xl font-black text-slate-900 mt-1">Data Siswa Aktif</h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Input data peserta didik, manajemen rombel, ekspor rapor PDF/Excel, dan sinkronisasi ke Halaman Statistik Website.
+            Manajemen data peserta didik aktif (Kelas X, XI, XII), rombongan belajar, ekspor rapor PDF/Excel, dan sinkronisasi ke Halaman Statistik Website.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => exportStudentsToExcelTemplate(students, filterStatus)}
+            onClick={() => exportStudentsToExcelTemplate(activeStudents, 'aktif')}
             className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-            title="Ekspor Seluruh Data Siswa ke Excel (Sesuai Format Template Resmi 14 Kolom)"
+            title="Ekspor Data Siswa Aktif ke Excel (Sesuai Format Template Resmi 14 Kolom)"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             <span>Ekspor ke Excel</span>
@@ -179,6 +186,36 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
         </div>
       </div>
 
+      {/* Banner Pemisahan Data Alumni */}
+      {onNavigateToAlumni && (
+        <div className="bg-gradient-to-r from-sky-50 to-indigo-50/80 border border-sky-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-black text-slate-900 flex items-center gap-2">
+                <span>Data Alumni Telah Dipisahkan ke Menu Tersendiri</span>
+                <span className="px-2 py-0.5 rounded-md bg-sky-200/80 text-sky-800 text-[10px] font-bold uppercase">
+                  Menu Khusus
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-0.5">
+                Untuk mengelola direktori alumni, jejak karir, studi lanjut kampus, serta ekspor data tracer study, buka menu Data Alumni.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onNavigateToAlumni}
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 cursor-pointer flex-shrink-0 self-start sm:self-center"
+          >
+            <span>Buka Data Alumni</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Control Bar: Search, Filters, Export buttons */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
@@ -194,17 +231,18 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
           </div>
 
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            {(['semua', 'aktif', 'alumni'] as const).map((st) => (
+            <span className="text-[11px] font-bold text-slate-500 px-2">Tingkat:</span>
+            {(['semua', 'X', 'XI', 'XII'] as const).map((cls) => (
               <button
-                key={st}
-                onClick={() => setFilterStatus(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
-                  filterStatus === st
+                key={cls}
+                onClick={() => setFilterClass(cls)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  filterClass === cls
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {st}
+                {cls === 'semua' ? 'Semua Kelas' : `Kelas ${cls}`}
               </button>
             ))}
           </div>
@@ -225,7 +263,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
           </button>
 
           <button
-            onClick={() => exportStudentsToExcelTemplate(students, filterStatus)}
+            onClick={() => exportStudentsToExcelTemplate(activeStudents, 'aktif')}
             className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Ekspor Seluruh Data Siswa ke Excel Sesuai Template Lengkap"
           >
@@ -243,7 +281,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
           </button>
 
           <button
-            onClick={() => exportStudentReportPDF(filteredStudents, filterStatus)}
+            onClick={() => exportStudentReportPDF(filteredStudents, 'aktif')}
             className="px-3.5 py-2 bg-[#5d3b9e] hover:bg-[#4d2f88] text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer"
           >
             <FileDown className="w-4 h-4" />

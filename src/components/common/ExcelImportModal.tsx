@@ -13,16 +13,19 @@ import { Student, TeacherStaff } from '../../types';
 import {
   parseStudentsFromCSV,
   parseTeachersFromCSV,
+  parseAlumniFromCSV,
   downloadStudentTemplate,
   downloadTeacherTemplate,
+  downloadAlumniTemplate,
 } from '../../services/excelTemplate';
 
 interface ExcelImportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'teachers' | 'students';
+  type: 'teachers' | 'students' | 'alumni';
   onImportTeachers?: (teachers: TeacherStaff[]) => void;
   onImportStudents?: (students: Student[]) => void;
+  onImportAlumni?: (alumni: Student[]) => void;
 }
 
 export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
@@ -31,12 +34,14 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   type,
   onImportTeachers,
   onImportStudents,
+  onImportAlumni,
 }) => {
   if (!isOpen) return null;
 
   const [file, setFile] = useState<File | null>(null);
   const [parsedTeachers, setParsedTeachers] = useState<TeacherStaff[]>([]);
   const [parsedStudents, setParsedStudents] = useState<Student[]>([]);
+  const [parsedAlumni, setParsedAlumni] = useState<Student[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -71,6 +76,15 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           } else {
             setParsedTeachers(parsed);
           }
+        } else if (type === 'alumni') {
+          const parsed = parseAlumniFromCSV(text);
+          if (parsed.length === 0) {
+            setError(
+              'Format berkas tidak sesuai dengan Template Data Alumni. Pastikan menggunakan Template Excel resmi SMAK Setia Bakti.'
+            );
+          } else {
+            setParsedAlumni(parsed);
+          }
         } else {
           const parsed = parseStudentsFromCSV(text);
           if (parsed.length === 0) {
@@ -95,6 +109,10 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       onImportTeachers(parsedTeachers);
       alert(`Berhasil mengimpor ${parsedTeachers.length} data Guru & Pegawai ke dalam sistem!`);
       onClose();
+    } else if (type === 'alumni' && parsedAlumni.length > 0 && onImportAlumni) {
+      onImportAlumni(parsedAlumni);
+      alert(`Berhasil mengimpor ${parsedAlumni.length} data Alumni ke dalam sistem!`);
+      onClose();
     } else if (type === 'students' && parsedStudents.length > 0 && onImportStudents) {
       onImportStudents(parsedStudents);
       alert(`Berhasil mengimpor ${parsedStudents.length} data Siswa ke dalam sistem!`);
@@ -102,7 +120,34 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     }
   };
 
-  const count = type === 'teachers' ? parsedTeachers.length : parsedStudents.length;
+  const count =
+    type === 'teachers'
+      ? parsedTeachers.length
+      : type === 'alumni'
+      ? parsedAlumni.length
+      : parsedStudents.length;
+
+  const getTitle = () => {
+    switch (type) {
+      case 'teachers':
+        return 'Guru & Pegawai';
+      case 'alumni':
+        return 'Alumni & Tracer Study';
+      case 'students':
+      default:
+        return 'Siswa Aktif';
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    if (type === 'teachers') {
+      downloadTeacherTemplate();
+    } else if (type === 'alumni') {
+      downloadAlumniTemplate();
+    } else {
+      downloadStudentTemplate();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -115,7 +160,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900">
-                Impor Data {type === 'teachers' ? 'Guru & Pegawai' : 'Siswa'} dari Excel
+                Impor Data {getTitle()} dari Excel
               </h3>
               <p className="text-xs text-slate-500">
                 Gunakan template resmi untuk mengunggah berkas format .xlsx / .csv
@@ -140,7 +185,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           </div>
           <button
             type="button"
-            onClick={() => (type === 'teachers' ? downloadTeacherTemplate() : downloadStudentTemplate())}
+            onClick={handleDownloadTemplate}
             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer flex-shrink-0"
           >
             <FileDown className="w-3.5 h-3.5" />
@@ -190,8 +235,20 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   <tr>
                     <th className="p-2.5">No</th>
                     <th className="p-2.5">Nama Lengkap</th>
-                    <th className="p-2.5">{type === 'teachers' ? 'Mata Pelajaran' : 'Kelas'}</th>
-                    <th className="p-2.5">{type === 'teachers' ? 'Jabatan' : 'NISN'}</th>
+                    <th className="p-2.5">
+                      {type === 'teachers'
+                        ? 'Mata Pelajaran'
+                        : type === 'alumni'
+                        ? 'Tahun & Jurusan'
+                        : 'Kelas'}
+                    </th>
+                    <th className="p-2.5">
+                      {type === 'teachers'
+                        ? 'Jabatan'
+                        : type === 'alumni'
+                        ? 'Kampus / Profesi'
+                        : 'NISN'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -202,6 +259,19 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                           <td className="p-2.5 font-bold">{t.name}</td>
                           <td className="p-2.5 text-slate-600">{t.subject}</td>
                           <td className="p-2.5 text-slate-600">{t.role}</td>
+                        </tr>
+                      ))
+                    : type === 'alumni'
+                    ? parsedAlumni.slice(0, 10).map((a, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50">
+                          <td className="p-2.5 text-slate-400">{idx + 1}</td>
+                          <td className="p-2.5 font-bold">{a.name}</td>
+                          <td className="p-2.5 text-slate-600">
+                            {a.graduationYear} - {a.major}
+                          </td>
+                          <td className="p-2.5 text-slate-600 truncate max-w-[200px]">
+                            {a.alumniCampus || a.alumniOccupation || '-'}
+                          </td>
                         </tr>
                       ))
                     : parsedStudents.slice(0, 10).map((s, idx) => (

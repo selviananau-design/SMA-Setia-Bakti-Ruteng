@@ -52,6 +52,7 @@ import {
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { AdminNewsEventsTab } from './admin/AdminNewsEventsTab';
 import { AdminStudentsTab } from './admin/AdminStudentsTab';
+import { AdminAlumniTab } from './admin/AdminAlumniTab';
 import { AdminPPDBTab } from './admin/AdminPPDBTab';
 import { AdminTeachersTab } from './admin/AdminTeachersTab';
 import { AdminGalleryTab } from './admin/AdminGalleryTab';
@@ -178,6 +179,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     | 'guru'
     | 'administrasi'
     | 'siswa'
+    | 'alumni'
     | 'berita'
     | 'kehidupan'
     | 'ppdb'
@@ -204,7 +206,8 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     { id: 'jurusan', label: 'Jurusan & Peminatan', icon: GraduationCap, sub: 'MIPA, IPS, Bahasa' },
     { id: 'guru', label: 'Profil Guru & Pegawai', icon: UserCheck, sub: 'Direktori Pendidik' },
     { id: 'administrasi', label: 'Administrasi Guru', icon: FolderCheck, sub: 'Perangkat Ajar & Presensi' },
-    { id: 'siswa', label: 'Data Siswa & Alumni', icon: Users, sub: 'Input & Kelola Siswa' },
+    { id: 'siswa', label: 'Data Siswa Aktif', icon: Users, sub: 'Kelas X, XI, XII & Rombel' },
+    { id: 'alumni', label: 'Data Alumni', icon: Award, sub: 'Tracer Study & Karir' },
     { id: 'berita', label: 'Warta & Berita Sekolah', icon: Newspaper, sub: 'Pengumuman & Agenda' },
     { id: 'kehidupan', label: 'Kehidupan Siswa & Eskul', icon: Sparkles, sub: 'Upload Karya Siswa & Eskul' },
     { id: 'ppdb', label: 'PPDB Online', icon: UserPlus, sub: 'Verifikasi Calon Siswa' },
@@ -456,13 +459,29 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
             />
           )}
 
-          {/* TAB 3: DATA SISWA & ALUMNI */}
+          {/* TAB 3: DATA SISWA AKTIF */}
           {activeMenu === 'siswa' && (
             <AdminStudentsTab
               session={session}
               students={students}
               onAddStudent={onAddStudent}
               onDeleteStudent={onDeleteStudent}
+              onNavigateToWebsiteTab={onNavigateToWebsiteTab}
+              onNavigateToAlumni={() => setActiveMenu('alumni')}
+            />
+          )}
+
+          {/* TAB: DATA ALUMNI & TRACER STUDY */}
+          {activeMenu === 'alumni' && (
+            <AdminAlumniTab
+              session={session}
+              students={students}
+              onAddAlumni={onAddStudent}
+              onUpdateAlumni={(updatedAlumni) => {
+                onDeleteStudent(updatedAlumni.id);
+                onAddStudent(updatedAlumni);
+              }}
+              onDeleteAlumni={onDeleteStudent}
               onNavigateToWebsiteTab={onNavigateToWebsiteTab}
             />
           )}

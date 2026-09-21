@@ -205,6 +205,22 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
         {/* Quick Data Count Chips */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <button
+            onClick={() => onNavigateToTab('siswa')}
+            className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-blue-200"
+          >
+            <Users className="w-3.5 h-3.5 text-blue-600" />
+            <span>{students.filter((s) => s.status === 'aktif').length} Siswa Aktif</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateToTab('alumni')}
+            className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-sky-200"
+          >
+            <GraduationCap className="w-3.5 h-3.5 text-sky-600" />
+            <span>{students.filter((s) => s.status === 'alumni').length} Data Alumni</span>
+          </button>
+
+          <button
             onClick={() => onNavigateToTab('berita')}
             className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200"
           >

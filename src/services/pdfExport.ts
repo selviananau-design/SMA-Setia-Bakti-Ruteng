@@ -128,6 +128,101 @@ export function exportStudentReportPDF(students: Student[], filterType: 'semua' 
   doc.save(`Laporan_Siswa_SMAK_Setia_Bakti_${filterType}.pdf`);
 }
 
+// 1.B Ekspor Laporan Direktori & Tracer Study Alumni
+export function exportAlumniReportPDF(alumni: Student[], yearFilter = 'semua') {
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const filtered =
+    yearFilter === 'semua'
+      ? alumni.filter((s) => s.status === 'alumni')
+      : alumni.filter(
+          (s) => s.status === 'alumni' && s.graduationYear?.toString() === yearFilter
+        );
+
+  const title = `Laporan Rekapitulasi Tracer Study Alumni SMAK Setia Bakti ${yearFilter === 'semua' ? 'Semua Angkatan' : `Tahun Kelulusan ${yearFilter}`}`;
+  drawLetterhead(doc, title);
+
+  // Summary box
+  doc.setFillColor(240, 253, 250); // Emerald/teal soft
+  doc.roundedRect(15, 56, 180, 16, 2, 2, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(15, 118, 110);
+  doc.text(`Total Alumni Terdata: ${filtered.length} Orang`, 20, 63);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(50, 50, 50);
+  const collegeCount = filtered.filter(
+    (s) => s.alumniCampus && s.alumniCampus.trim().length > 0
+  ).length;
+  const workCount = filtered.filter(
+    (s) => s.alumniOccupation && s.alumniOccupation.trim().length > 0
+  ).length;
+  doc.text(
+    `Melanjutkan Studi ke Perguruan Tinggi: ${collegeCount} Orang | Karir / Wirausaha: ${workCount} Orang | Status Data: Terverifikasi`,
+    20,
+    68
+  );
+
+  // Table header
+  let y = 78;
+  doc.setFillColor(13, 148, 136); // Teal header
+  doc.rect(15, y, 180, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.text('NO', 18, y + 5.5);
+  doc.text('NAMA ALUMNI & GELAR', 28, y + 5.5);
+  doc.text('THN', 78, y + 5.5);
+  doc.text('JURUSAN', 90, y + 5.5);
+  doc.text('PERGURUAN TINGGI / KAMPUS', 115, y + 5.5);
+  doc.text('PROFESI / KARIR SAAT INI', 155, y + 5.5);
+
+  y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(40, 40, 40);
+
+  filtered.slice(0, 22).forEach((a, index) => {
+    if (index % 2 === 1) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, y, 180, 7, 'F');
+    }
+    doc.text((index + 1).toString(), 18, y + 5);
+    doc.text((a.name || '-').substring(0, 26), 28, y + 5);
+    doc.text(a.graduationYear ? a.graduationYear.toString() : '-', 78, y + 5);
+    doc.text((a.major || '-').substring(0, 12), 90, y + 5);
+    doc.text((a.alumniCampus || '-').substring(0, 22), 115, y + 5);
+    doc.text((a.alumniOccupation || '-').substring(0, 22), 155, y + 5);
+
+    y += 7;
+  });
+
+  // Tanda Tangan Resmi
+  const sigY = Math.min(y + 15, 245);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.text(
+    'Ruteng, ' +
+      new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
+    140,
+    sigY
+  );
+  doc.text('Kepala SMAK Setia Bakti Ruteng,', 140, sigY + 5);
+  doc.text('Koordinator Bimbingan Karir & Alumni', 140, sigY + 10);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Drs. Petrus Kanisius Dadi, M.Pd.', 140, sigY + 28);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.text('NIP. 19750812 200212 1 003', 140, sigY + 32);
+
+  drawFooter(doc, 1, 1);
+  doc.save(`Laporan_Tracer_Study_Alumni_SMAK_Setia_Bakti_${yearFilter}.pdf`);
+}
+
 // 2. Ekspor Bukti / Kartu Pendaftaran PPDB Siswa Baru
 export function exportPPDBReceiptPDF(reg: PPDBRegistration) {
   const doc = new jsPDF('p', 'mm', 'a4');
