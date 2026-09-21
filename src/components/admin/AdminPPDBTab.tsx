@@ -109,16 +109,6 @@ export const AdminPPDBTab: React.FC<AdminPPDBTabProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          {onNavigateToWebsiteTab && (
-            <button
-              onClick={() => onNavigateToWebsiteTab('ppdb')}
-              className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-[#432874] text-xs font-bold rounded-xl border border-purple-200 flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Buka Formulir PPDB Website</span>
-            </button>
-          )}
-
           <button
             onClick={() => setShowManualModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"

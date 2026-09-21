@@ -132,16 +132,6 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {onNavigateToWebsiteTab && (
-            <button
-              onClick={() => onNavigateToWebsiteTab('statistik')}
-              className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-[#432874] text-xs font-bold rounded-xl border border-purple-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Lihat Statistik di Website</span>
-            </button>
-          )}
-
           <button
             onClick={() => setShowAddStudentModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"

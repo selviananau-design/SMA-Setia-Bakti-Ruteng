@@ -499,45 +499,54 @@ export default function App() {
     setStudentWorks((prev) => prev.filter((w) => w.id !== id));
   };
 
+  const handleLogout = () => {
+    setSession(null);
+    localStorage.removeItem('smak_user_session');
+    handleNavigateTab('beranda');
+  };
+
+  const isDashboard = activeTab === 'dashboard' && !!session;
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 font-sans">
-      {/* 1. School Header with Crest and Notification Bell */}
-      <Header
-        session={session}
-        notifications={notifications}
-        onNavigateTab={handleNavigateTab}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
-        onLogout={() => {
-          setSession(null);
-          handleNavigateTab('beranda');
-        }}
-        onOpenNotifications={() => {
-          if (session) {
-            handleNavigateTab('dashboard');
-          } else {
-            setIsLoginModalOpen(true);
-          }
-        }}
-        activeTab={activeTab}
-      />
-
-      {/* 2. Top Navigation Bar with Distinct Tabs */}
-      <Navbar
-        activeTab={activeTab}
-        onSelectTab={(tab, subTab) => {
-          if (tab === 'portal') {
+      {/* 1. School Header with Crest and Notification Bell (Disembunyikan saat di Dasbor) */}
+      {!isDashboard && (
+        <Header
+          session={session}
+          notifications={notifications}
+          onNavigateTab={handleNavigateTab}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
+          onLogout={handleLogout}
+          onOpenNotifications={() => {
             if (session) {
               handleNavigateTab('dashboard');
             } else {
               setIsLoginModalOpen(true);
             }
-          } else {
-            handleNavigateTab(tab, subTab);
-          }
-        }}
-        session={session}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
-      />
+          }}
+          activeTab={activeTab}
+        />
+      )}
+
+      {/* 2. Top Navigation Bar with Distinct Tabs (Disembunyikan saat di Dasbor) */}
+      {!isDashboard && (
+        <Navbar
+          activeTab={activeTab}
+          onSelectTab={(tab, subTab) => {
+            if (tab === 'portal') {
+              if (session) {
+                handleNavigateTab('dashboard');
+              } else {
+                setIsLoginModalOpen(true);
+              }
+            } else {
+              handleNavigateTab(tab, subTab);
+            }
+          }}
+          session={session}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
+        />
+      )}
 
       {/* 3. Main Dynamic Content Switcher */}
       <main className="flex-1 w-full">
@@ -717,8 +726,8 @@ export default function App() {
             onDeleteExtracurricular={handleDeleteExtracurricular}
             onAddStudentWork={handleAddStudentWork}
             onDeleteStudentWork={handleDeleteStudentWork}
-            onBackToPortal={() => setActiveTab('beranda')}
-            onNavigateToWebsiteTab={(tab) => setActiveTab(tab)}
+            onBackToPortal={handleLogout}
+            onLogout={handleLogout}
           />
         )}
       </main>
@@ -740,11 +749,13 @@ export default function App() {
         }}
       />
 
-      {/* 6. Comprehensive School Footer */}
-      <Footer
-        onNavigate={(tab) => setActiveTab(tab)}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
-      />
+      {/* 6. Comprehensive School Footer (Disembunyikan saat di Dasbor) */}
+      {!isDashboard && (
+        <Footer
+          onNavigate={(tab) => setActiveTab(tab)}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
+        />
+      )}
     </div>
   );
 }

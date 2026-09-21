@@ -15,6 +15,7 @@ import {
   Globe,
   School,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 import {
   Student,
@@ -112,6 +113,7 @@ interface AdminResultDashboardProps {
   onAddStudentWork?: (work: StudentWork) => void;
   onDeleteStudentWork?: (id: string) => void;
   onBackToPortal?: () => void;
+  onLogout?: () => void;
   onNavigateToWebsiteTab?: (tab: string) => void;
 }
 
@@ -154,6 +156,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   onAddStudentWork = () => {},
   onDeleteStudentWork = () => {},
   onBackToPortal,
+  onLogout,
   onNavigateToWebsiteTab,
 }) => {
   const [activeMenu, setActiveMenu] = useState<
@@ -241,22 +244,12 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
               </div>
             </div>
 
-            {onNavigateToWebsiteTab && (
+            {(onLogout || onBackToPortal) && (
               <button
-                onClick={() => onNavigateToWebsiteTab('beranda')}
-                className="w-full py-2 px-3 bg-purple-900/60 hover:bg-purple-800 text-purple-200 hover:text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer border border-purple-700/50 shadow"
+                onClick={() => (onLogout ? onLogout() : onBackToPortal?.())}
+                className="w-full py-2.5 px-3 bg-red-950/40 hover:bg-red-900/60 text-red-200 hover:text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer border border-red-800/40 shadow-sm"
               >
-                <Globe className="w-3.5 h-3.5" />
-                <span>Lihat Website Utama</span>
-              </button>
-            )}
-
-            {onBackToPortal && (
-              <button
-                onClick={onBackToPortal}
-                className="w-full py-2 px-3 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4 text-red-400" />
                 <span>Keluar dari Dasbor</span>
               </button>
             )}

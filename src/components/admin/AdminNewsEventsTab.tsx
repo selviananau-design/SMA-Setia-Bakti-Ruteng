@@ -128,16 +128,6 @@ export const AdminNewsEventsTab: React.FC<AdminNewsEventsTabProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          {onNavigateToWebsiteTab && (
-            <button
-              onClick={() => onNavigateToWebsiteTab('berita')}
-              className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-[#432874] text-xs font-bold rounded-xl border border-purple-200 flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Lihat di Halaman Website</span>
-            </button>
-          )}
-
           {subTab === 'news' ? (
             <button
               onClick={() => setShowAddNewsModal(true)}

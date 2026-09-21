@@ -79,16 +79,6 @@ export const AdminGalleryTab: React.FC<AdminGalleryTabProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          {onNavigateToWebsiteTab && (
-            <button
-              onClick={() => onNavigateToWebsiteTab('galeri')}
-              className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-[#432874] text-xs font-bold rounded-xl border border-purple-200 flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Lihat Galeri di Website</span>
-            </button>
-          )}
-
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"

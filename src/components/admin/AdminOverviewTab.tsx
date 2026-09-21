@@ -243,15 +243,6 @@ export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
             <Image className="w-3.5 h-3.5 text-pink-600" />
             <span>{galleryList.length} Galeri</span>
           </button>
-
-          {onNavigateToWebsiteTab && (
-            <button
-              onClick={() => onNavigateToWebsiteTab('beranda')}
-              className="px-3 py-1 rounded-lg bg-[#3b1d70] hover:bg-[#2b1454] text-white font-bold transition-colors cursor-pointer shadow-sm"
-            >
-              Lihat Website →
-            </button>
-          )}
         </div>
       </div>
 

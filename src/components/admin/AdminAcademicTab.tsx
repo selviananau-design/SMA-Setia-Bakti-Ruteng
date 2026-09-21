@@ -56,16 +56,6 @@ export const AdminAcademicTab: React.FC<AdminAcademicTabProps> = ({ onNavigateTo
             Pengelolaan alokasi jam belajar mingguan, KKTP (Kriteria Ketercapaian Tujuan Pembelajaran), dan guru pengampu.
           </p>
         </div>
-
-        {onNavigateToWebsiteTab && (
-          <button
-            onClick={() => onNavigateToWebsiteTab('akademik')}
-            className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-[#432874] text-xs font-bold rounded-xl border border-purple-200 flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <ExternalLink className="w-4 h-4" />
-            <span>Lihat Informasi Akademik di Website</span>
-          </button>
-        )}
       </div>
 
       {/* Major selector */}
