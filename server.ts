@@ -12,7 +12,8 @@ import {
 
 async function startServer() {
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+  // Port untuk mode lokal, Passenger akan menimpa ini dengan socket path
+  const LOCAL_PORT = Number(process.env.PORT) || 3000;
 
   console.log(`[Server] ℹ️ Memulai server...`);
   console.log(`[Server] ℹ️ NODE_ENV: ${process.env.NODE_ENV}`);
@@ -164,17 +165,16 @@ async function startServer() {
   // LISTEN: Deteksi Phusion Passenger (Hostinger) vs Mode Lokal
   // -------------------------------------------------------------
   if (typeof (global as any).PhusionPassenger !== 'undefined') {
-    // Mode Passenger (Hostinger shared hosting)
-    // Passenger menyediakan 'passenger' sebagai socket path via environment
+    // Mode Passenger: Passenger memberikan socket path melalui process.env.PORT
     console.log('[Server] 🚀 Mode Phusion Passenger terdeteksi. Menggunakan socket Passenger.');
-    (global as any).PhusionPassenger.configure({ autoInstall: false });
-    app.listen('passenger' as any, () => {
-      console.log('[Server] ✅ Server berhasil berjalan melalui Phusion Passenger socket.');
+    // Passenger akan mengatur agar aplikasi listen pada socket yang benar
+    app.listen(process.env.PORT as any, () => {
+      console.log(`[Server] ✅ Server berhasil berjalan melalui Phusion Passenger.`);
     });
   } else {
-    // Mode lokal (development / VPS / server biasa)
-    app.listen(PORT, () => {
-      console.log(`[Server] ✅ Server berhasil berjalan di port ${PORT} (mode lokal).`);
+    // Mode lokal: Dengarkan pada port TCP biasa
+    app.listen(LOCAL_PORT, () => {
+      console.log(`[Server] ✅ Server berhasil berjalan di port ${LOCAL_PORT} (mode lokal).`);
     });
   }
 }
