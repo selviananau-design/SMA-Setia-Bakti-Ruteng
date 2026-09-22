@@ -49,16 +49,6 @@ export async function initDatabase() {
 
     const connection = await pool.getConnection();
     await connection.ping();
-
-    // Buat tabel app_settings jika belum ada
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS app_settings (
-        setting_key VARCHAR(255) PRIMARY KEY,
-        setting_value LONGTEXT,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `);
-
     connection.release();
 
     isConnected = true;
