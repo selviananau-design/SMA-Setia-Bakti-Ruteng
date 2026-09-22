@@ -12,13 +12,11 @@ import {
 
 async function startServer() {
   const app = express();
-  // PERBAIKAN: Konversi ke Number agar TypeScript tidak error
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Inisialisasi koneksi MySQL Hostinger
   try {
     await initDatabase();
     console.log('✅ Koneksi database berhasil diinisialisasi.');
@@ -27,10 +25,9 @@ async function startServer() {
   }
 
   // -------------------------------------------------------------
-  // API ROUTES (Harus didaftarkan SEBELUM Vite Middleware)
+  // API ROUTES
   // -------------------------------------------------------------
 
-  // 1. Health check & status database
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
@@ -40,7 +37,6 @@ async function startServer() {
     res.json(status);
   });
 
-  // 2. Download Hostinger SQL script
   app.get('/api/download-sql', (req: Request, res: Response) => {
     const sqlPath = path.join(process.cwd(), 'hostinger_database.sql');
     if (fs.existsSync(sqlPath)) {
@@ -51,11 +47,9 @@ async function startServer() {
     res.status(404).json({ error: 'Berkas database SQL tidak ditemukan' });
   });
 
-  // 3. User Authentication Endpoint
   app.post('/api/auth/login', async (req: Request, res: Response) => {
     const { username, password, role } = req.body;
 
-    // Kredensial default demo / db
     const users: Record<string, any> = {
       admin: {
         id: 'usr-admin-1',
@@ -92,10 +86,7 @@ async function startServer() {
       '0078129011': {
         id: 'usr-siswa-1',
         role: role === 'orangtua' ? 'orangtua' : 'siswa',
-        name:
-          role === 'orangtua'
-            ? 'Bpk. Antonius Ngganggu (Orang Tua Yohanes Ndau)'
-            : 'Yohanes Maria Vianney Ndau',
+        name: role === 'orangtua' ? 'Bpk. Antonius Ngganggu (Orang Tua Yohanes Ndau)' : 'Yohanes Maria Vianney Ndau',
         identifier: '0078129011',
         className: 'X-MIPA 1',
         childNisn: '0078129011',
@@ -108,7 +99,6 @@ async function startServer() {
       return res.json({ success: true, session: targetUser });
     }
 
-    // Default fallback allow login
     const fallbackUser = {
       role: role || 'siswa',
       name: username,
@@ -118,7 +108,6 @@ async function startServer() {
     return res.json({ success: true, session: fallbackUser });
   });
 
-  // 4. Update Profile User
   app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
     const { identifier, profileData } = req.body;
     try {
@@ -129,7 +118,7 @@ async function startServer() {
     }
   });
 
-  // 5. Get All Data from Database Store
+  // Endpoint untuk mengambil semua data (Sekarang membaca dari MySQL)
   app.get('/api/data', async (req: Request, res: Response) => {
     try {
       const data = await getAllDbEntities();
@@ -139,7 +128,7 @@ async function startServer() {
     }
   });
 
-  // 6. Save/Sync Entity Data into Database
+  // Endpoint untuk menyimpan data ke database
   app.post('/api/sync/:entity', async (req: Request, res: Response) => {
     const { entity } = req.params;
     const data = req.body;
@@ -151,9 +140,6 @@ async function startServer() {
     }
   });
 
-  // -------------------------------------------------------------
-  // VITE MIDDLEWARE (Development) vs STATIC ASSETS (Production)
-  // -------------------------------------------------------------
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },

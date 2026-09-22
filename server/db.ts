@@ -29,7 +29,6 @@ const inMemoryStore: Record<string, any> = {};
 export async function initDatabase() {
   const config = getDbConfig();
   
-  // Hanya inisialisasi pool jika DB_HOST atau DB_USER diset
   if (!process.env.DB_HOST && !process.env.DB_USER) {
     console.log('[DB Info] Kredensial MySQL Hostinger belum diisi di .env. Menggunakan local store aktif.');
     return { connected: false, message: 'Menunggu konfigurasi MySQL Hostinger' };
@@ -50,6 +49,15 @@ export async function initDatabase() {
 
     const connection = await pool.getConnection();
     await connection.ping();
+
+    // PERBAIKAN: Otomatis buat tabel app_settings jika belum ada
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        setting_key VARCHAR(255) PRIMARY KEY,
+        setting_value LONGTEXT
+      )
+    `);
+
     connection.release();
 
     isConnected = true;
@@ -78,7 +86,6 @@ export async function getDatabaseStatus() {
   };
 }
 
-// Eksekusi query aman ke MySQL
 export async function queryDb<T = any>(sql: string, params?: any[]): Promise<T[]> {
   if (pool && isConnected) {
     try {
@@ -92,17 +99,16 @@ export async function queryDb<T = any>(sql: string, params?: any[]): Promise<T[]
   return [];
 }
 
-// Sinkronisasi data entitas ke Store Database
 export async function saveEntityToDb(entityKey: string, data: any) {
   inMemoryStore[entityKey] = data;
 
   if (pool && isConnected) {
     try {
-      // Simpan snapshot ke tabel app_settings jika tersedia
       await pool.query(
         'INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
         [entityKey, JSON.stringify(data), JSON.stringify(data)]
       );
+      console.log(`[DB Sync Success] Data ${entityKey} berhasil disimpan ke MySQL.`);
     } catch (err) {
       console.warn(`[DB Sync Warning] Gagal menyimpan ${entityKey} ke MySQL:`, err);
     }
@@ -119,7 +125,9 @@ export async function getEntityFromDb(entityKey: string) {
         [entityKey]
       );
       if (rows && rows.length > 0 && rows[0].setting_value) {
-        return JSON.parse(rows[0].setting_value);
+        const parsedData = JSON.parse(rows[0].setting_value);
+        inMemoryStore[entityKey] = parsedData; // Update cache
+        return parsedData;
       }
     } catch (err) {
       console.warn(`[DB Fetch Warning] Gagal membaca ${entityKey} dari MySQL:`, err);
@@ -129,6 +137,29 @@ export async function getEntityFromDb(entityKey: string) {
   return inMemoryStore[entityKey] || null;
 }
 
+// PERBAIKAN: Fungsi ini sekarang membaca dari MySQL, bukan hanya dari memori
 export async function getAllDbEntities() {
+  if (pool && isConnected) {
+    try {
+      const [rows]: any = await pool.query('SELECT setting_key, setting_value FROM app_settings');
+      const dbData: Record<string, any> = {};
+      
+      for (const row of rows) {
+        try {
+          dbData[row.setting_key] = JSON.parse(row.setting_value);
+        } catch (e) {
+          dbData[row.setting_key] = row.setting_value;
+        }
+      }
+      
+      // Update inMemoryStore sebagai cache
+      Object.assign(inMemoryStore, dbData);
+      return dbData;
+    } catch (err) {
+      console.warn('[DB Fetch All Warning] Gagal membaca semua data dari MySQL. Menggunakan cache memori.', err);
+    }
+  }
+  
+  // Fallback ke memori jika database gagal
   return inMemoryStore;
 }
