@@ -12,13 +12,20 @@ import {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // PERBAIKAN: Gunakan process.env.PORT agar kompatibel dengan Hostinger
+  const PORT = process.env.PORT || 3000; 
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Inisialisasi koneksi MySQL Hostinger
-  await initDatabase();
+  // Inisialisasi koneksi MySQL Hostinger dengan penanganan error
+  try {
+    await initDatabase();
+    console.log('✅ Koneksi database berhasil diinisialisasi.');
+  } catch (error) {
+    console.error('❌ Gagal menginisialisasi database:', error);
+    // Kita tidak langsung mematikan server agar endpoint health check tetap bisa diakses untuk debugging
+  }
 
   // -------------------------------------------------------------
   // API ROUTES (Harus didaftarkan SEBELUM Vite Middleware)
@@ -29,6 +36,7 @@ async function startServer() {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
+  // ENDPOINT INI ADALAH CARA MENGEcek KONEKSI DATABASE
   app.get('/api/db-status', async (req, res) => {
     const status = await getDatabaseStatus();
     res.json(status);
