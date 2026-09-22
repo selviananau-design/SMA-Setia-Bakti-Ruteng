@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
@@ -12,19 +12,18 @@ import {
 
 async function startServer() {
   const app = express();
-  // PERBAIKAN: Gunakan process.env.PORT agar kompatibel dengan Hostinger
-  const PORT = process.env.PORT || 3000; 
+  // PERBAIKAN: Konversi ke Number agar TypeScript tidak error
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Inisialisasi koneksi MySQL Hostinger dengan penanganan error
+  // Inisialisasi koneksi MySQL Hostinger
   try {
     await initDatabase();
     console.log('✅ Koneksi database berhasil diinisialisasi.');
   } catch (error) {
     console.error('❌ Gagal menginisialisasi database:', error);
-    // Kita tidak langsung mematikan server agar endpoint health check tetap bisa diakses untuk debugging
   }
 
   // -------------------------------------------------------------
@@ -32,18 +31,17 @@ async function startServer() {
   // -------------------------------------------------------------
 
   // 1. Health check & status database
-  app.get('/api/health', (req, res) => {
+  app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
-  // ENDPOINT INI ADALAH CARA MENGEcek KONEKSI DATABASE
-  app.get('/api/db-status', async (req, res) => {
+  app.get('/api/db-status', async (req: Request, res: Response) => {
     const status = await getDatabaseStatus();
     res.json(status);
   });
 
   // 2. Download Hostinger SQL script
-  app.get('/api/download-sql', (req, res) => {
+  app.get('/api/download-sql', (req: Request, res: Response) => {
     const sqlPath = path.join(process.cwd(), 'hostinger_database.sql');
     if (fs.existsSync(sqlPath)) {
       res.setHeader('Content-Type', 'application/sql');
@@ -54,7 +52,7 @@ async function startServer() {
   });
 
   // 3. User Authentication Endpoint
-  app.post('/api/auth/login', async (req, res) => {
+  app.post('/api/auth/login', async (req: Request, res: Response) => {
     const { username, password, role } = req.body;
 
     // Kredensial default demo / db
@@ -121,7 +119,7 @@ async function startServer() {
   });
 
   // 4. Update Profile User
-  app.post('/api/auth/update-profile', async (req, res) => {
+  app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
     const { identifier, profileData } = req.body;
     try {
       await saveEntityToDb(`profile_${identifier}`, profileData);
@@ -132,7 +130,7 @@ async function startServer() {
   });
 
   // 5. Get All Data from Database Store
-  app.get('/api/data', async (req, res) => {
+  app.get('/api/data', async (req: Request, res: Response) => {
     try {
       const data = await getAllDbEntities();
       res.json({ success: true, data });
@@ -142,7 +140,7 @@ async function startServer() {
   });
 
   // 6. Save/Sync Entity Data into Database
-  app.post('/api/sync/:entity', async (req, res) => {
+  app.post('/api/sync/:entity', async (req: Request, res: Response) => {
     const { entity } = req.params;
     const data = req.body;
     try {
@@ -165,7 +163,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (req: Request, res: Response) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

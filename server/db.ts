@@ -1,4 +1,4 @@
-import mysql from 'mysql2/promise';
+import mysql, { Pool } from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 
@@ -19,7 +19,7 @@ export const getDbConfig = (): DbConfig => ({
   database: process.env.DB_NAME || 'smak_setiabakti_db',
 });
 
-let pool: mysql.Pool | null = null;
+let pool: Pool | null = null;
 let isConnected = false;
 let lastError: string | null = null;
 
