@@ -19,6 +19,7 @@ import {
   MapPin,
   Calendar,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { UserSession } from '../../types';
 import { dbService } from '../../services/dbSync';
@@ -45,6 +46,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [email, setEmail] = useState(session.email || '');
   const [phone, setPhone] = useState('081238990112');
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Role-Specific States
   // Admin Utama
@@ -94,18 +96,48 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ==========================================================
+  // UPLOAD AVATAR KE SERVER (PENGGANTI BASE64)
+  // ==========================================================
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMessage('Ukuran foto terlalu besar. Maksimal 5 MB.');
-        return;
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('Ukuran foto terlalu besar. Maksimal 5 MB.');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Hanya file gambar (JPG, PNG, WebP) yang diizinkan.');
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.url) {
+        // Simpan URL dari server, BUKAN Base64
+        setAvatar(result.url);
+      } else {
+        setErrorMessage(result.error || 'Gagal mengunggah foto.');
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatar(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error('[Avatar Upload Error]', err);
+      setErrorMessage('Terjadi kesalahan saat mengunggah foto. Periksa koneksi Anda.');
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -119,9 +151,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         ...session,
         name: session.role === 'orangtua' ? parentName : name,
         email,
-        nip: session.role === 'admin' || session.role === 'guru_mapel' || session.role === 'wali_kelas' ? nip : undefined,
+        nip:
+          session.role === 'admin' || session.role === 'guru_mapel' || session.role === 'wali_kelas'
+            ? nip
+            : undefined,
         subject: session.role === 'guru_mapel' ? subject : undefined,
-        className: session.role === 'wali_kelas' ? classNameStr : session.role === 'siswa' ? studentClass : session.className,
+        className:
+          session.role === 'wali_kelas'
+            ? classNameStr
+            : session.role === 'siswa'
+            ? studentClass
+            : session.className,
         childNisn: session.role === 'orangtua' ? childNisn : undefined,
       };
 
@@ -184,15 +224,35 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const getRoleTitle = () => {
     switch (session.role) {
       case 'admin':
-        return { title: 'Pengaturan Profil Admin Utama', badge: 'Admin Utama (Super User)', bg: 'bg-indigo-600' };
+        return {
+          title: 'Pengaturan Profil Admin Utama',
+          badge: 'Admin Utama (Super User)',
+          bg: 'bg-indigo-600',
+        };
       case 'wali_kelas':
-        return { title: 'Pengaturan Profil Wali Kelas', badge: `Wali Kelas ${classNameStr}`, bg: 'bg-purple-600' };
+        return {
+          title: 'Pengaturan Profil Wali Kelas',
+          badge: `Wali Kelas ${classNameStr}`,
+          bg: 'bg-purple-600',
+        };
       case 'guru_mapel':
-        return { title: 'Pengaturan Profil Guru Mapel', badge: `Guru Mapel: ${subject}`, bg: 'bg-blue-600' };
+        return {
+          title: 'Pengaturan Profil Guru Mapel',
+          badge: `Guru Mapel: ${subject}`,
+          bg: 'bg-blue-600',
+        };
       case 'siswa':
-        return { title: 'Pengaturan Profil Siswa', badge: `Peserta Didik - Kelas ${studentClass}`, bg: 'bg-emerald-600' };
+        return {
+          title: 'Pengaturan Profil Siswa',
+          badge: `Peserta Didik - Kelas ${studentClass}`,
+          bg: 'bg-emerald-600',
+        };
       case 'orangtua':
-        return { title: 'Pengaturan Profil Orang Tua / Wali', badge: `Orang Tua Siswa (${childName})`, bg: 'bg-amber-600' };
+        return {
+          title: 'Pengaturan Profil Orang Tua / Wali',
+          badge: `Orang Tua Siswa (${childName})`,
+          bg: 'bg-amber-600',
+        };
       default:
         return { title: 'Pengaturan Profil Pengguna', badge: session.role, bg: 'bg-slate-700' };
     }
@@ -206,7 +266,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         {/* Header Modal */}
         <div className="bg-[#0f2444] text-white p-4 sm:p-5 flex items-center justify-between border-b border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-2xl ${roleMeta.bg} text-white flex items-center justify-center shadow-md`}>
+            <div
+              className={`w-11 h-11 rounded-2xl ${roleMeta.bg} text-white flex items-center justify-center shadow-md`}
+            >
               <User className="w-6 h-6" />
             </div>
             <div>
@@ -227,7 +289,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Switcher: Profil, Ganti Sandi, Info Database */}
+        {/* Tab Switcher */}
         <div className="flex items-center border-b border-slate-200 bg-slate-50 px-4 pt-2 gap-2 text-xs font-bold">
           <button
             type="button"
@@ -278,7 +340,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Body / Scrollable Content */}
+        {/* Modal Body */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           {successToast && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2 animate-fadeIn font-semibold">
@@ -297,7 +359,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           {/* TAB 1: FORM DATA PROFIL */}
           {activeTab === 'profile' && (
             <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
-              {/* Foto Profil dengan Upload Berkas Asli (Choose File) */}
+              {/* Foto Profil dengan Upload ke Server (Bukan Base64) */}
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
                 <div className="relative">
                   <div className="w-18 h-18 rounded-full bg-slate-200 overflow-hidden border-2 border-indigo-400 flex items-center justify-center text-slate-400 shadow-inner">
@@ -307,21 +369,41 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       <User className="w-10 h-10 text-slate-400" />
                     )}
                   </div>
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 text-center sm:text-left">
                   <label className="block font-bold text-slate-800 mb-1">
                     Unggah Foto Profil / Pas Foto Resmi
                   </label>
                   <p className="text-[11px] text-slate-500 mb-2">
-                    Gunakan foto formal latar belakang polos (JPG, PNG, maks. 5 MB).
+                    Gunakan foto formal latar belakang polos (JPG, PNG, maks. 5 MB). Foto akan
+                    diunggah ke server dan URL-nya disimpan di database.
                   </p>
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-xs">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Pilih Foto dari Perangkat</span>
+                  <label
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-xs ${
+                      isUploadingAvatar ? 'opacity-50 cursor-wait' : ''
+                    }`}
+                  >
+                    {isUploadingAvatar ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Mengunggah...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Pilih Foto dari Perangkat</span>
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarChange}
+                      disabled={isUploadingAvatar}
                       className="hidden"
                     />
                   </label>
@@ -333,7 +415,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Lengkap & Gelar
+                      </label>
                       <input
                         type="text"
                         required
@@ -343,7 +427,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">NIP / Identitas Pegawai</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        NIP / Identitas Pegawai
+                      </label>
                       <input
                         type="text"
                         value={nip}
@@ -355,7 +441,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Email Dinas Resmi</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Email Dinas Resmi
+                      </label>
                       <input
                         type="email"
                         value={email}
@@ -364,7 +452,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nomor WhatsApp / Kontak</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nomor WhatsApp / Kontak
+                      </label>
                       <input
                         type="tel"
                         value={phone}
@@ -375,7 +465,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Jabatan Struktural</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Jabatan Struktural
+                    </label>
                     <input
                       type="text"
                       value={position}
@@ -385,7 +477,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Lokasi Ruang Kerja Kantor</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Lokasi Ruang Kerja Kantor
+                    </label>
                     <input
                       type="text"
                       value={officeAddress}
@@ -401,7 +495,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Lengkap & Gelar
+                      </label>
                       <input
                         type="text"
                         required
@@ -411,7 +507,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">NIP / NUPTK Pendidik</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        NIP / NUPTK Pendidik
+                      </label>
                       <input
                         type="text"
                         value={nip}
@@ -423,7 +521,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Diampu</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Mata Pelajaran yang Diampu
+                      </label>
                       <input
                         type="text"
                         value={subject}
@@ -432,7 +532,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Rombel / Kelas Tatap Muka</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Rombel / Kelas Tatap Muka
+                      </label>
                       <input
                         type="text"
                         value={targetClasses}
@@ -444,7 +546,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Email Dinas Pendidik</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Email Dinas Pendidik
+                      </label>
                       <input
                         type="email"
                         value={email}
@@ -453,7 +557,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nomor WhatsApp Aktif</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nomor WhatsApp Aktif
+                      </label>
                       <input
                         type="tel"
                         value={phone}
@@ -464,7 +570,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Visi & Motto Mengajar Guru</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Visi & Motto Mengajar Guru
+                    </label>
                     <textarea
                       rows={2}
                       value={teachingMotto}
@@ -480,7 +588,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Lengkap & Gelar
+                      </label>
                       <input
                         type="text"
                         required
@@ -502,7 +612,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Kelas yang Diwalikan</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Kelas yang Diwalikan
+                      </label>
                       <input
                         type="text"
                         value={classNameStr}
@@ -511,7 +623,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Ruang Kelas / Gedung</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Ruang Kelas / Gedung
+                      </label>
                       <input
                         type="text"
                         value={roomLocation}
@@ -532,7 +646,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nomor WhatsApp Komunikasi</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nomor WhatsApp Komunikasi
+                      </label>
                       <input
                         type="tel"
                         value={phone}
@@ -543,7 +659,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Catatan / Pesan untuk Orang Tua & Siswa</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Catatan / Pesan untuk Orang Tua & Siswa
+                    </label>
                     <textarea
                       rows={2}
                       value={homeroomVision}
@@ -559,7 +677,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Lengkap Orang Tua / Wali</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Lengkap Orang Tua / Wali
+                      </label>
                       <input
                         type="text"
                         required
@@ -569,7 +689,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Hubungan Keluarga</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Hubungan Keluarga
+                      </label>
                       <select
                         value={parentRelation}
                         onChange={(e) => setParentRelation(e.target.value as any)}
@@ -584,7 +706,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Siswa / Anak yang Didampingi</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Siswa / Anak yang Didampingi
+                      </label>
                       <input
                         type="text"
                         value={childName}
@@ -593,7 +717,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">NISN Anak (10 Digit)</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        NISN Anak (10 Digit)
+                      </label>
                       <input
                         type="text"
                         value={childNisn}
@@ -605,7 +731,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nomor WhatsApp Darurat / Wali</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nomor WhatsApp Darurat / Wali
+                      </label>
                       <input
                         type="tel"
                         value={phone}
@@ -614,7 +742,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Pekerjaan / Instansi</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Pekerjaan / Instansi
+                      </label>
                       <input
                         type="text"
                         value={parentJob}
@@ -625,7 +755,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Alamat Tempat Tinggal / Rumah</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Alamat Tempat Tinggal / Rumah
+                    </label>
                     <textarea
                       rows={2}
                       value={homeAddress}
@@ -641,7 +773,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nama Lengkap Siswa
+                      </label>
                       <input
                         type="text"
                         required
@@ -651,7 +785,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Kelas & Jurusan</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Kelas & Jurusan
+                      </label>
                       <input
                         type="text"
                         value={studentClass}
@@ -663,7 +799,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">NISN (Nomor Induk Siswa Nasional)</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        NISN (Nomor Induk Siswa Nasional)
+                      </label>
                       <input
                         type="text"
                         disabled
@@ -684,7 +822,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Tempat & Tanggal Lahir</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Tempat & Tanggal Lahir
+                      </label>
                       <input
                         type="text"
                         value={birthPlaceDate}
@@ -693,7 +833,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Nomor WhatsApp Siswa</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Nomor WhatsApp Siswa
+                      </label>
                       <input
                         type="tel"
                         value={phone}
@@ -704,7 +846,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Minat, Cita-cita & Hobi</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      Minat, Cita-cita & Hobi
+                    </label>
                     <input
                       type="text"
                       value={hobbies}
@@ -726,11 +870,13 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingAvatar}
                   className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-md hover:shadow-lg cursor-pointer transition-all disabled:opacity-50"
                 >
                   <Database className="w-4 h-4 text-sky-300" />
-                  <span>{isLoading ? 'Menyimpan ke MySQL...' : 'Simpan Profil ke Database'}</span>
+                  <span>
+                    {isLoading ? 'Menyimpan ke MySQL...' : 'Simpan Profil ke Database'}
+                  </span>
                 </button>
               </div>
             </form>
@@ -738,16 +884,22 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
           {/* TAB 2: FORM GANTI KATA SANDI */}
           {activeTab === 'password' && (
-            <form onSubmit={handleSavePassword} className="space-y-3.5 text-xs max-w-md mx-auto py-2">
+            <form
+              onSubmit={handleSavePassword}
+              className="space-y-3.5 text-xs max-w-md mx-auto py-2"
+            >
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-start gap-2">
                 <Shield className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <span>
-                  Pastikan kata sandi baru Anda unik, kuat, dan tidak dibagikan ke siapapun demi menjaga kerahasiaan data nilai dan administrasi.
+                  Pastikan kata sandi baru Anda unik, kuat, dan tidak dibagikan ke siapapun demi
+                  menjaga kerahasiaan data nilai dan administrasi.
                 </span>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Kata Sandi Saat Ini</label>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Kata Sandi Saat Ini
+                </label>
                 <input
                   type="password"
                   required
@@ -759,7 +911,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Kata Sandi Baru (Min. 6 Karakter)</label>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Kata Sandi Baru (Min. 6 Karakter)
+                </label>
                 <input
                   type="password"
                   required
@@ -771,7 +925,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Konfirmasi Kata Sandi Baru</label>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Konfirmasi Kata Sandi Baru
+                </label>
                 <input
                   type="password"
                   required
@@ -811,18 +967,24 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </span>
                 </div>
                 <p className="text-slate-600 leading-relaxed text-[11px]">
-                  Aplikasi telah dikonfigurasi untuk penyimpanan database terpusat (bukan lagi LocalStorage murni). Seluruh data profil, akun, administrasi guru, siswa, PPDB, dan nilai tersimpan di basis data backend.
+                  Aplikasi telah dikonfigurasi untuk penyimpanan database terpusat (bukan lagi
+                  LocalStorage murni). Seluruh data profil, akun, administrasi guru, siswa, PPDB,
+                  dan nilai tersimpan di basis data backend.
                 </p>
               </div>
 
               <div className="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
                 <div className="px-4 py-2.5 bg-slate-50 flex items-center justify-between">
                   <span className="font-bold text-slate-700">Parameter Koneksi:</span>
-                  <span className="font-mono text-[11px] text-slate-500">Hostinger hPanel / cPanel</span>
+                  <span className="font-mono text-[11px] text-slate-500">
+                    Hostinger hPanel / cPanel
+                  </span>
                 </div>
                 <div className="px-4 py-2 flex items-center justify-between">
                   <span className="text-slate-500">Database Host:</span>
-                  <span className="font-mono font-bold text-slate-800">localhost (atau srvXXX.hstgr.io)</span>
+                  <span className="font-mono font-bold text-slate-800">
+                    localhost (atau srvXXX.hstgr.io)
+                  </span>
                 </div>
                 <div className="px-4 py-2 flex items-center justify-between">
                   <span className="text-slate-500">Database Port:</span>
@@ -830,11 +992,15 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 </div>
                 <div className="px-4 py-2 flex items-center justify-between">
                   <span className="text-slate-500">Struktur Tabel:</span>
-                  <span className="font-bold text-indigo-700">11 Tabel Utama (users, students, teachers, ppdb, admin_docs, dll)</span>
+                  <span className="font-bold text-indigo-700">
+                    11 Tabel Utama (users, students, teachers, ppdb, admin_docs, dll)
+                  </span>
                 </div>
                 <div className="px-4 py-2 flex items-center justify-between">
                   <span className="text-slate-500">Karakter Encoding:</span>
-                  <span className="font-mono text-slate-800">utf8mb4_unicode_ci (Mendukung simbol, aksen & latin)</span>
+                  <span className="font-mono text-slate-800">
+                    utf8mb4_unicode_ci (Mendukung simbol, aksen & latin)
+                  </span>
                 </div>
               </div>
 
@@ -842,7 +1008,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <div>
                   <span className="font-bold text-indigo-950 block">Skrip SQL Skema Lengkap:</span>
                   <span className="text-[11px] text-indigo-800">
-                    Unduh file <code>hostinger_database.sql</code> untuk di-import langsung di phpMyAdmin Hostinger Anda.
+                    Unduh file <code>hostinger_database.sql</code> untuk di-import langsung di
+                    phpMyAdmin Hostinger Anda.
                   </span>
                 </div>
                 <button
