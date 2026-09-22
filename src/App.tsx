@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { HeroSlider } from './components/HeroSlider';
@@ -170,120 +170,6 @@ export default function App() {
     };
   }, []);
 
-  // ==========================================================
-  // SYNC DATA KE DATABASE saat state berubah (skip initial load)
-  // ==========================================================
-  const initialSyncDone = useRef(false);
-
-  useEffect(() => {
-    if (!isDataLoaded) return;
-    if (!initialSyncDone.current) {
-      initialSyncDone.current = true;
-      return;
-    }
-    dbService.syncEntity('students', students);
-  }, [students, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('teachers', teachers);
-  }, [teachers, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('news', newsList);
-  }, [newsList, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('events', eventsList);
-  }, [eventsList, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('gallery', galleryList);
-  }, [galleryList, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('ppdb', ppdbList);
-  }, [ppdbList, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('notifications', notifications);
-  }, [notifications, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('studyMaterials', studyMaterials);
-  }, [studyMaterials, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('assignments', assignments);
-  }, [assignments, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('submissions', submissions);
-  }, [submissions, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('waliNotes', waliNotes);
-  }, [waliNotes, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('leaveRequests', leaveRequests);
-  }, [leaveRequests, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('discussions', discussions);
-  }, [discussions, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('extracurriculars', extracurriculars);
-  }, [extracurriculars, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('studentWorks', studentWorks);
-  }, [studentWorks, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('majors', majors);
-  }, [majors, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('schoolProfile', schoolProfile);
-  }, [schoolProfile, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('teacherAdminDocs', teacherAdminDocs);
-  }, [teacherAdminDocs, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('subjectAttendance', subjectAttendanceSessions);
-  }, [subjectAttendanceSessions, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('homepageConfig', homepageConfig);
-  }, [homepageConfig, isDataLoaded]);
-
-  useEffect(() => {
-    if (!isDataLoaded || !initialSyncDone.current) return;
-    dbService.syncEntity('sidebarConfig', sidebarConfig);
-  }, [sidebarConfig, isDataLoaded]);
-
   // Sesi login tetap disimpan di localStorage
   useEffect(() => {
     try {
@@ -298,10 +184,15 @@ export default function App() {
   }, [session]);
 
   // ==========================================================
-  // HANDLERS: Teacher Administration Documents
+  // HANDLERS: Data akan disinkronkan ke DB langsung di dalam handler
   // ==========================================================
+
   const handleUploadTeacherAdminDoc = (doc: TeacherAdminDocument) => {
-    setTeacherAdminDocs((prev) => [doc, ...prev]);
+    setTeacherAdminDocs((prev) => {
+      const updated = [doc, ...prev];
+      dbService.syncEntity('teacherAdminDocs', updated);
+      return updated;
+    });
   };
 
   const handleVerifyTeacherAdminDoc = (
@@ -311,8 +202,8 @@ export default function App() {
     notes?: string,
     verifierName?: string
   ) => {
-    setTeacherAdminDocs((prev) =>
-      prev.map((doc) =>
+    setTeacherAdminDocs((prev) => {
+      const updated = prev.map((doc) =>
         doc.id === id
           ? {
               ...doc,
@@ -327,82 +218,160 @@ export default function App() {
               }),
             }
           : doc
-      )
-    );
+      );
+      dbService.syncEntity('teacherAdminDocs', updated);
+      return updated;
+    });
   };
 
   const handleSaveSubjectAttendanceSession = (sessionData: SubjectAttendanceSession) => {
-    setSubjectAttendanceSessions((prev) => [sessionData, ...prev]);
+    setSubjectAttendanceSessions((prev) => {
+      const updated = [sessionData, ...prev];
+      dbService.syncEntity('subjectAttendance', updated);
+      return updated;
+    });
   };
 
   // Handlers: Student
   const handleAddStudent = (newStudent: Student) => {
-    setStudents((prev) => [newStudent, ...prev]);
+    setStudents((prev) => {
+      const updated = [newStudent, ...prev];
+      dbService.syncEntity('students', updated);
+      return updated;
+    });
   };
   const handleUpdateStudent = (updatedStudent: Student) => {
-    setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+    setStudents((prev) => {
+      const updated = prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s));
+      dbService.syncEntity('students', updated);
+      return updated;
+    });
   };
   const handleDeleteStudent = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data siswa ini dari sistem?')) {
-      setStudents((prev) => prev.filter((s) => s.id !== id));
+      setStudents((prev) => {
+        const updated = prev.filter((s) => s.id !== id);
+        dbService.syncEntity('students', updated);
+        return updated;
+      });
     }
   };
 
   // Handlers: Teacher
   const handleAddTeacher = (newTeacher: TeacherStaff) => {
-    setTeachers((prev) => [newTeacher, ...prev]);
+    setTeachers((prev) => {
+      const updated = [newTeacher, ...prev];
+      dbService.syncEntity('teachers', updated);
+      return updated;
+    });
   };
   const handleUpdateTeacher = (updatedTeacher: TeacherStaff) => {
-    setTeachers((prev) => prev.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t)));
+    setTeachers((prev) => {
+      const updated = prev.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t));
+      dbService.syncEntity('teachers', updated);
+      return updated;
+    });
   };
   const handleDeleteTeacher = (id: string) => {
-    setTeachers((prev) => prev.filter((t) => t.id !== id));
+    setTeachers((prev) => {
+      const updated = prev.filter((t) => t.id !== id);
+      dbService.syncEntity('teachers', updated);
+      return updated;
+    });
   };
 
   // Handlers: News
   const handleAddNews = (newNews: NewsItem) => {
-    setNewsList((prev) => [newNews, ...prev]);
+    setNewsList((prev) => {
+      const updated = [newNews, ...prev];
+      dbService.syncEntity('news', updated);
+      return updated;
+    });
   };
   const handleUpdateNews = (updatedNews: NewsItem) => {
-    setNewsList((prev) => prev.map((n) => (n.id === updatedNews.id ? updatedNews : n)));
+    setNewsList((prev) => {
+      const updated = prev.map((n) => (n.id === updatedNews.id ? updatedNews : n));
+      dbService.syncEntity('news', updated);
+      return updated;
+    });
   };
   const handleDeleteNews = (id: string) => {
-    setNewsList((prev) => prev.filter((n) => n.id !== id));
+    setNewsList((prev) => {
+      const updated = prev.filter((n) => n.id !== id);
+      dbService.syncEntity('news', updated);
+      return updated;
+    });
   };
 
   // Handlers: Events
   const handleAddEvent = (newEvent: SchoolEvent) => {
-    setEventsList((prev) => [newEvent, ...prev]);
+    setEventsList((prev) => {
+      const updated = [newEvent, ...prev];
+      dbService.syncEntity('events', updated);
+      return updated;
+    });
   };
   const handleUpdateEvent = (updatedEvent: SchoolEvent) => {
-    setEventsList((prev) => prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e)));
+    setEventsList((prev) => {
+      const updated = prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e));
+      dbService.syncEntity('events', updated);
+      return updated;
+    });
   };
   const handleDeleteEvent = (id: string) => {
-    setEventsList((prev) => prev.filter((e) => e.id !== id));
+    setEventsList((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      dbService.syncEntity('events', updated);
+      return updated;
+    });
   };
 
   // Handlers: Gallery
   const handleAddGallery = (newItem: GalleryItem) => {
-    setGalleryList((prev) => [newItem, ...prev]);
+    setGalleryList((prev) => {
+      const updated = [newItem, ...prev];
+      dbService.syncEntity('gallery', updated);
+      return updated;
+    });
   };
   const handleUpdateGallery = (updatedGallery: GalleryItem) => {
-    setGalleryList((prev) => prev.map((g) => (g.id === updatedGallery.id ? updatedGallery : g)));
+    setGalleryList((prev) => {
+      const updated = prev.map((g) => (g.id === updatedGallery.id ? updatedGallery : g));
+      dbService.syncEntity('gallery', updated);
+      return updated;
+    });
   };
   const handleDeleteGallery = (id: string) => {
-    setGalleryList((prev) => prev.filter((g) => g.id !== id));
+    setGalleryList((prev) => {
+      const updated = prev.filter((g) => g.id !== id);
+      dbService.syncEntity('gallery', updated);
+      return updated;
+    });
   };
 
   // Handlers: PPDB
   const handleAddPPDB = (newReg: PPDBRegistration) => {
-    setPpdbList((prev) => [newReg, ...prev]);
+    setPpdbList((prev) => {
+      const updated = [newReg, ...prev];
+      dbService.syncEntity('ppdb', updated);
+      return updated;
+    });
   };
   const handleUpdatePPDB = (updatedPPDB: PPDBRegistration) => {
-    setPpdbList((prev) => prev.map((p) => (p.id === updatedPPDB.id ? updatedPPDB : p)));
+    setPpdbList((prev) => {
+      const updated = prev.map((p) => (p.id === updatedPPDB.id ? updatedPPDB : p));
+      dbService.syncEntity('ppdb', updated);
+      return updated;
+    });
   };
   const handleUpdatePPDBStatus = (id: string, status: PPDBRegistration['status'], notes?: string) => {
-    setPpdbList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status, notes: notes || item.notes } : item))
-    );
+    setPpdbList((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id ? { ...item, status, notes: notes || item.notes } : item
+      );
+      dbService.syncEntity('ppdb', updated);
+      return updated;
+    });
   };
 
   // Handler: Send Push Notification
@@ -422,28 +391,52 @@ export default function App() {
       isRead: false,
       link: '/ppdb',
     };
-    setNotifications((prev) => [newNotif, ...prev]);
+    setNotifications((prev) => {
+      const updated = [newNotif, ...prev];
+      dbService.syncEntity('notifications', updated);
+      return updated;
+    });
   };
 
   // Handler: Mark notification as read
   const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+      dbService.syncEntity('notifications', updated);
+      return updated;
+    });
   };
 
   // Handlers: Study Materials
   const handleAddStudyMaterial = (mat: StudyMaterial) => {
-    setStudyMaterials((prev) => [mat, ...prev]);
+    setStudyMaterials((prev) => {
+      const updated = [mat, ...prev];
+      dbService.syncEntity('studyMaterials', updated);
+      return updated;
+    });
   };
   const handleDeleteStudyMaterial = (id: string) => {
-    setStudyMaterials((prev) => prev.filter((m) => m.id !== id));
+    setStudyMaterials((prev) => {
+      const updated = prev.filter((m) => m.id !== id);
+      dbService.syncEntity('studyMaterials', updated);
+      return updated;
+    });
   };
 
   // Handlers: Assignments
   const handleAddAssignment = (assignment: Assignment) => {
-    setAssignments((prev) => [assignment, ...prev]);
+    setAssignments((prev) => {
+      const updated = [assignment, ...prev];
+      dbService.syncEntity('assignments', updated);
+      return updated;
+    });
   };
   const handleDeleteAssignment = (id: string) => {
-    setAssignments((prev) => prev.filter((a) => a.id !== id));
+    setAssignments((prev) => {
+      const updated = prev.filter((a) => a.id !== id);
+      dbService.syncEntity('assignments', updated);
+      return updated;
+    });
   };
 
   // Handlers: Submissions
@@ -452,26 +445,42 @@ export default function App() {
       const filtered = prev.filter(
         (s) => !(s.assignmentId === submission.assignmentId && s.studentId === submission.studentId)
       );
-      return [submission, ...filtered];
+      const updated = [submission, ...filtered];
+      dbService.syncEntity('submissions', updated);
+      return updated;
     });
   };
   const handleGradeSubmission = (id: string, grade: number, feedback?: string) => {
-    setSubmissions((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, grade, feedback, status: 'Dinilai' } : s))
-    );
+    setSubmissions((prev) => {
+      const updated = prev.map((s) => (s.id === id ? { ...s, grade, feedback, status: 'Dinilai' } : s));
+      dbService.syncEntity('submissions', updated);
+      return updated;
+    });
   };
 
   // Handlers: Wali Kelas Notes
   const handleAddWaliNote = (note: WaliKelasNote) => {
-    setWaliNotes((prev) => [note, ...prev]);
+    setWaliNotes((prev) => {
+      const updated = [note, ...prev];
+      dbService.syncEntity('waliNotes', updated);
+      return updated;
+    });
   };
   const handleDeleteWaliNote = (id: string) => {
-    setWaliNotes((prev) => prev.filter((n) => n.id !== id));
+    setWaliNotes((prev) => {
+      const updated = prev.filter((n) => n.id !== id);
+      dbService.syncEntity('waliNotes', updated);
+      return updated;
+    });
   };
 
   // Handlers: Leave Requests
   const handleSubmitLeaveRequest = (req: LeaveRequest) => {
-    setLeaveRequests((prev) => [req, ...prev]);
+    setLeaveRequests((prev) => {
+      const updated = [req, ...prev];
+      dbService.syncEntity('leaveRequests', updated);
+      return updated;
+    });
   };
   const handleReviewLeaveRequest = (
     id: string,
@@ -479,66 +488,125 @@ export default function App() {
     notes?: string,
     reviewer?: string
   ) => {
-    setLeaveRequests((prev) =>
-      prev.map((r) =>
+    setLeaveRequests((prev) => {
+      const updated = prev.map((r) =>
         r.id === id
-          ? {
-              ...r,
-              status,
-              reviewNotes: notes,
-              reviewedBy: reviewer || 'Wali Kelas',
-            }
+          ? { ...r, status, reviewNotes: notes, reviewedBy: reviewer || 'Wali Kelas' }
           : r
-      )
-    );
+      );
+      dbService.syncEntity('leaveRequests', updated);
+      return updated;
+    });
   };
 
   // Handlers: Discussions
   const handleAddDiscussion = (disc: SubjectDiscussion) => {
-    setDiscussions((prev) => [disc, ...prev]);
+    setDiscussions((prev) => {
+      const updated = [disc, ...prev];
+      dbService.syncEntity('discussions', updated);
+      return updated;
+    });
   };
   const handleAddDiscussionReply = (discussionId: string, reply: DiscussionReply) => {
-    setDiscussions((prev) =>
-      prev.map((d) => (d.id === discussionId ? { ...d, replies: [...d.replies, reply] } : d))
-    );
+    setDiscussions((prev) => {
+      const updated = prev.map((d) =>
+        d.id === discussionId ? { ...d, replies: [...d.replies, reply] } : d
+      );
+      dbService.syncEntity('discussions', updated);
+      return updated;
+    });
   };
 
   // Handlers: School Profile
   const handleUpdateSchoolProfile = (profile: SchoolProfile) => {
     setSchoolProfile(profile);
+    dbService.syncEntity('schoolProfile', profile);
   };
 
   // Handlers: Majors
   const handleAddMajor = (major: MajorProgram) => {
-    setMajors((prev) => [major, ...prev]);
+    setMajors((prev) => {
+      const updated = [major, ...prev];
+      dbService.syncEntity('majors', updated);
+      return updated;
+    });
   };
   const handleUpdateMajor = (updatedMajor: MajorProgram) => {
-    setMajors((prev) => prev.map((m) => (m.id === updatedMajor.id ? updatedMajor : m)));
+    setMajors((prev) => {
+      const updated = prev.map((m) => (m.id === updatedMajor.id ? updatedMajor : m));
+      dbService.syncEntity('majors', updated);
+      return updated;
+    });
   };
   const handleDeleteMajor = (id: string) => {
-    setMajors((prev) => prev.filter((m) => m.id !== id));
+    setMajors((prev) => {
+      const updated = prev.filter((m) => m.id !== id);
+      dbService.syncEntity('majors', updated);
+      return updated;
+    });
   };
 
   // Handlers: Extracurriculars
   const handleAddExtracurricular = (eskul: Extracurricular) => {
-    setExtracurriculars((prev) => [eskul, ...prev]);
+    setExtracurriculars((prev) => {
+      const updated = [eskul, ...prev];
+      dbService.syncEntity('extracurriculars', updated);
+      return updated;
+    });
   };
   const handleUpdateExtracurricular = (updatedEskul: Extracurricular) => {
-    setExtracurriculars((prev) => prev.map((e) => (e.id === updatedEskul.id ? updatedEskul : e)));
+    setExtracurriculars((prev) => {
+      const updated = prev.map((e) => (e.id === updatedEskul.id ? updatedEskul : e));
+      dbService.syncEntity('extracurriculars', updated);
+      return updated;
+    });
   };
   const handleDeleteExtracurricular = (id: string) => {
-    setExtracurriculars((prev) => prev.filter((e) => e.id !== id));
+    setExtracurriculars((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      dbService.syncEntity('extracurriculars', updated);
+      return updated;
+    });
   };
 
   // Handlers: Student Works
   const handleAddStudentWork = (work: StudentWork) => {
-    setStudentWorks((prev) => [work, ...prev]);
+    setStudentWorks((prev) => {
+      const updated = [work, ...prev];
+      dbService.syncEntity('studentWorks', updated);
+      return updated;
+    });
   };
   const handleUpdateStudentWork = (updatedWork: StudentWork) => {
-    setStudentWorks((prev) => prev.map((w) => (w.id === updatedWork.id ? updatedWork : w)));
+    setStudentWorks((prev) => {
+      const updated = prev.map((w) => (w.id === updatedWork.id ? updatedWork : w));
+      dbService.syncEntity('studentWorks', updated);
+      return updated;
+    });
   };
   const handleDeleteStudentWork = (id: string) => {
-    setStudentWorks((prev) => prev.filter((w) => w.id !== id));
+    setStudentWorks((prev) => {
+      const updated = prev.filter((w) => w.id !== id);
+      dbService.syncEntity('studentWorks', updated);
+      return updated;
+    });
+  };
+
+  // Handlers: Homepage Config
+  const handleUpdateHomepageConfig = (updated: HomepageConfig) => {
+    setHomepageConfig(updated);
+    dbService.syncEntity('homepageConfig', updated);
+  };
+
+  const handleResetHomepageConfig = () => {
+    setHomepageConfig(DEFAULT_HOMEPAGE_CONFIG);
+    dbService.syncEntity('homepageConfig', DEFAULT_HOMEPAGE_CONFIG);
+  };
+
+  // Handlers: Sidebar Config
+  const handleUpdateSidebarConfig = (updated: AdminSidebarConfig) => {
+    setSidebarConfig(updated);
+    dbService.syncEntity('sidebarConfig', updated);
   };
 
   const handleLogout = () => {
@@ -772,10 +840,10 @@ export default function App() {
             onUpdateStudentWork={handleUpdateStudentWork}
             onDeleteStudentWork={handleDeleteStudentWork}
             homepageConfig={homepageConfig}
-            onUpdateHomepageConfig={(updated) => setHomepageConfig(updated)}
-            onResetHomepageConfig={() => setHomepageConfig(DEFAULT_HOMEPAGE_CONFIG)}
+            onUpdateHomepageConfig={handleUpdateHomepageConfig}
+            onResetHomepageConfig={handleResetHomepageConfig}
             sidebarConfig={sidebarConfig}
-            onUpdateSidebarConfig={(updated) => setSidebarConfig(updated)}
+            onUpdateSidebarConfig={handleUpdateSidebarConfig}
             initialAdminMenu={adminInitialMenu}
             onBackToPortal={handleLogout}
             onLogout={handleLogout}
