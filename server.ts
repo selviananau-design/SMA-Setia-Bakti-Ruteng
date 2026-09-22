@@ -18,6 +18,8 @@ async function startServer() {
   console.log(`[Server] ℹ️ Memulai server...`);
   console.log(`[Server] ℹ️ NODE_ENV: ${process.env.NODE_ENV}`);
   console.log(`[Server] ℹ️ PORT dari environment: ${process.env.PORT || 'TIDAK DISET'}`);
+  console.log(`[Server] ℹ️ HOME: ${process.env.HOME || 'TIDAK DISET'}`);
+  console.log(`[Server] ℹ️ CWD: ${process.cwd()}`);
   console.log(
     `[Server] ℹ️ Phusion Passenger: ${
       typeof (global as any).PhusionPassenger !== 'undefined' ? 'AKTIF' : 'TIDAK AKTIF'
@@ -25,13 +27,48 @@ async function startServer() {
   );
 
   // ==========================================================
-  // KONFIGURASI UPLOAD FILE (MULTER)
+  // KONFIGURASI FOLDER UPLOAD PERSISTEN
   // ==========================================================
-  // Folder uploads disimpan di root proyek (bukan di dist) agar tidak terhapus saat deploy
-  const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+  // Di Hostinger, folder deployment berada di dalam `versions/` yang dihapus setiap deploy.
+  // Kita perlu menyimpan upload di folder PERSISTEN di luar `versions/`.
+  //
+  // Lokasi prioritas (dicoba dari atas ke bawah):
+  // 1. ENV UPLOADS_DIR (paling fleksibel)
+  // 2. Untuk Passenger (Hostinger): /home/USERNAME/portal-uploads
+  // 3. Fallback untuk lokal: ./uploads
+  const UPLOADS_DIR = (() => {
+    if (process.env.UPLOADS_DIR) {
+      return process.env.UPLOADS_DIR;
+    }
+
+    if (typeof (global as any).PhusionPassenger !== 'undefined' && process.env.HOME) {
+      // Passenger mode di Hostinger — simpan di home folder user, di luar `versions/`
+      return path.join(process.env.HOME, 'portal-uploads');
+    }
+
+    // Development lokal
+    return path.join(process.cwd(), 'uploads');
+  })();
+
   if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    console.log(`[Uploads] Folder dibuat: ${UPLOADS_DIR}`);
+    try {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+      console.log(`[Uploads] ✅ Folder dibuat: ${UPLOADS_DIR}`);
+    } catch (err) {
+      console.error(`[Uploads] ❌ Gagal membuat folder ${UPLOADS_DIR}:`, err);
+    }
+  } else {
+    console.log(`[Uploads] ✅ Folder sudah ada: ${UPLOADS_DIR}`);
+  }
+
+  // Verifikasi folder bisa diakses
+  try {
+    const testFile = path.join(UPLOADS_DIR, '.write-test');
+    fs.writeFileSync(testFile, 'test');
+    fs.unlinkSync(testFile);
+    console.log(`[Uploads] ✅ Folder dapat ditulis.`);
+  } catch (err) {
+    console.error(`[Uploads] ❌ Folder TIDAK dapat ditulis:`, err);
   }
 
   const storage = multer.diskStorage({
@@ -39,7 +76,6 @@ async function startServer() {
       cb(null, UPLOADS_DIR);
     },
     filename: (req, file, cb) => {
-      // Sanitasi nama file dan tambahkan timestamp agar unik
       const ext = path.extname(file.originalname).toLowerCase();
       const baseName = path
         .basename(file.originalname, ext)
@@ -52,7 +88,7 @@ async function startServer() {
 
   const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Maks 5 MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'];
       if (allowedTypes.includes(file.mimetype)) {
@@ -69,8 +105,14 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Sajikan file dari folder uploads secara statis
-  app.use('/uploads', express.static(UPLOADS_DIR));
+  // Sajikan file statis dari folder uploads (HARUS sebelum catch-all route)
+  app.use(
+    '/uploads',
+    express.static(UPLOADS_DIR, {
+      maxAge: '30d',
+      fallthrough: true,
+    })
+  );
 
   // ==========================================================
   // INISIALISASI DATABASE
@@ -86,18 +128,32 @@ async function startServer() {
   // API ROUTES
   // ==========================================================
 
-  // 1. Health check
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
-  // 2. Status database
   app.get('/api/db-status', async (req: Request, res: Response) => {
     const status = await getDatabaseStatus();
     res.json(status);
   });
 
-  // 3. Download SQL script
+  // Endpoint diagnostik untuk memverifikasi folder upload
+  app.get('/api/upload-status', (req: Request, res: Response) => {
+    try {
+      const files = fs.existsSync(UPLOADS_DIR) ? fs.readdirSync(UPLOADS_DIR) : [];
+      res.json({
+        uploadsDir: UPLOADS_DIR,
+        exists: fs.existsSync(UPLOADS_DIR),
+        fileCount: files.length,
+        recentFiles: files.slice(-10),
+        cwd: process.cwd(),
+        home: process.env.HOME,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get('/api/download-sql', (req: Request, res: Response) => {
     const sqlPath = path.join(process.cwd(), 'hostinger_database.sql');
     if (fs.existsSync(sqlPath)) {
@@ -111,22 +167,26 @@ async function startServer() {
     res.status(404).json({ error: 'Berkas database SQL tidak ditemukan' });
   });
 
-  // 4. Upload gambar (BARU) - Menggantikan Base64
+  // Upload endpoint
   app.post('/api/upload', upload.single('image'), (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ success: false, error: 'Tidak ada file yang diunggah.' });
       }
 
-      // Kembalikan URL relatif yang bisa diakses dari frontend
       const fileUrl = `/uploads/${req.file.filename}`;
-      console.log(`[Upload Success] File disimpan: ${fileUrl} (${(req.file.size / 1024).toFixed(2)} KB)`);
+      console.log(
+        `[Upload Success] File disimpan: ${req.file.path} → URL: ${fileUrl} (${(
+          req.file.size / 1024
+        ).toFixed(2)} KB)`
+      );
 
       res.json({
         success: true,
         url: fileUrl,
         filename: req.file.filename,
         size: req.file.size,
+        savedTo: req.file.path,
       });
     } catch (err: any) {
       console.error('[Upload Error]', err);
@@ -134,7 +194,6 @@ async function startServer() {
     }
   });
 
-  // 5. Login
   app.post('/api/auth/login', async (req: Request, res: Response) => {
     const { username, role } = req.body;
 
@@ -199,7 +258,6 @@ async function startServer() {
     return res.json({ success: true, session: fallbackUser });
   });
 
-  // 6. Update profil
   app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
     const { identifier, profileData } = req.body;
     try {
@@ -210,7 +268,6 @@ async function startServer() {
     }
   });
 
-  // 7. Ambil semua data
   app.get('/api/data', async (req: Request, res: Response) => {
     try {
       const data = await getAllDbEntities();
@@ -220,7 +277,6 @@ async function startServer() {
     }
   });
 
-  // 8. Sinkronisasi entitas ke database
   app.post('/api/sync/:entity', async (req: Request, res: Response) => {
     const { entity } = req.params;
     const data = req.body;
@@ -254,12 +310,12 @@ async function startServer() {
   }
 
   // ==========================================================
-  // LISTEN: Deteksi Phusion Passenger (Hostinger) vs Mode Lokal
+  // LISTEN
   // ==========================================================
   if (typeof (global as any).PhusionPassenger !== 'undefined') {
-    console.log('[Server] 🚀 Mode Phusion Passenger terdeteksi. Menggunakan socket Passenger.');
+    console.log('[Server] 🚀 Mode Phusion Passenger terdeteksi.');
     app.listen(process.env.PORT as any, () => {
-      console.log(`[Server] ✅ Server berhasil berjalan melalui Phusion Passenger.`);
+      console.log(`[Server] ✅ Server berjalan melalui Phusion Passenger.`);
     });
   } else {
     app.listen(LOCAL_PORT, () => {
