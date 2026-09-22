@@ -139,6 +139,8 @@ interface AdminResultDashboardProps {
   homepageConfig?: HomepageConfig;
   onUpdateHomepageConfig?: (updated: HomepageConfig) => void;
   onResetHomepageConfig?: () => void;
+  sidebarConfig?: AdminSidebarConfig;
+  onUpdateSidebarConfig?: (config: AdminSidebarConfig) => void;
   initialActiveMenu?: string;
   onBackToPortal?: () => void;
   onLogout?: () => void;
@@ -164,6 +166,8 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   homepageConfig,
   onUpdateHomepageConfig,
   onResetHomepageConfig,
+  sidebarConfig,
+  onUpdateSidebarConfig,
   initialActiveMenu,
   onAddStudent,
   onUpdateStudent,
@@ -232,15 +236,8 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     return DEFAULT_HOMEPAGE_CONFIG;
   });
 
-  const [sidebarConfig, setSidebarConfig] = useState<AdminSidebarConfig>(() => {
-    try {
-      const saved = localStorage.getItem('smak_sidebar_config');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return DEFAULT_SIDEBAR_CONFIG;
-  });
+  // Gunakan sidebarConfig dari props, fallback ke default
+  const currentSidebarConfig = sidebarConfig || DEFAULT_SIDEBAR_CONFIG;
 
   const menuItems = [
     { id: 'overview', label: 'Ringkasan Kinerja', icon: LayoutGrid, sub: 'Ikhtisar & Statistik' },
@@ -261,9 +258,9 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
     { id: 'sidebar', label: 'Kustomisasi Sidebar', icon: Palette, sub: 'Ganti Foto & Tulisan' },
   ];
 
-  // Helper untuk warna aksen sidebar
+  // Helper untuk warna aksen sidebar (menggunakan currentSidebarConfig)
   const getSidebarAccentGradient = () => {
-    switch (sidebarConfig.themeAccent) {
+    switch (currentSidebarConfig.themeAccent) {
       case 'purple':
         return 'from-purple-600 to-fuchsia-600';
       case 'blue':
@@ -279,7 +276,7 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
   };
 
   const getLogoShapeRadius = () => {
-    switch (sidebarConfig.logoShape) {
+    switch (currentSidebarConfig.logoShape) {
       case 'circle':
         return 'rounded-full';
       case 'square':
@@ -303,19 +300,19 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                 <div
                   className={`w-10 h-10 ${getLogoShapeRadius()} bg-gradient-to-tr ${getSidebarAccentGradient()} flex items-center justify-center text-white shadow-lg overflow-hidden flex-shrink-0 border border-white/10`}
                 >
-                  {sidebarConfig.logoType === 'image' && sidebarConfig.logoUrl ? (
+                  {currentSidebarConfig.logoType === 'image' && currentSidebarConfig.logoUrl ? (
                     <img
-                      src={sidebarConfig.logoUrl}
+                      src={currentSidebarConfig.logoUrl}
                       alt="Logo Sidebar"
                       className="w-full h-full object-cover"
                     />
-                  ) : sidebarConfig.presetIcon === 'cross' ? (
+                  ) : currentSidebarConfig.presetIcon === 'cross' ? (
                     <Cross className="w-5 h-5" />
-                  ) : sidebarConfig.presetIcon === 'book' ? (
+                  ) : currentSidebarConfig.presetIcon === 'book' ? (
                     <BookOpen className="w-5 h-5" />
-                  ) : sidebarConfig.presetIcon === 'shield' ? (
+                  ) : currentSidebarConfig.presetIcon === 'shield' ? (
                     <ShieldCheck className="w-5 h-5" />
-                  ) : sidebarConfig.presetIcon === 'award' ? (
+                  ) : currentSidebarConfig.presetIcon === 'award' ? (
                     <Award className="w-5 h-5" />
                   ) : (
                     <GraduationCap className="w-6 h-6" />
@@ -323,14 +320,14 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-xs font-black text-white tracking-wider leading-tight truncate uppercase">
-                    {sidebarConfig.title || 'DASBOR ADMINISTRATOR'}
+                    {currentSidebarConfig.title || 'DASBOR ADMINISTRATOR'}
                   </h1>
                   <p className="text-[11px] font-bold text-sky-400 tracking-widest uppercase truncate">
-                    {sidebarConfig.subtitle || 'SMAK SETIA BAKTI'}
+                    {currentSidebarConfig.subtitle || 'SMAK SETIA BAKTI'}
                   </p>
-                  {sidebarConfig.tagline && (
+                  {currentSidebarConfig.tagline && (
                     <p className="text-[10px] text-slate-400 truncate leading-none mt-0.5">
-                      {sidebarConfig.tagline}
+                      {currentSidebarConfig.tagline}
                     </p>
                   )}
                 </div>
@@ -355,11 +352,11 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
                 </div>
                 <div className="truncate">
                   <div className="text-xs font-bold text-white truncate">
-                    {sidebarConfig.adminRoleLabel || 'Admin Utama'}
+                    {currentSidebarConfig.adminRoleLabel || 'Admin Utama'}
                   </div>
                   <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    {sidebarConfig.statusBadgeText || 'MySQL Aktif'}
+                    {currentSidebarConfig.statusBadgeText || 'MySQL Aktif'}
                   </div>
                 </div>
               </div>
@@ -627,8 +624,10 @@ export const AdminResultDashboard: React.FC<AdminResultDashboardProps> = ({
           {/* TAB 10: KUSTOMISASI SIDEBAR (FOTO & TULISAN) */}
           {activeMenu === 'sidebar' && (
             <AdminSidebarCustomizerTab
-              config={sidebarConfig}
-              onSaveConfig={(newCfg) => setSidebarConfig(newCfg)}
+              config={currentSidebarConfig}
+              onSaveConfig={(newCfg) => {
+                onUpdateSidebarConfig?.(newCfg);
+              }}
             />
           )}
         </main>

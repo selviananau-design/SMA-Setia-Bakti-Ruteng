@@ -1,7 +1,10 @@
 /**
  * Layanan Enkripsi & Perlindungan Privasi Data Siswa & Pegawai
  * Standar AES-256 GCM simulation & Data Masking sesuai UU PDP
+ * Data audit log disimpan di database MySQL (bukan localStorage).
  */
+
+import { dbService } from './dbSync';
 
 export interface EncryptionAuditLog {
   id: string;
@@ -12,41 +15,71 @@ export interface EncryptionAuditLog {
   status: 'SUCCESS' | 'DENIED';
 }
 
-const AUDIT_LOGS_KEY = 'smak_audit_logs';
+// In-memory cache untuk audit log (akan disinkronkan ke database)
+let auditLogsCache: EncryptionAuditLog[] = [];
 
-export function getAuditLogs(): EncryptionAuditLog[] {
+// Data default audit log
+const DEFAULT_AUDIT_LOGS: EncryptionAuditLog[] = [
+  {
+    id: 'LOG-001',
+    timestamp: new Date(Date.now() - 3600000 * 5).toLocaleTimeString('id-ID'),
+    actor: 'Admin Utama (Drs. Petrus)',
+    action: 'ENCRYPT',
+    fieldAffected: 'NIK & No. Kontak 748 Siswa',
+    status: 'SUCCESS',
+  },
+  {
+    id: 'LOG-002',
+    timestamp: new Date(Date.now() - 3600000 * 2).toLocaleTimeString('id-ID'),
+    actor: 'Sistem Keamanan Portal',
+    action: 'VERIFY_KEY',
+    fieldAffected: 'Validasi Enkripsi Database Dapodik',
+    status: 'SUCCESS',
+  },
+];
+
+/**
+ * Memuat audit logs dari database
+ */
+export async function loadAuditLogs(): Promise<EncryptionAuditLog[]> {
   try {
-    const data = localStorage.getItem(AUDIT_LOGS_KEY);
-    if (data) return JSON.parse(data);
+    const data = await dbService.loadAllData();
+    if (data?.auditLogs && Array.isArray(data.auditLogs) && data.auditLogs.length > 0) {
+      auditLogsCache = data.auditLogs;
+      return auditLogsCache;
+    }
+    // Jika belum ada di database, gunakan default dan simpan ke DB
+    auditLogsCache = DEFAULT_AUDIT_LOGS;
+    await dbService.syncEntity('auditLogs', DEFAULT_AUDIT_LOGS);
+    return auditLogsCache;
   } catch (e) {
-    console.error(e);
+    console.warn('[encryption] Gagal memuat audit logs dari database:', e);
+    if (auditLogsCache.length === 0) {
+      auditLogsCache = DEFAULT_AUDIT_LOGS;
+    }
+    return auditLogsCache;
   }
-  return [
-    {
-      id: 'LOG-001',
-      timestamp: new Date(Date.now() - 3600000 * 5).toLocaleTimeString('id-ID'),
-      actor: 'Admin Utama (Drs. Petrus)',
-      action: 'ENCRYPT',
-      fieldAffected: 'NIK & No. Kontak 748 Siswa',
-      status: 'SUCCESS',
-    },
-    {
-      id: 'LOG-002',
-      timestamp: new Date(Date.now() - 3600000 * 2).toLocaleTimeString('id-ID'),
-      actor: 'Sistem Keamanan Portal',
-      action: 'VERIFY_KEY',
-      fieldAffected: 'Validasi Enkripsi Database Dapodik',
-      status: 'SUCCESS',
-    },
-  ];
 }
 
-export function logAuditEvent(
+/**
+ * Mengambil audit logs dari cache (sinkron)
+ */
+export function getAuditLogs(): EncryptionAuditLog[] {
+  if (auditLogsCache.length === 0) {
+    return DEFAULT_AUDIT_LOGS;
+  }
+  return auditLogsCache;
+}
+
+/**
+ * Menambahkan event audit baru dan menyimpannya ke database
+ */
+export async function logAuditEvent(
   actor: string,
   action: 'ENCRYPT' | 'DECRYPT' | 'VERIFY_KEY' | 'EXPORT_DATA',
   fieldAffected: string,
   status: 'SUCCESS' | 'DENIED'
-) {
+): Promise<void> {
   const current = getAuditLogs();
   const newLog: EncryptionAuditLog = {
     id: `LOG-${Date.now().toString().slice(-4)}`,
@@ -56,11 +89,14 @@ export function logAuditEvent(
     fieldAffected,
     status,
   };
-  const updated = [newLog, ...current].slice(0, 30);
+  const updated = [newLog, ...current].slice(0, 100);
+  auditLogsCache = updated;
+
+  // Sinkronkan ke database
   try {
-    localStorage.setItem(AUDIT_LOGS_KEY, JSON.stringify(updated));
+    await dbService.syncEntity('auditLogs', updated);
   } catch (e) {
-    console.error(e);
+    console.warn('[encryption] Gagal menyimpan audit log ke database:', e);
   }
 }
 

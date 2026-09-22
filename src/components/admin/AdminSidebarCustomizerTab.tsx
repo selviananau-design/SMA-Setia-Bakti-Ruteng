@@ -15,10 +15,8 @@ import {
   Eye,
   Sliders,
   Settings,
-  Flame,
 } from 'lucide-react';
 import { AdminSidebarConfig } from '../../types';
-import { dbService } from '../../services/dbSync';
 
 export const DEFAULT_SIDEBAR_CONFIG: AdminSidebarConfig = {
   logoType: 'icon',
@@ -73,12 +71,9 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
     }
   };
 
+  // PERBAIKAN: Hanya panggil onSaveConfig, parent (App.tsx) yang menyimpan ke DB
   const handleSave = () => {
     onSaveConfig(formConfig);
-    // Simpan ke storage dan sinkronisasi ke server
-    localStorage.setItem('smak_sidebar_config', JSON.stringify(formConfig));
-    dbService.syncEntity('sidebarConfig', formConfig);
-
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -86,18 +81,16 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
     }, 2000);
   };
 
+  // PERBAIKAN: Reset hanya panggil onSaveConfig
   const handleReset = () => {
     if (confirm('Apakah Anda yakin ingin mengembalikan tampilan sidebar ke setelan bawaan?')) {
       setFormConfig(DEFAULT_SIDEBAR_CONFIG);
       onSaveConfig(DEFAULT_SIDEBAR_CONFIG);
-      localStorage.setItem('smak_sidebar_config', JSON.stringify(DEFAULT_SIDEBAR_CONFIG));
-      dbService.syncEntity('sidebarConfig', DEFAULT_SIDEBAR_CONFIG);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 2000);
     }
   };
 
-  // Render icon preview
   const renderSelectedIcon = () => {
     switch (formConfig.presetIcon) {
       case 'cross':
@@ -114,7 +107,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
     }
   };
 
-  // Gradient classes based on themeAccent
   const getAccentGradient = (accent?: string) => {
     switch (accent) {
       case 'purple':
@@ -184,7 +176,7 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
       {savedSuccess && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-sm animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <span>Pengaturan sidebar berhasil disimpan dan langsung diterapkan ke tampilan sidebar admin!</span>
+          <span>Pengaturan sidebar berhasil disimpan ke database dan langsung diterapkan!</span>
         </div>
       )}
 
@@ -203,7 +195,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
               </div>
             </div>
 
-            {/* Type selector */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -231,7 +222,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
               </button>
             </div>
 
-            {/* If Image mode */}
             {formConfig.logoType === 'image' && (
               <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
                 <div>
@@ -244,12 +234,7 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                       <p className="text-xs font-bold text-slate-700">Klik untuk Pilih Berkas Foto</p>
                       <p className="text-[11px] text-slate-400">Maks. 4 MB</p>
                     </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                   </label>
                   {uploadError && <p className="text-xs text-rose-600 font-semibold mt-1">{uploadError}</p>}
                 </div>
@@ -271,7 +256,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
               </div>
             )}
 
-            {/* If Icon mode */}
             {formConfig.logoType === 'icon' && (
               <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -315,7 +299,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
               </div>
             )}
 
-            {/* Logo Shape */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Bentuk Wadah Logo
@@ -369,7 +352,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                   placeholder="DASBOR ADMINISTRATOR"
                   className="w-full px-3.5 py-2.5 text-xs font-semibold rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">Disarankan menggunakan huruf kapital rapi (misal: DASBOR ADMINISTRATOR, PANEL UTAMA SEKOLAH).</p>
               </div>
 
               <div>
@@ -482,7 +464,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                 </span>
               </div>
 
-              {/* Sidebar Header Brand Preview */}
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#131c38]/60 border border-slate-800">
                 <div
                   className={`w-12 h-12 ${getShapeRadius(
@@ -492,11 +473,7 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                   )} flex items-center justify-center text-white shadow-lg overflow-hidden flex-shrink-0 border border-white/20`}
                 >
                   {formConfig.logoType === 'image' && formConfig.logoUrl ? (
-                    <img
-                      src={formConfig.logoUrl}
-                      alt="Logo Sidebar"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={formConfig.logoUrl} alt="Logo Sidebar" className="w-full h-full object-cover" />
                   ) : (
                     renderSelectedIcon()
                   )}
@@ -514,7 +491,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                 </div>
               </div>
 
-              {/* Sidebar User Widget Preview */}
               <div className="p-3 rounded-2xl bg-[#131c38] border border-slate-700/60 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 truncate">
                   <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
@@ -536,7 +512,6 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
                 </div>
               </div>
 
-              {/* Mock Menu Items */}
               <div className="space-y-1.5 pt-2 border-t border-slate-800">
                 <div
                   className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-white bg-gradient-to-r ${getAccentGradient(
@@ -557,7 +532,7 @@ export const AdminSidebarCustomizerTab: React.FC<AdminSidebarCustomizerTabProps>
               </div>
 
               <div className="pt-2 text-[11px] text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                💡 <span className="font-semibold text-slate-300">Tips:</span> Perubahan foto dan tulisan ini akan tersimpan otomatis di perangkat dan tersinkronisasi langsung ke database server.
+                💡 <span className="font-semibold text-slate-300">Tips:</span> Perubahan foto dan tulisan ini akan disinkronkan otomatis ke database server.
               </div>
 
               <button

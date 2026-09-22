@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { HeroSlider } from './components/HeroSlider';
@@ -22,6 +22,7 @@ import { DashboardView } from './components/DashboardView';
 import { ProfileSettingsModal } from './components/common/ProfileSettingsModal';
 import { dbService } from './services/dbSync';
 import { Footer } from './components/Footer';
+import { DEFAULT_SIDEBAR_CONFIG } from './components/admin/AdminSidebarCustomizerTab';
 
 import {
   INITIAL_STUDENTS,
@@ -68,12 +69,13 @@ import {
   TeacherAdminDocument,
   SubjectAttendanceSession,
   HomepageConfig,
+  AdminSidebarConfig,
 } from './types';
-import { BookOpen, Award, GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('beranda');
   const [activeSubTab, setActiveSubTab] = useState<string | undefined>(undefined);
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const handleNavigateTab = (tab: string, subTab?: string) => {
     setActiveTab(tab);
@@ -83,276 +85,221 @@ export default function App() {
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+
+  // Session - tetap di localStorage karena ini state per-perangkat
   const [session, setSession] = useState<UserSession | null>(() => {
-    const saved = localStorage.getItem('smak_user_session');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  // Students state with localStorage sync
-  const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem('smak_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-  });
-
-  // Teachers state with localStorage sync
-  const [teachers, setTeachers] = useState<TeacherStaff[]>(() => {
-    const saved = localStorage.getItem('smak_teachers');
-    return saved ? JSON.parse(saved) : INITIAL_TEACHERS;
-  });
-
-  // News state with localStorage sync
-  const [newsList, setNewsList] = useState<NewsItem[]>(() => {
-    const saved = localStorage.getItem('smak_news');
-    return saved ? JSON.parse(saved) : INITIAL_NEWS;
-  });
-
-  // Events state with localStorage sync
-  const [eventsList, setEventsList] = useState<SchoolEvent[]>(() => {
-    const saved = localStorage.getItem('smak_events');
-    return saved ? JSON.parse(saved) : INITIAL_EVENTS;
-  });
-
-  // Gallery state with localStorage sync
-  const [galleryList, setGalleryList] = useState<GalleryItem[]>(() => {
-    const saved = localStorage.getItem('smak_gallery');
-    return saved ? JSON.parse(saved) : INITIAL_GALLERY;
-  });
-
-  // PPDB Registrations state
-  const [ppdbList, setPpdbList] = useState<PPDBRegistration[]>(() => {
-    const saved = localStorage.getItem('smak_ppdb');
-    return saved ? JSON.parse(saved) : INITIAL_PPDB;
-  });
-
-  // Notifications state
-  const [notifications, setNotifications] = useState<PushNotification[]>(() => {
-    const saved = localStorage.getItem('smak_notifications');
-    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
-  });
-
-  // Study Materials state (Bahan Ajar)
-  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
-    const saved = localStorage.getItem('smak_materials');
-    return saved ? JSON.parse(saved) : INITIAL_STUDY_MATERIALS;
-  });
-
-  // Assignments state (Tugas Siswa)
-  const [assignments, setAssignments] = useState<Assignment[]>(() => {
-    const saved = localStorage.getItem('smak_assignments');
-    return saved ? JSON.parse(saved) : INITIAL_ASSIGNMENTS;
-  });
-
-  // Submissions state (Pengumpulan Tugas Siswa)
-  const [submissions, setSubmissions] = useState<AssignmentSubmission[]>(() => {
-    const saved = localStorage.getItem('smak_submissions');
-    return saved ? JSON.parse(saved) : INITIAL_SUBMISSIONS;
-  });
-
-  // Wali Kelas Notes state (Catatan Khusus Wali Kelas)
-  const [waliNotes, setWaliNotes] = useState<WaliKelasNote[]>(() => {
-    const saved = localStorage.getItem('smak_wali_notes');
-    return saved ? JSON.parse(saved) : INITIAL_WALI_NOTES;
-  });
-
-  // Leave Requests state (Permohonan Izin dari Orang Tua ke Wali Kelas)
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(() => {
-    const saved = localStorage.getItem('smak_leave_requests');
-    return saved ? JSON.parse(saved) : INITIAL_LEAVE_REQUESTS;
-  });
-
-  // Subject Discussions state (Forum Diskusi Siswa & Guru)
-  const [discussions, setDiscussions] = useState<SubjectDiscussion[]>(() => {
-    const saved = localStorage.getItem('smak_discussions');
-    return saved ? JSON.parse(saved) : INITIAL_DISCUSSIONS;
-  });
-
-  // Extracurriculars state (Ekskul Siswa)
-  const [extracurriculars, setExtracurriculars] = useState<Extracurricular[]>(() => {
-    const saved = localStorage.getItem('smak_extracurriculars');
-    return saved ? JSON.parse(saved) : INITIAL_EXTRACURRICULARS;
-  });
-
-  // Student Works state (Karya Siswa: Cerita, Puisi, Jurnalistik)
-  const [studentWorks, setStudentWorks] = useState<StudentWork[]>(() => {
-    const saved = localStorage.getItem('smak_student_works');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENT_WORKS;
-  });
-
-  // Majors state (Jurusan & Peminatan)
-  const [majors, setMajors] = useState<MajorProgram[]>(() => {
-    const saved = localStorage.getItem('smak_majors');
-    return saved ? JSON.parse(saved) : INITIAL_MAJORS;
-  });
-
-  // School Profile state (Profil Sekolah Admin Utama)
-  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(() => {
-    const saved = localStorage.getItem('smak_school_profile');
-    return saved ? JSON.parse(saved) : INITIAL_SCHOOL_PROFILE;
-  });
-
-  // Teacher Admin Documents state (Administrasi Guru Mapel & Supervisi)
-  const [teacherAdminDocs, setTeacherAdminDocs] = useState<TeacherAdminDocument[]>(() => {
-    const saved = localStorage.getItem('smak_teacher_admin_docs');
-    return saved ? JSON.parse(saved) : INITIAL_TEACHER_ADMIN_DOCS;
-  });
-
-  // Subject Attendance Sessions state (Presensi Guru Mapel Per Pertemuan)
-  const [subjectAttendanceSessions, setSubjectAttendanceSessions] = useState<SubjectAttendanceSession[]>(() => {
-    const saved = localStorage.getItem('smak_subject_attendance');
-    return saved ? JSON.parse(saved) : INITIAL_SUBJECT_ATTENDANCE_SESSIONS;
-  });
-
-  // Homepage Config state (Kustomisasi Gambar & Tulisan Halaman Utama Website)
-  const [homepageConfig, setHomepageConfig] = useState<HomepageConfig>(() => {
     try {
-      const saved = localStorage.getItem('smak_homepage_config');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
+      const saved = localStorage.getItem('smak_user_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
-    return DEFAULT_HOMEPAGE_CONFIG;
   });
+
+  // ==========================================================
+  // STATE DATA - Nilai awal dari mockData, akan diisi dari database
+  // ==========================================================
+  const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
+  const [teachers, setTeachers] = useState<TeacherStaff[]>(INITIAL_TEACHERS);
+  const [newsList, setNewsList] = useState<NewsItem[]>(INITIAL_NEWS);
+  const [eventsList, setEventsList] = useState<SchoolEvent[]>(INITIAL_EVENTS);
+  const [galleryList, setGalleryList] = useState<GalleryItem[]>(INITIAL_GALLERY);
+  const [ppdbList, setPpdbList] = useState<PPDBRegistration[]>(INITIAL_PPDB);
+  const [notifications, setNotifications] = useState<PushNotification[]>(INITIAL_NOTIFICATIONS);
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
+  const [assignments, setAssignments] = useState<Assignment[]>(INITIAL_ASSIGNMENTS);
+  const [submissions, setSubmissions] = useState<AssignmentSubmission[]>(INITIAL_SUBMISSIONS);
+  const [waliNotes, setWaliNotes] = useState<WaliKelasNote[]>(INITIAL_WALI_NOTES);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(INITIAL_LEAVE_REQUESTS);
+  const [discussions, setDiscussions] = useState<SubjectDiscussion[]>(INITIAL_DISCUSSIONS);
+  const [extracurriculars, setExtracurriculars] = useState<Extracurricular[]>(INITIAL_EXTRACURRICULARS);
+  const [studentWorks, setStudentWorks] = useState<StudentWork[]>(INITIAL_STUDENT_WORKS);
+  const [majors, setMajors] = useState<MajorProgram[]>(INITIAL_MAJORS);
+  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(INITIAL_SCHOOL_PROFILE);
+  const [teacherAdminDocs, setTeacherAdminDocs] = useState<TeacherAdminDocument[]>(INITIAL_TEACHER_ADMIN_DOCS);
+  const [subjectAttendanceSessions, setSubjectAttendanceSessions] = useState<SubjectAttendanceSession[]>(INITIAL_SUBJECT_ATTENDANCE_SESSIONS);
+  const [homepageConfig, setHomepageConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE_CONFIG);
+  const [sidebarConfig, setSidebarConfig] = useState<AdminSidebarConfig>(DEFAULT_SIDEBAR_CONFIG);
 
   const [adminInitialMenu, setAdminInitialMenu] = useState<string>('overview');
 
-  // Muat data dari MySQL Database Server saat aplikasi pertama kali dimuat
+  // ==========================================================
+  // LOAD DATA DARI DATABASE saat aplikasi pertama kali dimuat
+  // ==========================================================
   useEffect(() => {
-    dbService.loadAllData().then((serverData) => {
-      if (serverData && Object.keys(serverData).length > 0) {
-        if (serverData.students?.length) setStudents(serverData.students);
-        if (serverData.teachers?.length) setTeachers(serverData.teachers);
-        if (serverData.news?.length) setNewsList(serverData.news);
-        if (serverData.events?.length) setEventsList(serverData.events);
-        if (serverData.gallery?.length) setGalleryList(serverData.gallery);
-        if (serverData.ppdb?.length) setPpdbList(serverData.ppdb);
-        if (serverData.notifications?.length) setNotifications(serverData.notifications);
-        if (serverData.studyMaterials?.length) setStudyMaterials(serverData.studyMaterials);
-        if (serverData.assignments?.length) setAssignments(serverData.assignments);
-        if (serverData.submissions?.length) setSubmissions(serverData.submissions);
-        if (serverData.waliNotes?.length) setWaliNotes(serverData.waliNotes);
-        if (serverData.leaveRequests?.length) setLeaveRequests(serverData.leaveRequests);
-        if (serverData.discussions?.length) setDiscussions(serverData.discussions);
-        if (serverData.extracurriculars?.length) setExtracurriculars(serverData.extracurriculars);
-        if (serverData.studentWorks?.length) setStudentWorks(serverData.studentWorks);
-        if (serverData.majors?.length) setMajors(serverData.majors);
-        if (serverData.schoolProfile) setSchoolProfile(serverData.schoolProfile);
-        if (serverData.teacherAdminDocs?.length) setTeacherAdminDocs(serverData.teacherAdminDocs);
-        if (serverData.subjectAttendance?.length) setSubjectAttendanceSessions(serverData.subjectAttendance);
-        if (serverData.homepageConfig) setHomepageConfig(serverData.homepageConfig);
+    let mounted = true;
+
+    const loadDataFromDatabase = async () => {
+      try {
+        const serverData = await dbService.loadAllData();
+        if (!mounted) return;
+
+        if (serverData && Object.keys(serverData).length > 0) {
+          if (serverData.students?.length) setStudents(serverData.students);
+          if (serverData.teachers?.length) setTeachers(serverData.teachers);
+          if (serverData.news?.length) setNewsList(serverData.news);
+          if (serverData.events?.length) setEventsList(serverData.events);
+          if (serverData.gallery?.length) setGalleryList(serverData.gallery);
+          if (serverData.ppdb?.length) setPpdbList(serverData.ppdb);
+          if (serverData.notifications?.length) setNotifications(serverData.notifications);
+          if (serverData.studyMaterials?.length) setStudyMaterials(serverData.studyMaterials);
+          if (serverData.assignments?.length) setAssignments(serverData.assignments);
+          if (serverData.submissions?.length) setSubmissions(serverData.submissions);
+          if (serverData.waliNotes?.length) setWaliNotes(serverData.waliNotes);
+          if (serverData.leaveRequests?.length) setLeaveRequests(serverData.leaveRequests);
+          if (serverData.discussions?.length) setDiscussions(serverData.discussions);
+          if (serverData.extracurriculars?.length) setExtracurriculars(serverData.extracurriculars);
+          if (serverData.studentWorks?.length) setStudentWorks(serverData.studentWorks);
+          if (serverData.majors?.length) setMajors(serverData.majors);
+          if (serverData.schoolProfile) setSchoolProfile(serverData.schoolProfile);
+          if (serverData.teacherAdminDocs?.length) setTeacherAdminDocs(serverData.teacherAdminDocs);
+          if (serverData.subjectAttendance?.length) setSubjectAttendanceSessions(serverData.subjectAttendance);
+          if (serverData.homepageConfig) setHomepageConfig(serverData.homepageConfig);
+          if (serverData.sidebarConfig) setSidebarConfig(serverData.sidebarConfig);
+        }
+      } catch (err) {
+        console.warn('[App] Gagal memuat data dari database:', err);
+      } finally {
+        if (mounted) setIsDataLoaded(true);
       }
-    });
+    };
+
+    loadDataFromDatabase();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Sync state changes to localStorage and MySQL Database
+  // ==========================================================
+  // SYNC DATA KE DATABASE saat state berubah (skip initial load)
+  // ==========================================================
+  const initialSyncDone = useRef(false);
+
   useEffect(() => {
-    localStorage.setItem('smak_students', JSON.stringify(students));
+    if (!isDataLoaded) return;
+    if (!initialSyncDone.current) {
+      initialSyncDone.current = true;
+      return;
+    }
     dbService.syncEntity('students', students);
-  }, [students]);
+  }, [students, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_teachers', JSON.stringify(teachers));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('teachers', teachers);
-  }, [teachers]);
+  }, [teachers, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_news', JSON.stringify(newsList));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('news', newsList);
-  }, [newsList]);
+  }, [newsList, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_events', JSON.stringify(eventsList));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('events', eventsList);
-  }, [eventsList]);
+  }, [eventsList, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_gallery', JSON.stringify(galleryList));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('gallery', galleryList);
-  }, [galleryList]);
+  }, [galleryList, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_ppdb', JSON.stringify(ppdbList));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('ppdb', ppdbList);
-  }, [ppdbList]);
+  }, [ppdbList, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_notifications', JSON.stringify(notifications));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('notifications', notifications);
-  }, [notifications]);
+  }, [notifications, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_materials', JSON.stringify(studyMaterials));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('studyMaterials', studyMaterials);
-  }, [studyMaterials]);
+  }, [studyMaterials, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_assignments', JSON.stringify(assignments));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('assignments', assignments);
-  }, [assignments]);
+  }, [assignments, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_submissions', JSON.stringify(submissions));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('submissions', submissions);
-  }, [submissions]);
+  }, [submissions, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_wali_notes', JSON.stringify(waliNotes));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('waliNotes', waliNotes);
-  }, [waliNotes]);
+  }, [waliNotes, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_leave_requests', JSON.stringify(leaveRequests));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('leaveRequests', leaveRequests);
-  }, [leaveRequests]);
+  }, [leaveRequests, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_discussions', JSON.stringify(discussions));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('discussions', discussions);
-  }, [discussions]);
+  }, [discussions, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_extracurriculars', JSON.stringify(extracurriculars));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('extracurriculars', extracurriculars);
-  }, [extracurriculars]);
+  }, [extracurriculars, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_student_works', JSON.stringify(studentWorks));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('studentWorks', studentWorks);
-  }, [studentWorks]);
+  }, [studentWorks, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_majors', JSON.stringify(majors));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('majors', majors);
-  }, [majors]);
+  }, [majors, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_school_profile', JSON.stringify(schoolProfile));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('schoolProfile', schoolProfile);
-  }, [schoolProfile]);
+  }, [schoolProfile, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_teacher_admin_docs', JSON.stringify(teacherAdminDocs));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('teacherAdminDocs', teacherAdminDocs);
-  }, [teacherAdminDocs]);
+  }, [teacherAdminDocs, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_subject_attendance', JSON.stringify(subjectAttendanceSessions));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('subjectAttendance', subjectAttendanceSessions);
-  }, [subjectAttendanceSessions]);
+  }, [subjectAttendanceSessions, isDataLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('smak_homepage_config', JSON.stringify(homepageConfig));
+    if (!isDataLoaded || !initialSyncDone.current) return;
     dbService.syncEntity('homepageConfig', homepageConfig);
-  }, [homepageConfig]);
+  }, [homepageConfig, isDataLoaded]);
 
   useEffect(() => {
-    if (session) {
-      localStorage.setItem('smak_user_session', JSON.stringify(session));
-    } else {
-      localStorage.removeItem('smak_user_session');
+    if (!isDataLoaded || !initialSyncDone.current) return;
+    dbService.syncEntity('sidebarConfig', sidebarConfig);
+  }, [sidebarConfig, isDataLoaded]);
+
+  // Sesi login tetap disimpan di localStorage
+  useEffect(() => {
+    try {
+      if (session) {
+        localStorage.setItem('smak_user_session', JSON.stringify(session));
+      } else {
+        localStorage.removeItem('smak_user_session');
+      }
+    } catch (e) {
+      console.warn('[App] Gagal menyimpan sesi:', e);
     }
   }, [session]);
 
-  // Handlers: Teacher Administration Documents
+  // ==========================================================
+  // HANDLERS: Teacher Administration Documents
+  // ==========================================================
   const handleUploadTeacherAdminDoc = (doc: TeacherAdminDocument) => {
     setTeacherAdminDocs((prev) => [doc, ...prev]);
   };
@@ -384,7 +331,6 @@ export default function App() {
     );
   };
 
-  // Handlers: Subject Attendance Sessions
   const handleSaveSubjectAttendanceSession = (sessionData: SubjectAttendanceSession) => {
     setSubjectAttendanceSessions((prev) => [sessionData, ...prev]);
   };
@@ -481,12 +427,10 @@ export default function App() {
 
   // Handler: Mark notification as read
   const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
   };
 
-  // Handlers: Study Materials (Bahan Ajar)
+  // Handlers: Study Materials
   const handleAddStudyMaterial = (mat: StudyMaterial) => {
     setStudyMaterials((prev) => [mat, ...prev]);
   };
@@ -494,7 +438,7 @@ export default function App() {
     setStudyMaterials((prev) => prev.filter((m) => m.id !== id));
   };
 
-  // Handlers: Assignments (Tugas)
+  // Handlers: Assignments
   const handleAddAssignment = (assignment: Assignment) => {
     setAssignments((prev) => [assignment, ...prev]);
   };
@@ -502,7 +446,7 @@ export default function App() {
     setAssignments((prev) => prev.filter((a) => a.id !== id));
   };
 
-  // Handlers: Submissions (Pengumpulan Tugas)
+  // Handlers: Submissions
   const handleAddSubmission = (submission: AssignmentSubmission) => {
     setSubmissions((prev) => {
       const filtered = prev.filter(
@@ -525,7 +469,7 @@ export default function App() {
     setWaliNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
-  // Handlers: Leave Requests (Izin Orang Tua)
+  // Handlers: Leave Requests
   const handleSubmitLeaveRequest = (req: LeaveRequest) => {
     setLeaveRequests((prev) => [req, ...prev]);
   };
@@ -549,7 +493,7 @@ export default function App() {
     );
   };
 
-  // Handlers: Discussions (Diskusi Siswa & Guru)
+  // Handlers: Discussions
   const handleAddDiscussion = (disc: SubjectDiscussion) => {
     setDiscussions((prev) => [disc, ...prev]);
   };
@@ -586,7 +530,7 @@ export default function App() {
     setExtracurriculars((prev) => prev.filter((e) => e.id !== id));
   };
 
-  // Handlers: Student Works (Cerita, Puisi, Jurnalistik)
+  // Handlers: Student Works
   const handleAddStudentWork = (work: StudentWork) => {
     setStudentWorks((prev) => [work, ...prev]);
   };
@@ -599,7 +543,11 @@ export default function App() {
 
   const handleLogout = () => {
     setSession(null);
-    localStorage.removeItem('smak_user_session');
+    try {
+      localStorage.removeItem('smak_user_session');
+    } catch (e) {
+      console.warn(e);
+    }
     handleNavigateTab('beranda');
   };
 
@@ -607,7 +555,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 font-sans">
-      {/* 1. School Header with Crest and Notification Bell (Disembunyikan saat di Dasbor) */}
       {!isDashboard && (
         <Header
           session={session}
@@ -627,7 +574,6 @@ export default function App() {
         />
       )}
 
-      {/* 2. Top Navigation Bar with Distinct Tabs (Disembunyikan saat di Dasbor) */}
       {!isDashboard && (
         <Navbar
           activeTab={activeTab}
@@ -647,12 +593,9 @@ export default function App() {
         />
       )}
 
-      {/* 3. Main Dynamic Content Switcher */}
       <main className="flex-1 w-full">
-        {/* PAGE 1: BERANDA (HOME) */}
         {activeTab === 'beranda' && (
           <div className="space-y-0">
-            {/* 1. Grand Hero Slider with Overlapping Stats Ribbon (matches reference) */}
             <HeroSlider
               onNavigateTab={handleNavigateTab}
               config={homepageConfig}
@@ -663,16 +606,13 @@ export default function App() {
               }}
             />
 
-            {/* 1B. Sambutan Resmi Kepala Sekolah (Dinamis dari Kustomisasi Beranda) */}
             <HomepageWelcomeSection
               welcome={homepageConfig.welcomeSection}
               onNavigateTab={handleNavigateTab}
             />
 
-            {/* 2. Academic Excellence: "Find the Program That Inspires You" (matches reference) */}
             <AcademicProgramsSection onNavigateTab={handleNavigateTab} />
 
-            {/* 3. Vibrant Campus Life: "Experience More Than Education" Dark Navy Showcase + Karya Siswa & Ekskul */}
             <CampusLifeSection
               onNavigateTab={handleNavigateTab}
               initialSubTab="ekskul"
@@ -680,34 +620,27 @@ export default function App() {
               studentWorks={studentWorks}
             />
 
-            {/* 4. Why SMAK Setia Bakti: "A School That Supports You" 4-Pillars (matches reference) */}
             <WhyChooseUsSection
               onNavigateTab={handleNavigateTab}
               config={homepageConfig.whyChooseUs}
             />
 
-            {/* 5. Tri-Column Showcase: Student Voice + Latest News & Events + PPDB Next Step Callout (matches reference) */}
             <StudentVoiceAndNewsSection
               newsList={newsList}
               events={eventsList}
               onNavigateTab={handleNavigateTab}
             />
 
-            {/* 6. Quick Action Facility Modals (Athletics, Asrama, Kantin Sehat, Kalender Akademik) */}
             <QuickActionRibbon onNavigateTab={handleNavigateTab} />
 
-            {/* 7. Interactive Statistics & Alumni Tracker */}
             <StatsDashboard students={students} />
 
-            {/* 8. Teachers & Faculty Directory Preview */}
             <TeacherStaffSection teachers={teachers} />
 
-            {/* 9. Student Gallery & Campus Life Documentation */}
             <StudentGallery items={galleryList} />
           </div>
         )}
 
-        {/* PAGE 2: PROFIL KAMI (TERPISAH SEBAGAI HALAMAN MANDIRI DENGAN SUB-MENU LENGKAP) */}
         {activeTab === 'profil' && (
           <SchoolProfileSection
             profile={schoolProfile}
@@ -716,7 +649,6 @@ export default function App() {
           />
         )}
 
-        {/* PAGE 3: JURUSAN & PROGRAM (TERPISAH SEBAGAI HALAMAN MANDIRI DENGAN SUB-MENU PEMINATAN) */}
         {(activeTab === 'jurusan' || activeTab === 'akademik') && (
           <AcademicProgramsFullPage
             majors={majors}
@@ -725,7 +657,6 @@ export default function App() {
           />
         )}
 
-        {/* PAGE 4: INFORMASI PPDB (ONLINE REGISTRATION & STATUS DENGAN SUB-MENU LENGKAP) */}
         {activeTab === 'ppdb' && (
           <PPDBOnline
             ppdbList={ppdbList}
@@ -734,15 +665,10 @@ export default function App() {
           />
         )}
 
-        {/* PAGE 5: DEWAN GURU & STAF (DENGAN FILTER DEPARTEMEN / SUB-MENU) */}
         {activeTab === 'guru' && (
-          <TeacherStaffSection
-            teachers={teachers}
-            initialDept={activeSubTab}
-          />
+          <TeacherStaffSection teachers={teachers} initialDept={activeSubTab} />
         )}
 
-        {/* PAGE 6: KEHIDUPAN SISWA (EKSKUL, KARYA SASTRA & JURNALISTIK, OSIS, ASRAMA, GALERI) */}
         {(activeTab === 'kehidupan' || activeTab === 'galeri') && (
           <CampusLifeSection
             onNavigateTab={handleNavigateTab}
@@ -752,17 +678,12 @@ export default function App() {
           />
         )}
 
-        {/* PAGE 7: STATISTIK LENGKAP SISWA, KELULUSAN, ALUMNI & KOPERASI */}
         {activeTab === 'statistik' && (
           <div className="py-6">
-            <StatsDashboard
-              students={students}
-              initialSubTab={activeSubTab}
-            />
+            <StatsDashboard students={students} initialSubTab={activeSubTab} />
           </div>
         )}
 
-        {/* PAGE 8: BERITA & PENGUMUMAN */}
         {activeTab === 'berita' && (
           <div className="max-w-7xl mx-auto px-4 py-10 space-y-8 animate-fadeIn">
             <div className="border-b border-slate-200 pb-4">
@@ -784,7 +705,6 @@ export default function App() {
           </div>
         )}
 
-        {/* PAGE 8: AUTHENTICATED DASHBOARD (ADMIN / GURU / SISWA / ORANG TUA) */}
         {activeTab === 'dashboard' && session && (
           <DashboardView
             session={session}
@@ -854,6 +774,8 @@ export default function App() {
             homepageConfig={homepageConfig}
             onUpdateHomepageConfig={(updated) => setHomepageConfig(updated)}
             onResetHomepageConfig={() => setHomepageConfig(DEFAULT_HOMEPAGE_CONFIG)}
+            sidebarConfig={sidebarConfig}
+            onUpdateSidebarConfig={(updated) => setSidebarConfig(updated)}
             initialAdminMenu={adminInitialMenu}
             onBackToPortal={handleLogout}
             onLogout={handleLogout}
@@ -862,14 +784,12 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. Real-Time Push Notification Toast Alert */}
       <PushNotificationBanner
         notifications={notifications}
         onMarkAsRead={handleMarkAsRead}
         onNavigateToPPDB={() => setActiveTab('ppdb')}
       />
 
-      {/* 5. Login Modal for Admin, Guru, Siswa, Orang Tua */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -879,18 +799,15 @@ export default function App() {
         }}
       />
 
-      {/* 5b. Profile Settings Modal (Admin, Guru, Siswa, Orang Tua) */}
       <ProfileSettingsModal
         isOpen={isProfileModalOpen}
         session={session}
         onClose={() => setIsProfileModalOpen(false)}
         onUpdateSession={(updatedSession: UserSession) => {
           setSession(updatedSession);
-          localStorage.setItem('smak_user_session', JSON.stringify(updatedSession));
         }}
       />
 
-      {/* 6. Comprehensive School Footer (Disembunyikan saat di Dasbor) */}
       {!isDashboard && (
         <Footer
           onNavigate={(tab) => setActiveTab(tab)}
