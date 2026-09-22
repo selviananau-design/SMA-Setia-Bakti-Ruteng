@@ -13,17 +13,31 @@ import {
 
 async function startServer() {
   const app = express();
-  const LOCAL_PORT = Number(process.env.PORT) || 3000;
-  const isPassenger = typeof (global as any).PhusionPassenger !== 'undefined';
 
-  console.log(`[Server] NODE_ENV=${process.env.NODE_ENV}, PASSENGER=${isPassenger}, HOME=${process.env.HOME || 'N/A'}`);
+  // ==========================================================
+  // FIX UTAMA: Selalu gunakan process.env.PORT dari Hostinger
+  // dan listen pada 0.0.0.0 agar dapat diakses reverse proxy.
+  // Fallback ke 3000 hanya untuk development lokal.
+  // ==========================================================
+  const PORT = Number(process.env.PORT) || 3000;
 
-  // Tentukan folder upload dengan aman
+  console.log('[Server] ════════════════════════════════════════');
+  console.log(`[Server] NODE_ENV    : ${process.env.NODE_ENV || 'N/A'}`);
+  console.log(`[Server] PORT (env)  : ${process.env.PORT || 'TIDAK DISET'}`);
+  console.log(`[Server] PORT (pakai): ${PORT}`);
+  console.log(`[Server] HOME        : ${process.env.HOME || 'N/A'}`);
+  console.log(`[Server] CWD         : ${process.cwd()}`);
+  console.log('[Server] ════════════════════════════════════════');
+
+  // ==========================================================
+  // FOLDER UPLOAD
+  // ==========================================================
   let UPLOADS_DIR: string;
   try {
     if (process.env.UPLOADS_DIR) {
       UPLOADS_DIR = process.env.UPLOADS_DIR;
-    } else if (isPassenger && process.env.HOME) {
+    } else if (process.env.HOME && process.env.HOME.includes('/domains/')) {
+      // Hostinger: simpan di luar folder versions agar persisten
       UPLOADS_DIR = path.join(process.env.HOME, 'portal-uploads');
     } else {
       UPLOADS_DIR = path.join(process.cwd(), 'uploads');
@@ -36,7 +50,9 @@ async function startServer() {
   } catch (err: any) {
     console.error(`[Uploads] Gagal setup folder: ${err.message}`);
     UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-    try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
+    try {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    } catch {}
   }
 
   const storage = multer.diskStorage({
@@ -52,10 +68,16 @@ async function startServer() {
     limits: { fileSize: 5 * 1024 * 1024 },
   });
 
+  // ==========================================================
+  // MIDDLEWARE
+  // ==========================================================
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   app.use('/uploads', express.static(UPLOADS_DIR));
 
+  // ==========================================================
+  // DATABASE
+  // ==========================================================
   try {
     await initDatabase();
     console.log('✅ Database terhubung.');
@@ -63,8 +85,17 @@ async function startServer() {
     console.error('❌ Gagal init database:', error);
   }
 
+  // ==========================================================
+  // API ROUTES
+  // ==========================================================
+
   app.get('/api/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
+    res.json({
+      status: 'ok',
+      time: new Date().toISOString(),
+      port: PORT,
+      env: process.env.NODE_ENV,
+    });
   });
 
   app.get('/api/db-status', async (req: Request, res: Response) => {
@@ -84,14 +115,57 @@ async function startServer() {
   app.post('/api/auth/login', async (req: Request, res: Response) => {
     const { username, role } = req.body;
     const users: Record<string, any> = {
-      admin: { id: 'usr-admin-1', role: 'admin', name: 'Admin Utama', identifier: 'admin', email: 'admin@smaksetiabakti.sch.id', token: 'token_admin', nip: '197001011995011001' },
-      walikelas: { id: 'usr-wali-1', role: 'wali_kelas', name: 'Wali Kelas', identifier: 'walikelas', nip: '198811202015022004', email: 'wali@smaksetiabakti.sch.id', className: 'X-MIPA 1', token: 'token_wali' },
-      gurumapel: { id: 'usr-mapel-1', role: 'guru_mapel', name: 'Guru Mapel', identifier: 'gurumapel', nip: '198504122010011012', email: 'guru@smaksetiabakti.sch.id', subject: 'Biologi', className: 'X-MIPA 1', token: 'token_mapel' },
-      '0078129011': { id: 'usr-siswa-1', role: role === 'orangtua' ? 'orangtua' : 'siswa', name: 'Siswa', identifier: '0078129011', className: 'X-MIPA 1', childNisn: '0078129011', token: 'token_siswa' },
+      admin: {
+        id: 'usr-admin-1',
+        role: 'admin',
+        name: 'Admin Utama',
+        identifier: 'admin',
+        email: 'admin@smaksetiabakti.sch.id',
+        token: 'token_admin',
+        nip: '197001011995011001',
+      },
+      walikelas: {
+        id: 'usr-wali-1',
+        role: 'wali_kelas',
+        name: 'Wali Kelas',
+        identifier: 'walikelas',
+        nip: '198811202015022004',
+        email: 'wali@smaksetiabakti.sch.id',
+        className: 'X-MIPA 1',
+        token: 'token_wali',
+      },
+      gurumapel: {
+        id: 'usr-mapel-1',
+        role: 'guru_mapel',
+        name: 'Guru Mapel',
+        identifier: 'gurumapel',
+        nip: '198504122010011012',
+        email: 'guru@smaksetiabakti.sch.id',
+        subject: 'Biologi',
+        className: 'X-MIPA 1',
+        token: 'token_mapel',
+      },
+      '0078129011': {
+        id: 'usr-siswa-1',
+        role: role === 'orangtua' ? 'orangtua' : 'siswa',
+        name: 'Siswa',
+        identifier: '0078129011',
+        className: 'X-MIPA 1',
+        childNisn: '0078129011',
+        token: 'token_siswa',
+      },
     };
     const target = users[username];
     if (target) return res.json({ success: true, session: target });
-    return res.json({ success: true, session: { role: role || 'siswa', name: username, identifier: username, token: `token_${Date.now()}` } });
+    return res.json({
+      success: true,
+      session: {
+        role: role || 'siswa',
+        name: username,
+        identifier: username,
+        token: `token_${Date.now()}`,
+      },
+    });
   });
 
   app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
@@ -127,8 +201,14 @@ async function startServer() {
     res.status(404).json({ error: 'Tidak ditemukan' });
   });
 
+  // ==========================================================
+  // FRONTEND
+  // ==========================================================
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
@@ -138,11 +218,12 @@ async function startServer() {
     });
   }
 
-  if (isPassenger) {
-    app.listen(process.env.PORT as any, () => console.log(`✅ Passenger ready.`));
-  } else {
-    app.listen(LOCAL_PORT, () => console.log(`✅ Server lokal di port ${LOCAL_PORT}.`));
-  }
+  // ==========================================================
+  // LISTEN — FIX UTAMA: Selalu pakai PORT dari env, listen 0.0.0.0
+  // ==========================================================
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server berjalan di http://0.0.0.0:${PORT}`);
+  });
 }
 
 startServer();
