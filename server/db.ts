@@ -1,7 +1,7 @@
 import mysql, { Pool } from 'mysql2/promise';
 
 // ==========================================================
-// KONFIGURASI DATABASE MySQL
+// KONFIGURASI DATABASE MySQL (OPTIMIZED FOR LOW RESOURCE)
 // ==========================================================
 export interface DbConfig {
   host: string;
@@ -11,65 +11,87 @@ export interface DbConfig {
   database: string;
 }
 
+// Cache config agar tidak dibaca ulang setiap saat
+let cachedConfig: DbConfig | null = null;
+
 export const getDbConfig = (): DbConfig => {
-  // Ambil dari environment variables
+  if (cachedConfig) return cachedConfig;
+
   const host = process.env.DB_HOST || 'localhost';
   const user = process.env.DB_USER || '';
   const password = process.env.DB_PASSWORD || '';
   const database = process.env.DB_NAME || 'u128935091_db_stiba';
 
-  // DEBUG: Tampilkan nilai env yang terbaca (password disamarkan)
-  console.log('[DB Config] Konfigurasi yang akan digunakan:');
-  console.log(`  host     : ${host}`);
-  console.log(`  port     : 3306 (DIPAKSA - tidak baca env DB_PORT)`);
-  console.log(`  user     : ${user || '(KOSONG! Cek Environment Variables)'}`);
-  console.log(`  password : ${password ? '(ada, ' + password.length + ' karakter)' : '(KOSONG! Cek Environment Variables)'}`);
-  console.log(`  database : ${database}`);
-
-  return {
+  cachedConfig = {
     host,
-    port: 3306, // ← SELALU 3306, jangan gunakan process.env.DB_PORT
+    port: 3306, // SELALU 3306, jangan baca env DB_PORT
     user,
     password,
     database,
   };
+
+  // Log hanya sekali, bukan setiap initDatabase dipanggil
+  console.log('[DB Config] host=%s, user=%s, db=%s', host, user || '(KOSONG)', database);
+
+  return cachedConfig;
 };
 
 let pool: Pool | null = null;
 let isConnected = false;
 let lastError: string | null = null;
+let isInitializing = false;
 
 // In-Memory Storage Cache (fallback jika database tidak terhubung)
 const inMemoryStore: Record<string, any> = {};
 
 // ==========================================================
-// INISIALISASI DATABASE
+// INISIALISASI DATABASE (OPTIMIZED)
 // ==========================================================
 export async function initDatabase() {
+  // Cegah double init jika ada multiple request saat startup
+  if (isInitializing) {
+    console.log('[DB] Init sudah berjalan, skip...');
+    return { connected: isConnected, host: 'pending', database: 'pending' };
+  }
+
+  if (pool && isConnected) {
+    console.log('[DB] Sudah terhubung sebelumnya, skip init ulang.');
+    return { connected: true, host: cachedConfig?.host || 'localhost', database: cachedConfig?.database || '' };
+  }
+
+  isInitializing = true;
   const config = getDbConfig();
 
-  // Cek apakah kredensial dasar sudah diisi
+  // Cek kredensial dasar
   if (!config.user) {
-    console.error('[DB Error] ❌ DB_USER tidak diset! Isi Environment Variables di Hostinger.');
+    console.error('[DB Error] ❌ DB_USER tidak diset!');
     isConnected = false;
-    lastError = 'DB_USER tidak diset di Environment Variables';
+    lastError = 'DB_USER tidak diset';
+    isInitializing = false;
     return { connected: false, error: lastError };
   }
 
   try {
-    console.log('[DB] Membuat connection pool...');
+    console.log('[DB] Membuat connection pool (optimized)...');
     pool = mysql.createPool({
       host: config.host,
       port: config.port,
       user: config.user,
       password: config.password,
       database: config.database,
+      // ========================================================
+      // OPTIMASI RESOURCE: Kurangi connection pool dari 10 → 2
+      // ========================================================
       waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      connectTimeout: 10000, // 10 detik
-      enableKeepAlive: true,
-      keepAliveInitialDelay: 10000,
+      connectionLimit: 2,        // ← HEMAT RAM (dari 10 → 2)
+      maxIdle: 2,                // ← Maks 2 koneksi idle
+      idleTimeout: 60000,        // ← Putuskan koneksi idle setelah 60 detik
+      queueLimit: 5,             // ← Batasi antrian
+      connectTimeout: 8000,      // ← Timeout koneksi 8 detik
+      // ========================================================
+      // MATIKAN KEEP-ALIVE: Hemat resource (koneksi tidak terus terbuka)
+      // ========================================================
+      enableKeepAlive: false,    // ← HEMAT CPU & RAM
     });
 
     console.log('[DB] Menguji koneksi...');
@@ -79,41 +101,21 @@ export async function initDatabase() {
 
     isConnected = true;
     lastError = null;
-    console.log(`[DB Success] ✅ Berhasil terhubung ke database MySQL: ${config.database}@${config.host}:${config.port}`);
+    console.log(`[DB Success] ✅ Terhubung ke database: ${config.database}@${config.host}:${config.port}`);
 
-    // Cek max_allowed_packet
-    try {
-      const [rows]: any = await pool.query("SHOW VARIABLES LIKE 'max_allowed_packet'");
-      if (rows && rows.length > 0) {
-        const maxPacketBytes = parseInt(rows[0].Value, 10);
-        const maxPacketMB = (maxPacketBytes / (1024 * 1024)).toFixed(2);
-        console.log(`[DB Info] max_allowed_packet: ${maxPacketMB} MB`);
-        if (maxPacketBytes < 4 * 1024 * 1024) {
-          console.warn(`[DB Warning] ⚠️ max_allowed_packet terlalu kecil. Minta Hostinger naikkan ke 64 MB.`);
-        }
-      }
-    } catch (e: any) {
-      console.warn('[DB Info] Tidak bisa cek max_allowed_packet:', e.message);
-    }
+    // ========================================================
+    // HAPUS QUERY DIAGNOSTIK STARTUP (HEMAT RESOURCE)
+    // Cek max_allowed_packet dan SHOW TABLES sudah dihapus karena
+    // tidak perlu dan hanya membuang resource saat startup
+    // ========================================================
 
-    // Cek tabel app_settings
-    try {
-      const [tables]: any = await pool.query("SHOW TABLES LIKE 'app_settings'");
-      if (!tables || tables.length === 0) {
-        console.warn('[DB Warning] ⚠️ Tabel app_settings TIDAK ADA! Buat tabel di phpMyAdmin.');
-      } else {
-        console.log('[DB Info] ✅ Tabel app_settings ditemukan.');
-      }
-    } catch (e: any) {
-      console.warn('[DB Info] Tidak bisa cek tabel:', e.message);
-    }
-
+    isInitializing = false;
     return { connected: true, host: config.host, database: config.database };
   } catch (err: any) {
     isConnected = false;
-    lastError = err?.message || 'Gagal terhubung ke server MySQL';
-    console.error(`[DB Error] ❌ Gagal terhubung: ${lastError}`);
-    console.error(`[DB Error] Code: ${err.code}, Errno: ${err.errno}`);
+    lastError = err?.message || 'Gagal terhubung ke MySQL';
+    console.error(`[DB Error] ❌ Gagal: ${lastError}`);
+    isInitializing = false;
     return { connected: false, error: lastError };
   }
 }
@@ -152,46 +154,22 @@ export async function queryDb<T = any>(sql: string, params?: any[]): Promise<T[]
 }
 
 // ==========================================================
-// SIMPAN DATA KE DATABASE
+// SIMPAN DATA KE DATABASE (dengan validasi ringan)
 // ==========================================================
 export async function saveEntityToDb(entityKey: string, data: any) {
-  // Simpan dulu ke memori sebagai cache
+  // Simpan ke memori dulu
   inMemoryStore[entityKey] = data;
 
   const jsonString = JSON.stringify(data);
   const sizeInBytes = jsonString.length;
   const sizeInKB = (sizeInBytes / 1024).toFixed(2);
-  const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(3);
-
-  console.log(`[DB Sync] Simpan '${entityKey}' (${sizeInKB} KB / ${sizeInMB} MB)...`);
-
-  // Deteksi Base64
-  const base64Matches = jsonString.match(/data:image\/[a-zA-Z]+;base64,/g);
-  const base64Count = base64Matches ? base64Matches.length : 0;
-
-  if (base64Count > 0) {
-    console.warn(`[DB Sync] '${entityKey}' mengandung ${base64Count} gambar Base64`);
-  }
-
-  // Batas ukuran keras: 8 MB
-  const HARD_LIMIT_MB = 8;
-  if (sizeInBytes > HARD_LIMIT_MB * 1024 * 1024) {
-    const errorMsg = `Data '${entityKey}' terlalu besar (${sizeInMB} MB > ${HARD_LIMIT_MB} MB).`;
-    console.error(`[DB Sync REJECTED] ❌ ${errorMsg}`);
-    return {
-      success: false,
-      error: errorMsg,
-      size: { bytes: sizeInBytes, mb: sizeInMB },
-      base64Count,
-    };
-  }
 
   // Cek koneksi
   if (!pool || !isConnected) {
     console.warn(`[DB Sync] ❌ Database tidak terhubung. '${entityKey}' hanya di memori.`);
     return {
       success: false,
-      error: 'Database tidak terhubung. Cek Environment Variables (DB_USER, DB_PASSWORD, DB_NAME) di Hostinger.',
+      error: 'Database tidak terhubung. Cek Environment Variables di Hostinger.',
     };
   }
 
@@ -200,35 +178,30 @@ export async function saveEntityToDb(entityKey: string, data: any) {
       'INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
       [entityKey, jsonString, jsonString]
     );
-    console.log(`[DB Sync Success] ✅ '${entityKey}' (${sizeInKB} KB) tersimpan ke MySQL.`);
+    console.log(`[DB Sync Success] ✅ '${entityKey}' (${sizeInKB} KB) tersimpan.`);
     return {
       success: true,
       count: Array.isArray(data) ? data.length : 1,
-      size: { bytes: sizeInBytes, kb: sizeInKB, mb: sizeInMB },
-      base64Count,
+      size: { bytes: sizeInBytes, kb: sizeInKB },
     };
   } catch (err: any) {
     const errMsg = err.message || 'Unknown error';
     const errCode = err.code || 'NO_CODE';
 
-    console.error(`[DB Sync Error] ❌ GAGAL simpan '${entityKey}' (${sizeInKB} KB)`);
-    console.error(`[DB Sync Error] Message: ${errMsg}`);
-    console.error(`[DB Sync Error] Code: ${errCode}`);
+    console.error(`[DB Sync Error] ❌ GAGAL simpan '${entityKey}': ${errMsg} (${errCode})`);
 
     let userMessage = errMsg;
     if (errCode === 'ER_NET_PACKET_TOO_LARGE' || errMsg.includes('max_allowed_packet')) {
-      userMessage = `Data terlalu besar (${sizeInMB} MB). Kompres gambar atau minta Hostinger naikkan max_allowed_packet.`;
+      userMessage = `Data terlalu besar. Kompres gambar atau kurangi data.`;
     } else if (errMsg.includes('Data too long')) {
-      userMessage = `Kolom database terlalu kecil (${sizeInMB} MB). Pastikan kolom setting_value bertipe LONGTEXT.`;
+      userMessage = `Kolom database terlalu kecil. Pastikan bertipe LONGTEXT.`;
     }
 
     return {
       success: false,
       error: userMessage,
-      technicalError: errMsg,
       code: errCode,
-      size: { bytes: sizeInBytes, kb: sizeInKB, mb: sizeInMB },
-      base64Count,
+      size: { bytes: sizeInBytes, kb: sizeInKB },
     };
   }
 }
@@ -273,13 +246,13 @@ export async function getAllDbEntities() {
       }
 
       Object.assign(inMemoryStore, dbData);
-      console.log(`[DB Fetch] ✅ Memuat ${rows.length} entitas dari database.`);
+      console.log(`[DB Fetch] ✅ Memuat ${rows.length} entitas.`);
       return dbData;
     } catch (err: any) {
       console.warn('[DB Fetch] Gagal baca semua data:', err.message);
     }
   }
 
-  console.log(`[DB Fetch] ⚠️ Menggunakan cache memori (database tidak terhubung).`);
+  console.log(`[DB Fetch] ⚠️ Pakai cache memori.`);
   return inMemoryStore;
 }
