@@ -14,6 +14,10 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
+  console.log(`[Server] ℹ️ Memulai server...`);
+  console.log(`[Server] ℹ️ NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`[Server] ℹ️ PORT dari environment: ${process.env.PORT || 'TIDAK DISET (fallback ke 3000)'}`);
+
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -48,7 +52,7 @@ async function startServer() {
   });
 
   app.post('/api/auth/login', async (req: Request, res: Response) => {
-    const { username, password, role } = req.body;
+    const { username, role } = req.body;
 
     const users: Record<string, any> = {
       admin: {
@@ -118,7 +122,6 @@ async function startServer() {
     }
   });
 
-  // Endpoint untuk mengambil semua data (Sekarang membaca dari MySQL)
   app.get('/api/data', async (req: Request, res: Response) => {
     try {
       const data = await getAllDbEntities();
@@ -128,7 +131,6 @@ async function startServer() {
     }
   });
 
-  // Endpoint untuk menyimpan data ke database
   app.post('/api/sync/:entity', async (req: Request, res: Response) => {
     const { entity } = req.params;
     const data = req.body;
@@ -154,8 +156,9 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  // PERBAIKAN: Hapus '0.0.0.0' agar kompatibel dengan Hostinger
+  app.listen(PORT, () => {
+    console.log(`[Server] ✅ Server berhasil berjalan di port ${PORT}`);
   });
 }
 
