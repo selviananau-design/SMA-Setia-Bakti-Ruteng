@@ -16,7 +16,8 @@ async function startServer() {
 
   console.log(`[Server] ℹ️ Memulai server...`);
   console.log(`[Server] ℹ️ NODE_ENV: ${process.env.NODE_ENV}`);
-  console.log(`[Server] ℹ️ PORT dari environment: ${process.env.PORT || 'TIDAK DISET (fallback ke 3000)'}`);
+  console.log(`[Server] ℹ️ PORT dari environment: ${process.env.PORT || 'TIDAK DISET'}`);
+  console.log(`[Server] ℹ️ Phusion Passenger: ${typeof (global as any).PhusionPassenger !== 'undefined' ? 'AKTIF' : 'TIDAK AKTIF'}`);
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -142,6 +143,9 @@ async function startServer() {
     }
   });
 
+  // -------------------------------------------------------------
+  // VITE MIDDLEWARE (Development) vs STATIC ASSETS (Production)
+  // -------------------------------------------------------------
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -156,10 +160,23 @@ async function startServer() {
     });
   }
 
-  // PERBAIKAN: Hapus '0.0.0.0' agar kompatibel dengan Hostinger
-  app.listen(PORT, () => {
-    console.log(`[Server] ✅ Server berhasil berjalan di port ${PORT}`);
-  });
+  // -------------------------------------------------------------
+  // LISTEN: Deteksi Phusion Passenger (Hostinger) vs Mode Lokal
+  // -------------------------------------------------------------
+  if (typeof (global as any).PhusionPassenger !== 'undefined') {
+    // Mode Passenger (Hostinger shared hosting)
+    // Passenger menyediakan 'passenger' sebagai socket path via environment
+    console.log('[Server] 🚀 Mode Phusion Passenger terdeteksi. Menggunakan socket Passenger.');
+    (global as any).PhusionPassenger.configure({ autoInstall: false });
+    app.listen('passenger' as any, () => {
+      console.log('[Server] ✅ Server berhasil berjalan melalui Phusion Passenger socket.');
+    });
+  } else {
+    // Mode lokal (development / VPS / server biasa)
+    app.listen(PORT, () => {
+      console.log(`[Server] ✅ Server berhasil berjalan di port ${PORT} (mode lokal).`);
+    });
+  }
 }
 
 startServer();
