@@ -86,7 +86,6 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
 
-  // Session - tetap di localStorage karena ini state per-perangkat
   const [session, setSession] = useState<UserSession | null>(() => {
     try {
       const saved = localStorage.getItem('smak_user_session');
@@ -96,9 +95,6 @@ export default function App() {
     }
   });
 
-  // ==========================================================
-  // STATE DATA - Nilai awal dari mockData, akan diisi dari database
-  // ==========================================================
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [teachers, setTeachers] = useState<TeacherStaff[]>(INITIAL_TEACHERS);
   const [newsList, setNewsList] = useState<NewsItem[]>(INITIAL_NEWS);
@@ -124,7 +120,7 @@ export default function App() {
   const [adminInitialMenu, setAdminInitialMenu] = useState<string>('overview');
 
   // ==========================================================
-  // LOAD DATA DARI DATABASE saat aplikasi pertama kali dimuat
+  // LOAD DATA DARI DATABASE (DIPERBAIKI: Gunakan Array.isArray)
   // ==========================================================
   useEffect(() => {
     let mounted = true;
@@ -135,25 +131,25 @@ export default function App() {
         if (!mounted) return;
 
         if (serverData && Object.keys(serverData).length > 0) {
-          if (serverData.students?.length) setStudents(serverData.students);
-          if (serverData.teachers?.length) setTeachers(serverData.teachers);
-          if (serverData.news?.length) setNewsList(serverData.news);
-          if (serverData.events?.length) setEventsList(serverData.events);
-          if (serverData.gallery?.length) setGalleryList(serverData.gallery);
-          if (serverData.ppdb?.length) setPpdbList(serverData.ppdb);
-          if (serverData.notifications?.length) setNotifications(serverData.notifications);
-          if (serverData.studyMaterials?.length) setStudyMaterials(serverData.studyMaterials);
-          if (serverData.assignments?.length) setAssignments(serverData.assignments);
-          if (serverData.submissions?.length) setSubmissions(serverData.submissions);
-          if (serverData.waliNotes?.length) setWaliNotes(serverData.waliNotes);
-          if (serverData.leaveRequests?.length) setLeaveRequests(serverData.leaveRequests);
-          if (serverData.discussions?.length) setDiscussions(serverData.discussions);
-          if (serverData.extracurriculars?.length) setExtracurriculars(serverData.extracurriculars);
-          if (serverData.studentWorks?.length) setStudentWorks(serverData.studentWorks);
-          if (serverData.majors?.length) setMajors(serverData.majors);
+          if (Array.isArray(serverData.students)) setStudents(serverData.students);
+          if (Array.isArray(serverData.teachers)) setTeachers(serverData.teachers);
+          if (Array.isArray(serverData.news)) setNewsList(serverData.news);
+          if (Array.isArray(serverData.events)) setEventsList(serverData.events);
+          if (Array.isArray(serverData.gallery)) setGalleryList(serverData.gallery);
+          if (Array.isArray(serverData.ppdb)) setPpdbList(serverData.ppdb);
+          if (Array.isArray(serverData.notifications)) setNotifications(serverData.notifications);
+          if (Array.isArray(serverData.studyMaterials)) setStudyMaterials(serverData.studyMaterials);
+          if (Array.isArray(serverData.assignments)) setAssignments(serverData.assignments);
+          if (Array.isArray(serverData.submissions)) setSubmissions(serverData.submissions);
+          if (Array.isArray(serverData.waliNotes)) setWaliNotes(serverData.waliNotes);
+          if (Array.isArray(serverData.leaveRequests)) setLeaveRequests(serverData.leaveRequests);
+          if (Array.isArray(serverData.discussions)) setDiscussions(serverData.discussions);
+          if (Array.isArray(serverData.extracurriculars)) setExtracurriculars(serverData.extracurriculars);
+          if (Array.isArray(serverData.studentWorks)) setStudentWorks(serverData.studentWorks);
+          if (Array.isArray(serverData.majors)) setMajors(serverData.majors);
           if (serverData.schoolProfile) setSchoolProfile(serverData.schoolProfile);
-          if (serverData.teacherAdminDocs?.length) setTeacherAdminDocs(serverData.teacherAdminDocs);
-          if (serverData.subjectAttendance?.length) setSubjectAttendanceSessions(serverData.subjectAttendance);
+          if (Array.isArray(serverData.teacherAdminDocs)) setTeacherAdminDocs(serverData.teacherAdminDocs);
+          if (Array.isArray(serverData.subjectAttendance)) setSubjectAttendanceSessions(serverData.subjectAttendance);
           if (serverData.homepageConfig) setHomepageConfig(serverData.homepageConfig);
           if (serverData.sidebarConfig) setSidebarConfig(serverData.sidebarConfig);
         }
@@ -170,7 +166,7 @@ export default function App() {
     };
   }, []);
 
-  // Sesi login tetap disimpan di localStorage
+  // Simpan sesi login ke localStorage
   useEffect(() => {
     try {
       if (session) {
@@ -184,7 +180,7 @@ export default function App() {
   }, [session]);
 
   // ==========================================================
-  // HANDLERS: Data akan disinkronkan ke DB langsung di dalam handler
+  // HANDLERS (Sinkronisasi ke DB hanya terjadi di dalam handler)
   // ==========================================================
 
   const handleUploadTeacherAdminDoc = (doc: TeacherAdminDocument) => {
@@ -205,18 +201,7 @@ export default function App() {
     setTeacherAdminDocs((prev) => {
       const updated = prev.map((doc) =>
         doc.id === id
-          ? {
-              ...doc,
-              status,
-              supervisionScore: score !== undefined ? score : doc.supervisionScore,
-              feedbackNotes: notes !== undefined ? notes : doc.feedbackNotes,
-              verifiedBy: verifierName || doc.verifiedBy,
-              verifiedAt: new Date().toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              }),
-            }
+          ? { ...doc, status, supervisionScore: score !== undefined ? score : doc.supervisionScore, feedbackNotes: notes !== undefined ? notes : doc.feedbackNotes, verifiedBy: verifierName || doc.verifiedBy, verifiedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) }
           : doc
       );
       dbService.syncEntity('teacherAdminDocs', updated);
@@ -232,367 +217,154 @@ export default function App() {
     });
   };
 
-  // Handlers: Student
   const handleAddStudent = (newStudent: Student) => {
-    setStudents((prev) => {
-      const updated = [newStudent, ...prev];
-      dbService.syncEntity('students', updated);
-      return updated;
-    });
+    setStudents((prev) => { const updated = [newStudent, ...prev]; dbService.syncEntity('students', updated); return updated; });
   };
   const handleUpdateStudent = (updatedStudent: Student) => {
-    setStudents((prev) => {
-      const updated = prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s));
-      dbService.syncEntity('students', updated);
-      return updated;
-    });
+    setStudents((prev) => { const updated = prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)); dbService.syncEntity('students', updated); return updated; });
   };
   const handleDeleteStudent = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data siswa ini dari sistem?')) {
-      setStudents((prev) => {
-        const updated = prev.filter((s) => s.id !== id);
-        dbService.syncEntity('students', updated);
-        return updated;
-      });
+      setStudents((prev) => { const updated = prev.filter((s) => s.id !== id); dbService.syncEntity('students', updated); return updated; });
     }
   };
 
-  // Handlers: Teacher
   const handleAddTeacher = (newTeacher: TeacherStaff) => {
-    setTeachers((prev) => {
-      const updated = [newTeacher, ...prev];
-      dbService.syncEntity('teachers', updated);
-      return updated;
-    });
+    setTeachers((prev) => { const updated = [newTeacher, ...prev]; dbService.syncEntity('teachers', updated); return updated; });
   };
   const handleUpdateTeacher = (updatedTeacher: TeacherStaff) => {
-    setTeachers((prev) => {
-      const updated = prev.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t));
-      dbService.syncEntity('teachers', updated);
-      return updated;
-    });
+    setTeachers((prev) => { const updated = prev.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t)); dbService.syncEntity('teachers', updated); return updated; });
   };
   const handleDeleteTeacher = (id: string) => {
-    setTeachers((prev) => {
-      const updated = prev.filter((t) => t.id !== id);
-      dbService.syncEntity('teachers', updated);
-      return updated;
-    });
+    setTeachers((prev) => { const updated = prev.filter((t) => t.id !== id); dbService.syncEntity('teachers', updated); return updated; });
   };
 
-  // Handlers: News
   const handleAddNews = (newNews: NewsItem) => {
-    setNewsList((prev) => {
-      const updated = [newNews, ...prev];
-      dbService.syncEntity('news', updated);
-      return updated;
-    });
+    setNewsList((prev) => { const updated = [newNews, ...prev]; dbService.syncEntity('news', updated); return updated; });
   };
   const handleUpdateNews = (updatedNews: NewsItem) => {
-    setNewsList((prev) => {
-      const updated = prev.map((n) => (n.id === updatedNews.id ? updatedNews : n));
-      dbService.syncEntity('news', updated);
-      return updated;
-    });
+    setNewsList((prev) => { const updated = prev.map((n) => (n.id === updatedNews.id ? updatedNews : n)); dbService.syncEntity('news', updated); return updated; });
   };
   const handleDeleteNews = (id: string) => {
-    setNewsList((prev) => {
-      const updated = prev.filter((n) => n.id !== id);
-      dbService.syncEntity('news', updated);
-      return updated;
-    });
+    setNewsList((prev) => { const updated = prev.filter((n) => n.id !== id); dbService.syncEntity('news', updated); return updated; });
   };
 
-  // Handlers: Events
   const handleAddEvent = (newEvent: SchoolEvent) => {
-    setEventsList((prev) => {
-      const updated = [newEvent, ...prev];
-      dbService.syncEntity('events', updated);
-      return updated;
-    });
+    setEventsList((prev) => { const updated = [newEvent, ...prev]; dbService.syncEntity('events', updated); return updated; });
   };
   const handleUpdateEvent = (updatedEvent: SchoolEvent) => {
-    setEventsList((prev) => {
-      const updated = prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e));
-      dbService.syncEntity('events', updated);
-      return updated;
-    });
+    setEventsList((prev) => { const updated = prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e)); dbService.syncEntity('events', updated); return updated; });
   };
   const handleDeleteEvent = (id: string) => {
-    setEventsList((prev) => {
-      const updated = prev.filter((e) => e.id !== id);
-      dbService.syncEntity('events', updated);
-      return updated;
-    });
+    setEventsList((prev) => { const updated = prev.filter((e) => e.id !== id); dbService.syncEntity('events', updated); return updated; });
   };
 
-  // Handlers: Gallery
   const handleAddGallery = (newItem: GalleryItem) => {
-    setGalleryList((prev) => {
-      const updated = [newItem, ...prev];
-      dbService.syncEntity('gallery', updated);
-      return updated;
-    });
+    setGalleryList((prev) => { const updated = [newItem, ...prev]; dbService.syncEntity('gallery', updated); return updated; });
   };
   const handleUpdateGallery = (updatedGallery: GalleryItem) => {
-    setGalleryList((prev) => {
-      const updated = prev.map((g) => (g.id === updatedGallery.id ? updatedGallery : g));
-      dbService.syncEntity('gallery', updated);
-      return updated;
-    });
+    setGalleryList((prev) => { const updated = prev.map((g) => (g.id === updatedGallery.id ? updatedGallery : g)); dbService.syncEntity('gallery', updated); return updated; });
   };
   const handleDeleteGallery = (id: string) => {
-    setGalleryList((prev) => {
-      const updated = prev.filter((g) => g.id !== id);
-      dbService.syncEntity('gallery', updated);
-      return updated;
-    });
+    setGalleryList((prev) => { const updated = prev.filter((g) => g.id !== id); dbService.syncEntity('gallery', updated); return updated; });
   };
 
-  // Handlers: PPDB
   const handleAddPPDB = (newReg: PPDBRegistration) => {
-    setPpdbList((prev) => {
-      const updated = [newReg, ...prev];
-      dbService.syncEntity('ppdb', updated);
-      return updated;
-    });
+    setPpdbList((prev) => { const updated = [newReg, ...prev]; dbService.syncEntity('ppdb', updated); return updated; });
   };
   const handleUpdatePPDB = (updatedPPDB: PPDBRegistration) => {
-    setPpdbList((prev) => {
-      const updated = prev.map((p) => (p.id === updatedPPDB.id ? updatedPPDB : p));
-      dbService.syncEntity('ppdb', updated);
-      return updated;
-    });
+    setPpdbList((prev) => { const updated = prev.map((p) => (p.id === updatedPPDB.id ? updatedPPDB : p)); dbService.syncEntity('ppdb', updated); return updated; });
   };
   const handleUpdatePPDBStatus = (id: string, status: PPDBRegistration['status'], notes?: string) => {
-    setPpdbList((prev) => {
-      const updated = prev.map((item) =>
-        item.id === id ? { ...item, status, notes: notes || item.notes } : item
-      );
-      dbService.syncEntity('ppdb', updated);
-      return updated;
-    });
+    setPpdbList((prev) => { const updated = prev.map((item) => (item.id === id ? { ...item, status, notes: notes || item.notes } : item)); dbService.syncEntity('ppdb', updated); return updated; });
   };
 
-  // Handler: Send Push Notification
-  const handleSendPushNotification = (
-    title: string,
-    message: string,
-    target: 'all' | 'guru' | 'orangtua' | 'siswa',
-    priority: 'urgent' | 'info' | 'akademik'
-  ) => {
-    const newNotif: PushNotification = {
-      id: `notif-${Date.now()}`,
-      title,
-      message,
-      target,
-      priority,
-      timestamp: 'Baru Saja',
-      isRead: false,
-      link: '/ppdb',
-    };
-    setNotifications((prev) => {
-      const updated = [newNotif, ...prev];
-      dbService.syncEntity('notifications', updated);
-      return updated;
-    });
+  const handleSendPushNotification = (title: string, message: string, target: 'all' | 'guru' | 'orangtua' | 'siswa', priority: 'urgent' | 'info' | 'akademik') => {
+    const newNotif: PushNotification = { id: `notif-${Date.now()}`, title, message, target, priority, timestamp: 'Baru Saja', isRead: false, link: '/ppdb' };
+    setNotifications((prev) => { const updated = [newNotif, ...prev]; dbService.syncEntity('notifications', updated); return updated; });
   };
 
-  // Handler: Mark notification as read
   const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-      dbService.syncEntity('notifications', updated);
-      return updated;
-    });
+    setNotifications((prev) => { const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)); dbService.syncEntity('notifications', updated); return updated; });
   };
 
-  // Handlers: Study Materials
   const handleAddStudyMaterial = (mat: StudyMaterial) => {
-    setStudyMaterials((prev) => {
-      const updated = [mat, ...prev];
-      dbService.syncEntity('studyMaterials', updated);
-      return updated;
-    });
+    setStudyMaterials((prev) => { const updated = [mat, ...prev]; dbService.syncEntity('studyMaterials', updated); return updated; });
   };
   const handleDeleteStudyMaterial = (id: string) => {
-    setStudyMaterials((prev) => {
-      const updated = prev.filter((m) => m.id !== id);
-      dbService.syncEntity('studyMaterials', updated);
-      return updated;
-    });
+    setStudyMaterials((prev) => { const updated = prev.filter((m) => m.id !== id); dbService.syncEntity('studyMaterials', updated); return updated; });
   };
 
-  // Handlers: Assignments
   const handleAddAssignment = (assignment: Assignment) => {
-    setAssignments((prev) => {
-      const updated = [assignment, ...prev];
-      dbService.syncEntity('assignments', updated);
-      return updated;
-    });
+    setAssignments((prev) => { const updated = [assignment, ...prev]; dbService.syncEntity('assignments', updated); return updated; });
   };
   const handleDeleteAssignment = (id: string) => {
-    setAssignments((prev) => {
-      const updated = prev.filter((a) => a.id !== id);
-      dbService.syncEntity('assignments', updated);
-      return updated;
-    });
+    setAssignments((prev) => { const updated = prev.filter((a) => a.id !== id); dbService.syncEntity('assignments', updated); return updated; });
   };
 
-  // Handlers: Submissions
   const handleAddSubmission = (submission: AssignmentSubmission) => {
-    setSubmissions((prev) => {
-      const filtered = prev.filter(
-        (s) => !(s.assignmentId === submission.assignmentId && s.studentId === submission.studentId)
-      );
-      const updated = [submission, ...filtered];
-      dbService.syncEntity('submissions', updated);
-      return updated;
-    });
+    setSubmissions((prev) => { const filtered = prev.filter((s) => !(s.assignmentId === submission.assignmentId && s.studentId === submission.studentId)); const updated = [submission, ...filtered]; dbService.syncEntity('submissions', updated); return updated; });
   };
   const handleGradeSubmission = (id: string, grade: number, feedback?: string) => {
-    setSubmissions((prev) => {
-      const updated = prev.map((s) => (s.id === id ? { ...s, grade, feedback, status: 'Dinilai' } : s));
-      dbService.syncEntity('submissions', updated);
-      return updated;
-    });
+    setSubmissions((prev) => { const updated = prev.map((s) => (s.id === id ? { ...s, grade, feedback, status: 'Dinilai' } : s)); dbService.syncEntity('submissions', updated); return updated; });
   };
 
-  // Handlers: Wali Kelas Notes
   const handleAddWaliNote = (note: WaliKelasNote) => {
-    setWaliNotes((prev) => {
-      const updated = [note, ...prev];
-      dbService.syncEntity('waliNotes', updated);
-      return updated;
-    });
+    setWaliNotes((prev) => { const updated = [note, ...prev]; dbService.syncEntity('waliNotes', updated); return updated; });
   };
   const handleDeleteWaliNote = (id: string) => {
-    setWaliNotes((prev) => {
-      const updated = prev.filter((n) => n.id !== id);
-      dbService.syncEntity('waliNotes', updated);
-      return updated;
-    });
+    setWaliNotes((prev) => { const updated = prev.filter((n) => n.id !== id); dbService.syncEntity('waliNotes', updated); return updated; });
   };
 
-  // Handlers: Leave Requests
   const handleSubmitLeaveRequest = (req: LeaveRequest) => {
-    setLeaveRequests((prev) => {
-      const updated = [req, ...prev];
-      dbService.syncEntity('leaveRequests', updated);
-      return updated;
-    });
+    setLeaveRequests((prev) => { const updated = [req, ...prev]; dbService.syncEntity('leaveRequests', updated); return updated; });
   };
-  const handleReviewLeaveRequest = (
-    id: string,
-    status: LeaveRequest['status'],
-    notes?: string,
-    reviewer?: string
-  ) => {
-    setLeaveRequests((prev) => {
-      const updated = prev.map((r) =>
-        r.id === id
-          ? { ...r, status, reviewNotes: notes, reviewedBy: reviewer || 'Wali Kelas' }
-          : r
-      );
-      dbService.syncEntity('leaveRequests', updated);
-      return updated;
-    });
+  const handleReviewLeaveRequest = (id: string, status: LeaveRequest['status'], notes?: string, reviewer?: string) => {
+    setLeaveRequests((prev) => { const updated = prev.map((r) => r.id === id ? { ...r, status, reviewNotes: notes, reviewedBy: reviewer || 'Wali Kelas' } : r); dbService.syncEntity('leaveRequests', updated); return updated; });
   };
 
-  // Handlers: Discussions
   const handleAddDiscussion = (disc: SubjectDiscussion) => {
-    setDiscussions((prev) => {
-      const updated = [disc, ...prev];
-      dbService.syncEntity('discussions', updated);
-      return updated;
-    });
+    setDiscussions((prev) => { const updated = [disc, ...prev]; dbService.syncEntity('discussions', updated); return updated; });
   };
   const handleAddDiscussionReply = (discussionId: string, reply: DiscussionReply) => {
-    setDiscussions((prev) => {
-      const updated = prev.map((d) =>
-        d.id === discussionId ? { ...d, replies: [...d.replies, reply] } : d
-      );
-      dbService.syncEntity('discussions', updated);
-      return updated;
-    });
+    setDiscussions((prev) => { const updated = prev.map((d) => (d.id === discussionId ? { ...d, replies: [...d.replies, reply] } : d)); dbService.syncEntity('discussions', updated); return updated; });
   };
 
-  // Handlers: School Profile
   const handleUpdateSchoolProfile = (profile: SchoolProfile) => {
     setSchoolProfile(profile);
     dbService.syncEntity('schoolProfile', profile);
   };
 
-  // Handlers: Majors
   const handleAddMajor = (major: MajorProgram) => {
-    setMajors((prev) => {
-      const updated = [major, ...prev];
-      dbService.syncEntity('majors', updated);
-      return updated;
-    });
+    setMajors((prev) => { const updated = [major, ...prev]; dbService.syncEntity('majors', updated); return updated; });
   };
   const handleUpdateMajor = (updatedMajor: MajorProgram) => {
-    setMajors((prev) => {
-      const updated = prev.map((m) => (m.id === updatedMajor.id ? updatedMajor : m));
-      dbService.syncEntity('majors', updated);
-      return updated;
-    });
+    setMajors((prev) => { const updated = prev.map((m) => (m.id === updatedMajor.id ? updatedMajor : m)); dbService.syncEntity('majors', updated); return updated; });
   };
   const handleDeleteMajor = (id: string) => {
-    setMajors((prev) => {
-      const updated = prev.filter((m) => m.id !== id);
-      dbService.syncEntity('majors', updated);
-      return updated;
-    });
+    setMajors((prev) => { const updated = prev.filter((m) => m.id !== id); dbService.syncEntity('majors', updated); return updated; });
   };
 
-  // Handlers: Extracurriculars
   const handleAddExtracurricular = (eskul: Extracurricular) => {
-    setExtracurriculars((prev) => {
-      const updated = [eskul, ...prev];
-      dbService.syncEntity('extracurriculars', updated);
-      return updated;
-    });
+    setExtracurriculars((prev) => { const updated = [eskul, ...prev]; dbService.syncEntity('extracurriculars', updated); return updated; });
   };
   const handleUpdateExtracurricular = (updatedEskul: Extracurricular) => {
-    setExtracurriculars((prev) => {
-      const updated = prev.map((e) => (e.id === updatedEskul.id ? updatedEskul : e));
-      dbService.syncEntity('extracurriculars', updated);
-      return updated;
-    });
+    setExtracurriculars((prev) => { const updated = prev.map((e) => (e.id === updatedEskul.id ? updatedEskul : e)); dbService.syncEntity('extracurriculars', updated); return updated; });
   };
   const handleDeleteExtracurricular = (id: string) => {
-    setExtracurriculars((prev) => {
-      const updated = prev.filter((e) => e.id !== id);
-      dbService.syncEntity('extracurriculars', updated);
-      return updated;
-    });
+    setExtracurriculars((prev) => { const updated = prev.filter((e) => e.id !== id); dbService.syncEntity('extracurriculars', updated); return updated; });
   };
 
-  // Handlers: Student Works
   const handleAddStudentWork = (work: StudentWork) => {
-    setStudentWorks((prev) => {
-      const updated = [work, ...prev];
-      dbService.syncEntity('studentWorks', updated);
-      return updated;
-    });
+    setStudentWorks((prev) => { const updated = [work, ...prev]; dbService.syncEntity('studentWorks', updated); return updated; });
   };
   const handleUpdateStudentWork = (updatedWork: StudentWork) => {
-    setStudentWorks((prev) => {
-      const updated = prev.map((w) => (w.id === updatedWork.id ? updatedWork : w));
-      dbService.syncEntity('studentWorks', updated);
-      return updated;
-    });
+    setStudentWorks((prev) => { const updated = prev.map((w) => (w.id === updatedWork.id ? updatedWork : w)); dbService.syncEntity('studentWorks', updated); return updated; });
   };
   const handleDeleteStudentWork = (id: string) => {
-    setStudentWorks((prev) => {
-      const updated = prev.filter((w) => w.id !== id);
-      dbService.syncEntity('studentWorks', updated);
-      return updated;
-    });
+    setStudentWorks((prev) => { const updated = prev.filter((w) => w.id !== id); dbService.syncEntity('studentWorks', updated); return updated; });
   };
 
-  // Handlers: Homepage Config
   const handleUpdateHomepageConfig = (updated: HomepageConfig) => {
     setHomepageConfig(updated);
     dbService.syncEntity('homepageConfig', updated);
@@ -603,7 +375,6 @@ export default function App() {
     dbService.syncEntity('homepageConfig', DEFAULT_HOMEPAGE_CONFIG);
   };
 
-  // Handlers: Sidebar Config
   const handleUpdateSidebarConfig = (updated: AdminSidebarConfig) => {
     setSidebarConfig(updated);
     dbService.syncEntity('sidebarConfig', updated);
@@ -611,11 +382,7 @@ export default function App() {
 
   const handleLogout = () => {
     setSession(null);
-    try {
-      localStorage.removeItem('smak_user_session');
-    } catch (e) {
-      console.warn(e);
-    }
+    try { localStorage.removeItem('smak_user_session'); } catch (e) { console.warn(e); }
     handleNavigateTab('beranda');
   };
 
@@ -624,113 +391,39 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900 font-sans">
       {!isDashboard && (
-        <Header
-          session={session}
-          notifications={notifications}
-          onNavigateTab={handleNavigateTab}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
-          onLogout={handleLogout}
-          onOpenProfile={() => setIsProfileModalOpen(true)}
-          onOpenNotifications={() => {
-            if (session) {
-              handleNavigateTab('dashboard');
-            } else {
-              setIsLoginModalOpen(true);
-            }
-          }}
-          activeTab={activeTab}
-        />
+        <Header session={session} notifications={notifications} onNavigateTab={handleNavigateTab} onOpenLogin={() => setIsLoginModalOpen(true)} onLogout={handleLogout} onOpenProfile={() => setIsProfileModalOpen(true)} onOpenNotifications={() => { if (session) { handleNavigateTab('dashboard'); } else { setIsLoginModalOpen(true); } }} activeTab={activeTab} />
       )}
 
       {!isDashboard && (
-        <Navbar
-          activeTab={activeTab}
-          onSelectTab={(tab, subTab) => {
-            if (tab === 'portal') {
-              if (session) {
-                handleNavigateTab('dashboard');
-              } else {
-                setIsLoginModalOpen(true);
-              }
-            } else {
-              handleNavigateTab(tab, subTab);
-            }
-          }}
-          session={session}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
-        />
+        <Navbar activeTab={activeTab} onSelectTab={(tab, subTab) => { if (tab === 'portal') { if (session) { handleNavigateTab('dashboard'); } else { setIsLoginModalOpen(true); } } else { handleNavigateTab(tab, subTab); } }} session={session} onOpenLogin={() => setIsLoginModalOpen(true)} />
       )}
 
       <main className="flex-1 w-full">
         {activeTab === 'beranda' && (
           <div className="space-y-0">
-            <HeroSlider
-              onNavigateTab={handleNavigateTab}
-              config={homepageConfig}
-              isAdmin={session?.role === 'admin'}
-              onOpenCustomizer={() => {
-                setAdminInitialMenu('homepage');
-                setActiveTab('dashboard');
-              }}
-            />
-
-            <HomepageWelcomeSection
-              welcome={homepageConfig.welcomeSection}
-              onNavigateTab={handleNavigateTab}
-            />
-
+            <HeroSlider onNavigateTab={handleNavigateTab} config={homepageConfig} isAdmin={session?.role === 'admin'} onOpenCustomizer={() => { setAdminInitialMenu('homepage'); setActiveTab('dashboard'); }} />
+            <HomepageWelcomeSection welcome={homepageConfig.welcomeSection} onNavigateTab={handleNavigateTab} />
             <AcademicProgramsSection onNavigateTab={handleNavigateTab} />
-
-            <CampusLifeSection
-              onNavigateTab={handleNavigateTab}
-              initialSubTab="ekskul"
-              extracurriculars={extracurriculars}
-              studentWorks={studentWorks}
-            />
-
-            <WhyChooseUsSection
-              onNavigateTab={handleNavigateTab}
-              config={homepageConfig.whyChooseUs}
-            />
-
-            <StudentVoiceAndNewsSection
-              newsList={newsList}
-              events={eventsList}
-              onNavigateTab={handleNavigateTab}
-            />
-
+            <CampusLifeSection onNavigateTab={handleNavigateTab} initialSubTab="ekskul" extracurriculars={extracurriculars} studentWorks={studentWorks} />
+            <WhyChooseUsSection onNavigateTab={handleNavigateTab} config={homepageConfig.whyChooseUs} />
+            <StudentVoiceAndNewsSection newsList={newsList} events={eventsList} onNavigateTab={handleNavigateTab} />
             <QuickActionRibbon onNavigateTab={handleNavigateTab} />
-
             <StatsDashboard students={students} />
-
             <TeacherStaffSection teachers={teachers} />
-
             <StudentGallery items={galleryList} />
           </div>
         )}
 
         {activeTab === 'profil' && (
-          <SchoolProfileSection
-            profile={schoolProfile}
-            initialSubTab={activeSubTab}
-            onNavigateTab={handleNavigateTab}
-          />
+          <SchoolProfileSection profile={schoolProfile} initialSubTab={activeSubTab} onNavigateTab={handleNavigateTab} />
         )}
 
         {(activeTab === 'jurusan' || activeTab === 'akademik') && (
-          <AcademicProgramsFullPage
-            majors={majors}
-            initialMajor={activeSubTab}
-            onNavigateTab={handleNavigateTab}
-          />
+          <AcademicProgramsFullPage majors={majors} initialMajor={activeSubTab} onNavigateTab={handleNavigateTab} />
         )}
 
         {activeTab === 'ppdb' && (
-          <PPDBOnline
-            ppdbList={ppdbList}
-            onAddRegistration={handleAddPPDB}
-            initialSubTab={activeSubTab}
-          />
+          <PPDBOnline ppdbList={ppdbList} onAddRegistration={handleAddPPDB} initialSubTab={activeSubTab} />
         )}
 
         {activeTab === 'guru' && (
@@ -738,12 +431,7 @@ export default function App() {
         )}
 
         {(activeTab === 'kehidupan' || activeTab === 'galeri') && (
-          <CampusLifeSection
-            onNavigateTab={handleNavigateTab}
-            initialSubTab={activeSubTab}
-            extracurriculars={extracurriculars}
-            studentWorks={studentWorks}
-          />
+          <CampusLifeSection onNavigateTab={handleNavigateTab} initialSubTab={activeSubTab} extracurriculars={extracurriculars} studentWorks={studentWorks} />
         )}
 
         {activeTab === 'statistik' && (
@@ -755,20 +443,12 @@ export default function App() {
         {activeTab === 'berita' && (
           <div className="max-w-7xl mx-auto px-4 py-10 space-y-8 animate-fadeIn">
             <div className="border-b border-slate-200 pb-4">
-              <span className="text-xs font-bold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded-full inline-block mb-1">
-                Warta Sekolah
-              </span>
-              <h2 className="text-3xl font-bold text-[#321759] font-serif">
-                Berita, Agenda & Pengumuman Resmi
-              </h2>
+              <span className="text-xs font-bold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded-full inline-block mb-1">Warta Sekolah</span>
+              <h2 className="text-3xl font-bold text-[#321759] font-serif">Berita, Agenda & Pengumuman Resmi</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <DistrictNews newsList={newsList} onNavigateTab={handleNavigateTab} />
-              </div>
-              <div>
-                <UpcomingEvents events={eventsList} onNavigateTab={handleNavigateTab} />
-              </div>
+              <div className="lg:col-span-2"><DistrictNews newsList={newsList} onNavigateTab={handleNavigateTab} /></div>
+              <div><UpcomingEvents events={eventsList} onNavigateTab={handleNavigateTab} /></div>
             </div>
           </div>
         )}
@@ -852,35 +532,12 @@ export default function App() {
         )}
       </main>
 
-      <PushNotificationBanner
-        notifications={notifications}
-        onMarkAsRead={handleMarkAsRead}
-        onNavigateToPPDB={() => setActiveTab('ppdb')}
-      />
-
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLoginSuccess={(newSession) => {
-          setSession(newSession);
-          setActiveTab('dashboard');
-        }}
-      />
-
-      <ProfileSettingsModal
-        isOpen={isProfileModalOpen}
-        session={session}
-        onClose={() => setIsProfileModalOpen(false)}
-        onUpdateSession={(updatedSession: UserSession) => {
-          setSession(updatedSession);
-        }}
-      />
+      <PushNotificationBanner notifications={notifications} onMarkAsRead={handleMarkAsRead} onNavigateToPPDB={() => setActiveTab('ppdb')} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLoginSuccess={(newSession) => { setSession(newSession); setActiveTab('dashboard'); }} />
+      <ProfileSettingsModal isOpen={isProfileModalOpen} session={session} onClose={() => setIsProfileModalOpen(false)} onUpdateSession={(updatedSession: UserSession) => { setSession(updatedSession); }} />
 
       {!isDashboard && (
-        <Footer
-          onNavigate={(tab) => setActiveTab(tab)}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
-        />
+        <Footer onNavigate={(tab) => setActiveTab(tab)} onOpenLogin={() => setIsLoginModalOpen(true)} />
       )}
     </div>
   );

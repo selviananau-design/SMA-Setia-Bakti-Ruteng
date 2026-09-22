@@ -50,11 +50,12 @@ export async function initDatabase() {
     const connection = await pool.getConnection();
     await connection.ping();
 
-    // PERBAIKAN: Otomatis buat tabel app_settings jika belum ada
+    // Buat tabel app_settings jika belum ada
     await connection.query(`
       CREATE TABLE IF NOT EXISTS app_settings (
         setting_key VARCHAR(255) PRIMARY KEY,
-        setting_value LONGTEXT
+        setting_value LONGTEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
 
@@ -109,12 +110,15 @@ export async function saveEntityToDb(entityKey: string, data: any) {
         [entityKey, JSON.stringify(data), JSON.stringify(data)]
       );
       console.log(`[DB Sync Success] Data ${entityKey} berhasil disimpan ke MySQL.`);
-    } catch (err) {
-      console.warn(`[DB Sync Warning] Gagal menyimpan ${entityKey} ke MySQL:`, err);
+      return { success: true, count: Array.isArray(data) ? data.length : 1 };
+    } catch (err: any) {
+      console.error(`[DB Sync Error] Gagal menyimpan ${entityKey} ke MySQL:`, err.message);
+      return { success: false, error: err.message };
     }
   }
-
-  return { success: true, count: Array.isArray(data) ? data.length : 1 };
+  
+  console.warn(`[DB Sync Warning] Database tidak terhubung, data ${entityKey} hanya tersimpan di memori sementara.`);
+  return { success: false, error: 'Database tidak terhubung' };
 }
 
 export async function getEntityFromDb(entityKey: string) {
@@ -137,7 +141,6 @@ export async function getEntityFromDb(entityKey: string) {
   return inMemoryStore[entityKey] || null;
 }
 
-// PERBAIKAN: Fungsi ini sekarang membaca dari MySQL, bukan hanya dari memori
 export async function getAllDbEntities() {
   if (pool && isConnected) {
     try {
