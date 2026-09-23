@@ -27,20 +27,20 @@ export interface SchoolEvent {
 export interface Student {
   id: string;
   nisn: string;
-  nik: string; // Sensitif - Terenkripsi
+  nik: string;
   name: string;
   gender: 'L' | 'P';
   classLevel: 'X' | 'XI' | 'XII';
-  className: string; // e.g., 'X-MIPA 1'
+  className: string;
   major: 'MIPA' | 'IPS' | 'Bahasa & Budaya';
   status: 'aktif' | 'alumni';
   graduationYear?: number;
-  phone: string; // Sensitif - Terenkripsi
+  phone: string;
   parentName: string;
-  parentPhone: string; // Sensitif - Terenkripsi
+  parentPhone: string;
   address: string;
-  gpa: number; // Nilai Rata-rata
-  attendanceRate: number; // %
+  gpa: number;
+  attendanceRate: number;
   tuitionStatus: 'Lunas' | 'Menunggak' | 'Beasiswa';
   encryptedHash: string;
   alumniOccupation?: string;
@@ -61,8 +61,8 @@ export interface TeacherStaff {
   bio: string;
   photoUrl: string;
   isWaliKelas?: boolean;
-  waliClassName?: string; // e.g., 'X-MIPA 1'
-  teachingClasses?: string[]; // e.g., ['X-MIPA 1', 'X-MIPA 2', 'XI-MIPA 1']
+  waliClassName?: string;
+  teachingClasses?: string[];
 }
 
 export interface PPDBRegistration {
@@ -106,13 +106,13 @@ export interface UserSession {
   id?: string;
   role: UserRole;
   name: string;
-  identifier: string; // NIP, NISN, or Admin username
+  identifier: string;
   nip?: string;
   token: string;
   email?: string;
-  childNisn?: string; // for parent
-  className?: string; // for student or wali kelas
-  subject?: string; // for guru mapel
+  childNisn?: string;
+  className?: string;
+  subject?: string;
   teacherType?: 'guru_mapel' | 'wali_kelas';
 }
 
@@ -125,12 +125,11 @@ export interface GalleryItem {
   description: string;
 }
 
-// 1. Bahan Ajar dari Guru Mapel
 export interface StudyMaterial {
   id: string;
   title: string;
   subject: string;
-  className: string; // e.g. 'X-MIPA 1'
+  className: string;
   teacherName: string;
   teacherNip: string;
   uploadDate: string;
@@ -140,7 +139,6 @@ export interface StudyMaterial {
   description: string;
 }
 
-// 1b. Dokumen Administrasi & Perangkat Ajar Guru (untuk diverifikasi Admin Utama / Kepala Sekolah)
 export type TeacherAdminCategory =
   | 'Bundel Administrasi Lengkap (CP, ATP hingga RPM)'
   | 'Modul Ajar / RPP Merdeka'
@@ -159,8 +157,8 @@ export interface TeacherAdministrationDoc {
   teacherName: string;
   teacherNip: string;
   subject: string;
-  targetClass: string; // e.g. 'X-MIPA 1', 'Fase E (Kelas X)', 'Semua Kelas'
-  academicYear: string; // e.g. '2026/2027'
+  targetClass: string;
+  academicYear: string;
   semester: 'Ganjil' | 'Genap';
   category: TeacherAdminCategory;
   title: string;
@@ -174,14 +172,13 @@ export interface TeacherAdministrationDoc {
   verifiedBy?: string;
   verifiedAt?: string;
   feedbackNotes?: string;
-  supervisionScore?: number; // Skala 1-100
+  supervisionScore?: number;
   score?: number;
   bundleComponents?: string[];
 }
 
 export type TeacherAdminDocument = TeacherAdministrationDoc;
 
-// 1c. Presensi Siswa per Pertemuan Mata Pelajaran (Guru Mapel)
 export interface SubjectAttendanceItem {
   studentId: string;
   studentName: string;
@@ -198,10 +195,10 @@ export interface SubjectAttendanceSession {
   teacherName: string;
   teacherNip: string;
   teacherId?: string;
-  meetingNumber: number; // Pertemuan ke-1, 2, dst.
-  date: string; // YYYY-MM-DD
-  timeSlot?: string; // e.g. 'Jam 07.30 - 09.00'
-  topic: string; // Pokok Bahasan / Topik Pembelajaran
+  meetingNumber: number;
+  date: string;
+  timeSlot?: string;
+  topic: string;
   attendanceList: SubjectAttendanceItem[];
   items?: SubjectAttendanceItem[];
   summary: {
@@ -220,12 +217,11 @@ export interface SubjectAttendanceSession {
   createdAt: string;
 }
 
-// 2. Tugas dari Guru Mapel
 export interface StudentAssignment {
   id: string;
   title: string;
   subject: string;
-  className: string; // e.g. 'X-MIPA 1'
+  className: string;
   teacherName: string;
   teacherNip: string;
   assignedDate: string;
@@ -236,7 +232,6 @@ export interface StudentAssignment {
 
 export type Assignment = StudentAssignment;
 
-// 3. Pengumpulan Tugas Siswa
 export interface AssignmentSubmission {
   id: string;
   assignmentId: string;
@@ -256,7 +251,6 @@ export interface AssignmentSubmission {
   status: 'Menunggu Dinilai' | 'Sudah Dinilai' | 'Perlu Perbaikan' | 'Dinilai';
 }
 
-// 4. Catatan Penting Wali Kelas untuk Siswa & Orang Tua
 export interface WaliKelasNote {
   id: string;
   studentId: string;
@@ -271,7 +265,6 @@ export interface WaliKelasNote {
   actionRequired?: string;
 }
 
-// 5. Pengajuan Izin / Sakit dari Orang Tua ke Wali Kelas
 export interface LeaveRequest {
   id: string;
   studentId: string;
@@ -293,7 +286,6 @@ export interface LeaveRequest {
   reviewNotes?: string;
 }
 
-// 6. Forum Diskusi Siswa dengan Guru Mapel atau Wali Kelas
 export interface ClassDiscussion {
   id: string;
   type: 'mapel' | 'walikelas';
@@ -316,7 +308,6 @@ export interface ClassDiscussion {
 export type SubjectDiscussion = ClassDiscussion;
 export type DiscussionReply = ClassDiscussion['replies'][number];
 
-// 7. Ekstrakurikuler Siswa
 export interface ExtracurricularActivity {
   id: string;
   name: string;
@@ -334,7 +325,6 @@ export interface ExtracurricularActivity {
 
 export type Extracurricular = ExtracurricularActivity;
 
-// 8. Karya Siswa (Cerpen, Puisi, Liputan Jurnalistik, Seni)
 export interface StudentWork {
   id: string;
   title: string;
@@ -355,7 +345,6 @@ export interface StudentWork {
   status: 'Terbit' | 'Draf';
 }
 
-// 9. Jurusan & Peminatan (Dikelola Admin Utama)
 export interface MajorProgram {
   id: string;
   name: string;
@@ -368,7 +357,9 @@ export interface MajorProgram {
   iconName?: string;
 }
 
+// ==========================================================
 // 10. Profil Sekolah (Dikelola Admin Utama)
+// ==========================================================
 export interface SchoolProfile {
   name: string;
   npsn: string;
@@ -385,9 +376,20 @@ export interface SchoolProfile {
   logoUrl?: string;
   heroImageUrl?: string;
   principalPhotoUrl?: string;
+  // ==========================================================
+  // FIELD BARU: Foto yang dapat diubah dari Admin Panel
+  // ==========================================================
+  historyPhotoUrl?: string;        // Foto di tab "Sejarah & Identitas"
+  historyPhotoCaption?: string;    // Keterangan foto sejarah
+  facilityPhotos?: {
+    id: string;
+    title: string;
+    desc: string;
+    img: string;
+    tag: string;
+  }[];                             // Foto-foto di tab "Fasilitas"
 }
 
-// 11. Konfigurasi Kustomisasi Sidebar Admin Utama
 export interface AdminSidebarConfig {
   logoType: 'icon' | 'image';
   logoUrl?: string;
@@ -401,7 +403,6 @@ export interface AdminSidebarConfig {
   themeAccent?: 'indigo' | 'blue' | 'purple' | 'emerald' | 'amber';
 }
 
-// 12. Konfigurasi Kustomisasi Gambar & Tulisan Halaman Utama Website (Beranda)
 export interface HeroSlide {
   id: string;
   url: string;
@@ -443,7 +444,6 @@ export interface HomepageWelcomeSection {
 }
 
 export interface HomepageConfig {
-  // 1. Hero Banner Utama
   heroEyebrow: string;
   heroHeadline: string;
   heroHeadlineHighlight?: string;
@@ -452,16 +452,12 @@ export interface HomepageConfig {
   heroCtaTab: string;
   heroSlides: HeroSlide[];
 
-  // 2. Tiga Kartu Peminatan Cepat di Bawah Hero
   featureCards: QuickFeatureCard[];
 
-  // 3. Empat Baris Statistik Singkat
   quickStats: QuickStatItem[];
 
-  // 4. Sambutan Kepala Sekolah di Halaman Utama
   welcomeSection: HomepageWelcomeSection;
 
-  // 5. Bagian Mengapa SMAK Setia Bakti (Why Choose Us)
   whyChooseUs: {
     eyebrow: string;
     title: string;
@@ -471,7 +467,6 @@ export interface HomepageConfig {
     pillars: WhyChooseUsPillar[];
   };
 
-  // 6. Running Announcement Bar di Beranda
   announcementBar: {
     enabled: boolean;
     badgeText: string;
@@ -480,4 +475,3 @@ export interface HomepageConfig {
     targetTab?: string;
   };
 }
-

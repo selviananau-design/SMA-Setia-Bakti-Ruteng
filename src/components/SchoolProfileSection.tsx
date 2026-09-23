@@ -42,9 +42,7 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
   }, [initialSubTab]);
 
   // ==========================================================
-  // SINKRONISASI KEPALA SEKOLAH
-  // Prioritas: homepageConfig.welcomeSection (dari Kustomisasi Halaman Utama)
-  // Fallback: schoolProfile (data lama)
+  // SINKRONISASI DATA KEPALA SEKOLAH
   // ==========================================================
   const welcome = homepageConfig?.welcomeSection || DEFAULT_HOMEPAGE_CONFIG.welcomeSection;
 
@@ -52,18 +50,74 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
     welcome?.principalPhotoUrl ||
     'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80';
 
-  const principalName =
-    welcome?.principalName || profile.principal || 'Kepala Sekolah';
-
-  const principalRole =
-    welcome?.principalRole || 'Kepala Sekolah SMA Katolik Setia Bakti Ruteng';
-
-  const principalGreetingTitle =
-    welcome?.title || 'Mendidik Manusia Seutuhnya: Cerdas Akal, Luhur Hati, dan Kuat Karakter';
-
+  const principalName = welcome?.principalName || profile.principal || 'Kepala Sekolah';
+  const principalRole = welcome?.principalRole || 'Kepala Sekolah SMA Katolik Setia Bakti Ruteng';
+  const principalGreetingTitle = welcome?.title || 'Mendidik Manusia Seutuhnya: Cerdas Akal, Luhur Hati, dan Kuat Karakter';
   const principalQuote = welcome?.quote || '';
-
   const principalBadge = welcome?.badge || 'PESAN & HARAPAN PENDIDIK';
+
+  // ==========================================================
+  // FOTO SEJARAH (diambil dari profile.historyPhotoUrl)
+  // ==========================================================
+  const historyPhotoUrl =
+    profile.historyPhotoUrl ||
+    'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80';
+
+  const historyPhotoCaption =
+    profile.historyPhotoCaption || 'Kampus Hijau Berwawasan Lingkungan';
+
+  // ==========================================================
+  // FOTO FASILITAS (jika ada di profile, gunakan; jika tidak, pakai default)
+  // ==========================================================
+  const defaultFacilities = [
+    {
+      id: 'fac-1',
+      title: 'Laboratorium MIPA Terpadu',
+      desc: 'Fasilitas praktikum Fisika, Kimia, dan Biologi lengkap dengan mikroskop optik modern, preparat, kit robotika sains, dan ruang asam bersertifikasi.',
+      img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80',
+      tag: 'Sains & Riset',
+    },
+    {
+      id: 'fac-2',
+      title: 'Laboratorium Komputer & Multimedia',
+      desc: '3 ruang lab komputer ber-AC dengan koneksi internet fiber-optic 100 Mbps, perangkat PC Intel Core i7 untuk pembelajaran coding, desain grafis, dan asesmen digital.',
+      img: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
+      tag: 'Teknologi Digital',
+    },
+    {
+      id: 'fac-3',
+      title: 'Perpustakaan Digital St. Agustinus',
+      desc: 'Koleksi lebih dari 12.000 judul buku fisik, ensiklopedia, jurnal ilmiah, ruang baca berkarpet yang tenang, dan katalog e-library daring.',
+      img: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=600&q=80',
+      tag: 'Literasi & Pustaka',
+    },
+    {
+      id: 'fac-4',
+      title: 'Kapela Sekolah St. Yohanes Paulus II',
+      desc: 'Tempat hening untuk ibadat pagi, adorasi sakramen mahakudus, misa perayaan hari raya gereja, dan pembinaan retret/rekoleksi tahunan siswa.',
+      img: 'https://images.unsplash.com/photo-1548625361-1960246a47a1?auto=format&fit=crop&w=600&q=80',
+      tag: 'Spiritualitas Katolik',
+    },
+    {
+      id: 'fac-5',
+      title: 'Asrama Putra & Putri Terpadu',
+      desc: 'Hunian asrama asri dan aman di lingkungan sejuk Ruteng dengan pendampingan suster dan pastor, ruang belajar bersama, serta katering nutrisi terjamin.',
+      img: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80',
+      tag: 'Kehidupan Asrama',
+    },
+    {
+      id: 'fac-6',
+      title: 'Kompleks Olahraga & Pentas Seni',
+      desc: 'Lapangan basket berstandar Perbasi, lapangan voli, futsal, dan aula serbaguna kapasitas 1.200 orang untuk pementasan tari caci dan paduan suara.',
+      img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80',
+      tag: 'Olahraga & Seni',
+    },
+  ];
+
+  const facilityItems =
+    profile.facilityPhotos && profile.facilityPhotos.length > 0
+      ? profile.facilityPhotos
+      : defaultFacilities;
 
   const tabs = [
     { id: 'sejarah', label: 'Sejarah & Identitas', icon: Building2 },
@@ -142,7 +196,7 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 <div className="text-sm text-slate-700 space-y-4 leading-relaxed">
                   <p>
                     {profile.history ||
-                      'SMA Katolik Setia Bakti Ruteng didirikan pada tanggal 1 Agustus 1968 oleh para perintis misi Katolik di bawah naungan Keuskupan Ruteng dan Yayasan Persekolahan St. Paulus Ruteng (YAPERPATER). Didorong oleh kerinduan mendalam untuk menghadirkan institusi pendidikan menengah tingkat atas yang berbobot iman kristiani bagi putra-putri Manggarai dan daratan Flores.'}
+                      'SMA Katolik Setia Bakti Ruteng didirikan pada tanggal 1 Agustus 1968 oleh para perintis misi Katolik di bawah naungan Keuskupan Ruteng dan Yayasan Persekolahan St. Paulus Ruteng (YAPERPATER).'}
                   </p>
                   <p>
                     Nama <strong>"Setia Bakti"</strong> mengakar dari nilai luhur kesetiaan kepada ajaran Kristus, nusa dan bangsa, serta pembaktian tulus tanpa pamrih bagi kesejahteraan umat manusia dan pemajuan masyarakat Manggarai.
@@ -174,13 +228,13 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
               <div className="lg:col-span-5 space-y-6">
                 <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
                   <img
-                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80"
-                    alt="Gedung Kampus SMAK Setia Bakti"
+                    src={historyPhotoUrl}
+                    alt={historyPhotoCaption}
                     className="w-full h-56 object-cover"
                     referrerPolicy="no-referrer"
                   />
                   <div className="p-5 space-y-2">
-                    <h3 className="font-bold text-slate-900 text-base">Kampus Hijau Berwawasan Lingkungan</h3>
+                    <h3 className="font-bold text-slate-900 text-base">{historyPhotoCaption}</h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
                       Terletak di dataran tinggi Ruteng yang sejuk, kompleks sekolah dilengkapi taman refleksi, kapela doa, dan fasilitas multimedia berstandar nasional.
                     </p>
@@ -283,7 +337,7 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
           </div>
         )}
 
-        {/* TAB 3: SAMBUTAN KEPALA SEKOLAH — SINKRON DENGAN KUSTOMISASI HALAMAN UTAMA */}
+        {/* TAB 3: SAMBUTAN KEPALA SEKOLAH */}
         {activeSubTab === 'sambutan' && (
           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm animate-fadeIn">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -297,12 +351,8 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                   />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    {principalName}
-                  </h3>
-                  <p className="text-xs font-semibold text-[#005fb8]">
-                    {principalRole}
-                  </p>
+                  <h3 className="text-lg font-bold text-slate-900">{principalName}</h3>
+                  <p className="text-xs font-semibold text-[#005fb8]">{principalRole}</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Masa Bakti: 2022 – Sekarang</p>
                 </div>
               </div>
@@ -311,9 +361,7 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">
                   {principalBadge}
                 </span>
-                <h2 className="text-2xl font-serif font-bold text-slate-900">
-                  "{principalGreetingTitle}"
-                </h2>
+                <h2 className="text-2xl font-serif font-bold text-slate-900">"{principalGreetingTitle}"</h2>
                 <div className="text-sm text-slate-700 space-y-3 leading-relaxed">
                   <p>
                     <em>Salam damai sejahtera dalam kasih Kristus bagi kita semua,</em>
@@ -348,45 +396,11 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: 'Laboratorium MIPA Terpadu',
-                    desc: 'Fasilitas praktikum Fisika, Kimia, dan Biologi lengkap dengan mikroskop optik modern, preparat, kit robotika sains, dan ruang asam bersertifikasi.',
-                    img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Sains & Riset',
-                  },
-                  {
-                    title: 'Laboratorium Komputer & Multimedia',
-                    desc: '3 ruang lab komputer ber-AC dengan koneksi internet fiber-optic 100 Mbps, perangkat PC Intel Core i7 untuk pembelajaran coding, desain grafis, dan asesmen digital.',
-                    img: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Teknologi Digital',
-                  },
-                  {
-                    title: 'Perpustakaan Digital St. Agustinus',
-                    desc: 'Koleksi lebih dari 12.000 judul buku fisik, ensiklopedia, jurnal ilmiah, ruang baca berkarpet yang tenang, dan katalog e-library daring.',
-                    img: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Literasi & Pustaka',
-                  },
-                  {
-                    title: 'Kapela Sekolah St. Yohanes Paulus II',
-                    desc: 'Tempat hening untuk ibadat pagi, adorasi sakramen mahakudus, misa perayaan hari raya gereja, dan pembinaan retret/rekoleksi tahunan siswa.',
-                    img: 'https://images.unsplash.com/photo-1548625361-1960246a47a1?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Spiritualitas Katolik',
-                  },
-                  {
-                    title: 'Asrama Putra & Putri Terpadu',
-                    desc: 'Hunian asrama asri dan aman di lingkungan sejuk Ruteng dengan pendampingan suster dan pastor, ruang belajar bersama, serta katering nutrisi terjamin.',
-                    img: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Kehidupan Asrama',
-                  },
-                  {
-                    title: 'Kompleks Olahraga & Pentas Seni',
-                    desc: 'Lapangan basket berstandar Perbasi, lapangan voli, futsal, dan aula serbaguna kapasitas 1.200 orang untuk pementasan tari caci dan paduan suara.',
-                    img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80',
-                    tag: 'Olahraga & Seni',
-                  },
-                ].map((item, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between">
+                {facilityItems.map((item, idx) => (
+                  <div
+                    key={item.id || idx}
+                    className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between"
+                  >
                     <div>
                       <div className="h-44 w-full overflow-hidden bg-slate-200 relative">
                         <img
@@ -416,7 +430,7 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
           </div>
         )}
 
-        {/* TAB 5: IDENTITAS RESMI, AKREDITASI & TATA KELOLA */}
+        {/* TAB 5: IDENTITAS RESMI */}
         {activeSubTab === 'identitas' && (
           <div className="space-y-6 animate-fadeIn">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
