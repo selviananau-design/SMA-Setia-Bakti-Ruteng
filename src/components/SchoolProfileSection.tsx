@@ -17,17 +17,19 @@ import {
   Lightbulb,
   Cross,
 } from 'lucide-react';
-import { SchoolProfile } from '../types';
-import { INITIAL_SCHOOL_PROFILE } from '../data/mockData';
+import { SchoolProfile, HomepageConfig } from '../types';
+import { INITIAL_SCHOOL_PROFILE, DEFAULT_HOMEPAGE_CONFIG } from '../data/mockData';
 
 interface SchoolProfileSectionProps {
   profile?: SchoolProfile;
+  homepageConfig?: HomepageConfig;
   initialSubTab?: string;
   onNavigateTab?: (tab: string, subTab?: string) => void;
 }
 
 export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
   profile = INITIAL_SCHOOL_PROFILE,
+  homepageConfig,
   initialSubTab = 'sejarah',
   onNavigateTab,
 }) => {
@@ -38,6 +40,30 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
       setActiveSubTab(initialSubTab);
     }
   }, [initialSubTab]);
+
+  // ==========================================================
+  // SINKRONISASI KEPALA SEKOLAH
+  // Prioritas: homepageConfig.welcomeSection (dari Kustomisasi Halaman Utama)
+  // Fallback: schoolProfile (data lama)
+  // ==========================================================
+  const welcome = homepageConfig?.welcomeSection || DEFAULT_HOMEPAGE_CONFIG.welcomeSection;
+
+  const principalPhoto =
+    welcome?.principalPhotoUrl ||
+    'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80';
+
+  const principalName =
+    welcome?.principalName || profile.principal || 'Kepala Sekolah';
+
+  const principalRole =
+    welcome?.principalRole || 'Kepala Sekolah SMA Katolik Setia Bakti Ruteng';
+
+  const principalGreetingTitle =
+    welcome?.title || 'Mendidik Manusia Seutuhnya: Cerdas Akal, Luhur Hati, dan Kuat Karakter';
+
+  const principalQuote = welcome?.quote || '';
+
+  const principalBadge = welcome?.badge || 'PESAN & HARAPAN PENDIDIK';
 
   const tabs = [
     { id: 'sejarah', label: 'Sejarah & Identitas', icon: Building2 },
@@ -191,7 +217,6 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 </h2>
               </div>
 
-              {/* Visi Card */}
               <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 space-y-2">
                 <span className="text-xs font-extrabold text-blue-800 uppercase tracking-wider">
                   VISI SEKOLAH (TARGET 2030)
@@ -202,7 +227,6 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 </p>
               </div>
 
-              {/* Misi List */}
               <div className="space-y-3 pt-2">
                 <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider block">
                   MISI STRATEGIS SEKOLAH:
@@ -228,7 +252,6 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 </div>
               </div>
 
-              {/* Core Values */}
               <div className="pt-4 border-t border-slate-100">
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
                   4 Pilar Nilai Karakter Siswa Setia Bakti:
@@ -260,25 +283,25 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
           </div>
         )}
 
-        {/* TAB 3: SAMBUTAN KEPALA SEKOLAH */}
+        {/* TAB 3: SAMBUTAN KEPALA SEKOLAH — SINKRON DENGAN KUSTOMISASI HALAMAN UTAMA */}
         {activeSubTab === 'sambutan' && (
           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm animate-fadeIn">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-4 text-center space-y-3">
                 <div className="w-48 h-56 mx-auto rounded-2xl overflow-hidden shadow-lg border-4 border-slate-100 bg-slate-100">
                   <img
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80"
-                    alt="Kepala Sekolah SMAK Setia Bakti"
+                    src={principalPhoto}
+                    alt={principalName}
                     className="w-full h-full object-cover object-top"
                     referrerPolicy="no-referrer"
                   />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">
-                    {profile.principal || 'Drs. Petrus Kanisius Dadi'}
+                    {principalName}
                   </h3>
                   <p className="text-xs font-semibold text-[#005fb8]">
-                    Kepala Sekolah SMA Katolik Setia Bakti Ruteng
+                    {principalRole}
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Masa Bakti: 2022 – Sekarang</p>
                 </div>
@@ -286,23 +309,18 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
 
               <div className="lg:col-span-8 space-y-4 border-t lg:border-t-0 lg:border-l border-slate-200 lg:pl-8 pt-6 lg:pt-0">
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">
-                  Pesan & Harapan Pendidik
+                  {principalBadge}
                 </span>
                 <h2 className="text-2xl font-serif font-bold text-slate-900">
-                  "Mendidik Manusia Seutuhnya: Cerdas Akal, Luhur Hati, dan Kuat Karakter"
+                  "{principalGreetingTitle}"
                 </h2>
                 <div className="text-sm text-slate-700 space-y-3 leading-relaxed">
                   <p>
                     <em>Salam damai sejahtera dalam kasih Kristus bagi kita semua,</em>
                   </p>
                   <p>
-                    Selamat datang di portal resmi SMA Katolik Setia Bakti Ruteng. Di era lompatan teknologi kecerdasan buatan dan globalisasi saat ini, pendidikan tidak boleh hanya berkutat pada transfer pengetahuan teknis di dalam kelas semata. Kami meyakini bahwa pendidikan sejati adalah pembentukan hati nurani dan penempaan integritas pribadi.
-                  </p>
-                  <p>
-                    Setiap anak yang dipercayakan orang tua di kampus SMAK Setia Bakti kami dampingi dengan penuh kasih dan ketegasan moral. Melalui integrasi Kurikulum Merdeka dengan penguatan riset sains, kepekaan sosial, literasi bahasa internasional, serta pelestarian budaya Manggarai, kami mempersiapkan generasi muda yang tangguh bersaing di tingkat global tanpa kehilangan akar nilai iman dan kemanusiaannya.
-                  </p>
-                  <p>
-                    Mari bersama-sama bersinergi—Bapak/Ibu Guru, Orang Tua Murid, Alumni, dan Pemerhati Pendidikan—untuk terus mengharumkan nama SMAK Setia Bakti demi kemuliaan Tuhan dan kemajuan nusa tercinta.
+                    {principalQuote ||
+                      'Selamat datang di portal resmi SMA Katolik Setia Bakti Ruteng. Kami berkomitmen menyelenggarakan pendidikan Katolik yang berkarakter, mengakar pada budaya Manggarai, serta siap bersaing di panggung nasional dan global.'}
                   </p>
                 </div>
                 <div className="pt-2">
@@ -402,13 +420,12 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
         {activeSubTab === 'identitas' && (
           <div className="space-y-6 animate-fadeIn">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Identitas Resmi Dokumen */}
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <span className="text-xs font-bold text-blue-700 uppercase tracking-widest bg-blue-50 px-2.5 py-1 rounded">
                   Legalitas & Data Pokok Pendidikan
                 </span>
                 <h3 className="text-xl font-bold text-slate-900">Identitas Resmi Sekolah (Kemendikbudristek)</h3>
-                
+
                 <div className="space-y-3 text-xs divide-y divide-slate-100">
                   <div className="pt-2 flex justify-between">
                     <span className="text-slate-500 font-medium">Nama Resmi Satuan Pendidikan:</span>
@@ -445,13 +462,12 @@ export const SchoolProfileSection: React.FC<SchoolProfileSectionProps> = ({
                 </div>
               </div>
 
-              {/* Kontak & Lokasi */}
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <span className="text-xs font-bold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">
                   Sekretariat & Pelayanan
                 </span>
                 <h3 className="text-xl font-bold text-slate-900">Alamat & Kanal Informasi</h3>
-                
+
                 <div className="space-y-4 text-xs">
                   <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
                     <MapPin className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
