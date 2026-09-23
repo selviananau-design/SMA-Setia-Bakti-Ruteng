@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { School, Save, CheckCircle2, Award, BookOpen, MapPin, Phone, Mail, FileText, Camera } from 'lucide-react';
+import {
+  School,
+  Save,
+  CheckCircle2,
+  Award,
+  BookOpen,
+  MapPin,
+  Phone,
+  Mail,
+  FileText,
+  Camera,
+  Image as ImageIcon,
+} from 'lucide-react';
 import { SchoolProfile } from '../../types';
 import { ImageUploadField } from '../common/ImageUploadField';
 
@@ -188,46 +200,88 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none font-mono"
             />
           </div>
+        </div>
 
-          {/* Bagian Unggah Foto Resmi Sekolah (Choose File - Tanpa URL) */}
-          <div className="md:col-span-2 pt-4 border-t border-slate-200">
-            <div className="flex items-center gap-2 mb-3">
-              <Camera className="w-4 h-4 text-blue-600" />
-              <h3 className="text-sm font-bold text-slate-800">
-                Foto Resmi & Identitas Visual Sekolah (Pilih Berkas / Choose File)
-              </h3>
-            </div>
-            <p className="text-[11px] text-slate-500 mb-4">
-              Unggah foto langsung dari perangkat (komputer / ponsel). Seluruh gambar disimpan langsung ke sistem tanpa perlu memasukkan tautan URL eksternal.
-            </p>
+        {/* ========================================================== */}
+        {/* BAGIAN 1: FOTO RESMI & IDENTITAS VISUAL SEKOLAH          */}
+        {/* ========================================================== */}
+        <div className="pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-2 mb-3">
+            <Camera className="w-4 h-4 text-blue-600" />
+            <h3 className="text-sm font-bold text-slate-800">
+              Foto Resmi & Identitas Visual Sekolah (Pilih Berkas / Choose File)
+            </h3>
+          </div>
+          <p className="text-[11px] text-slate-500 mb-4">
+            Unggah foto langsung dari perangkat (komputer / ponsel). Seluruh gambar disimpan langsung ke sistem tanpa perlu memasukkan tautan URL eksternal.
+          </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ImageUploadField
-                label="Logo Resmi Sekolah / Lambang"
-                value={formData.logoUrl}
-                onChange={(dataUrl) => setFormData({ ...formData, logoUrl: dataUrl })}
-                helperText="Format transparan PNG disarankan (Max 5MB)"
-                aspectRatio="square"
-                placeholderText="Pilih berkas logo sekolah"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ImageUploadField
+              label="Logo Resmi Sekolah / Lambang"
+              value={formData.logoUrl}
+              onChange={(dataUrl) => setFormData({ ...formData, logoUrl: dataUrl })}
+              helperText="Format transparan PNG disarankan (Max 5MB)"
+              aspectRatio="square"
+              placeholderText="Pilih berkas logo sekolah"
+            />
+
+            <ImageUploadField
+              label="Pas Foto Resmi Kepala Sekolah"
+              value={formData.principalPhotoUrl}
+              onChange={(dataUrl) => setFormData({ ...formData, principalPhotoUrl: dataUrl })}
+              helperText="Pas foto jas / seragam resmi formal"
+              aspectRatio="square"
+              placeholderText="Pilih foto kepala sekolah"
+            />
+
+            <ImageUploadField
+              label="Foto Gedung / Kampus Utama"
+              value={formData.heroImageUrl}
+              onChange={(dataUrl) => setFormData({ ...formData, heroImageUrl: dataUrl })}
+              helperText="Foto lanskap gerbang / gedung SMAK Setia Bakti"
+              aspectRatio="video"
+              placeholderText="Pilih foto gedung kampus"
+            />
+          </div>
+        </div>
+
+        {/* ========================================================== */}
+        {/* BAGIAN 2: FOTO SEJARAH & KILAS BALIK (BARU)              */}
+        {/* ========================================================== */}
+        <div className="pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-2 mb-3">
+            <ImageIcon className="w-4 h-4 text-purple-600" />
+            <h3 className="text-sm font-bold text-slate-800">
+              Foto Sejarah & Kilas Balik Sekolah
+            </h3>
+          </div>
+          <p className="text-[11px] text-slate-500 mb-4">
+            Foto ini akan tampil di halaman <strong>Profil → Sejarah & Identitas</strong>. Disarankan foto lanskap dengan kualitas baik.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ImageUploadField
+              label="Foto Sejarah / Gedung Kampus (Profil Sekolah)"
+              value={formData.historyPhotoUrl}
+              onChange={(dataUrl) => setFormData({ ...formData, historyPhotoUrl: dataUrl })}
+              helperText="Foto lanskap gerbang, gedung, atau suasana kampus"
+              aspectRatio="video"
+              placeholderText="Pilih foto sejarah kampus"
+            />
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Keterangan / Caption Foto Sejarah</label>
+              <textarea
+                rows={4}
+                value={formData.historyPhotoCaption || ''}
+                onChange={(e) => setFormData({ ...formData, historyPhotoCaption: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none leading-relaxed"
+                placeholder="Contoh: Kampus Hijau Berwawasan Lingkungan"
               />
-
-              <ImageUploadField
-                label="Pas Foto Resmi Kepala Sekolah"
-                value={formData.principalPhotoUrl}
-                onChange={(dataUrl) => setFormData({ ...formData, principalPhotoUrl: dataUrl })}
-                helperText="Pas foto jas / seragam resmi formal"
-                aspectRatio="square"
-                placeholderText="Pilih foto kepala sekolah"
-              />
-
-              <ImageUploadField
-                label="Foto Gedung / Kampus Utama"
-                value={formData.heroImageUrl}
-                onChange={(dataUrl) => setFormData({ ...formData, heroImageUrl: dataUrl })}
-                helperText="Foto lanskap gerbang / gedung SMAK Setia Bakti"
-                aspectRatio="video"
-                placeholderText="Pilih foto gedung kampus"
-              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Teks ini akan tampil sebagai judul di bawah foto sejarah.
+              </p>
             </div>
           </div>
         </div>

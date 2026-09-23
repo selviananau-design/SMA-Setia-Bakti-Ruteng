@@ -446,7 +446,6 @@ export const INITIAL_STUDENTS: Student[] = [
     tuitionStatus: 'Menunggak',
     encryptedHash: simulateAesEncrypt('5310026211050008:Agnes'),
   },
-  // ALUMNI
   {
     id: 's-9',
     nisn: '0045129931',
@@ -722,9 +721,6 @@ export const INITIAL_GALLERY: GalleryItem[] = [
   },
 ];
 
-// ==========================================
-// 1. BAHAN AJAR GURU MAPEL (UNTUK SISWA UNDUH)
-// ==========================================
 export const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [
   {
     id: 'mat-1',
@@ -780,9 +776,6 @@ export const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [
   },
 ];
 
-// ==========================================
-// 2. TUGAS DARI GURU MAPEL
-// ==========================================
 export const INITIAL_ASSIGNMENTS: StudentAssignment[] = [
   {
     id: 'asg-1',
@@ -822,9 +815,6 @@ export const INITIAL_ASSIGNMENTS: StudentAssignment[] = [
   },
 ];
 
-// ==========================================
-// 3. PENGUMPULAN TUGAS SISWA (SUBMISSIONS)
-// ==========================================
 export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
   {
     id: 'sub-1',
@@ -860,9 +850,6 @@ export const INITIAL_SUBMISSIONS: AssignmentSubmission[] = [
   },
 ];
 
-// ==========================================
-// 4. CATATAN PENTING WALI KELAS
-// ==========================================
 export const INITIAL_WALI_NOTES: WaliKelasNote[] = [
   {
     id: 'wn-1',
@@ -905,9 +892,6 @@ export const INITIAL_WALI_NOTES: WaliKelasNote[] = [
   },
 ];
 
-// ==========================================
-// 5. PENGAJUAN IZIN DARI ORANG TUA KE WALI KELAS
-// ==========================================
 export const INITIAL_LEAVE_REQUESTS: LeaveRequest[] = [
   {
     id: 'lr-1',
@@ -948,9 +932,6 @@ export const INITIAL_LEAVE_REQUESTS: LeaveRequest[] = [
   },
 ];
 
-// ==========================================
-// 6. FORUM DISKUSI SISWA DENGAN GURU & WALI KELAS
-// ==========================================
 export const INITIAL_DISCUSSIONS: ClassDiscussion[] = [
   {
     id: 'disc-1',
@@ -993,9 +974,6 @@ export const INITIAL_DISCUSSIONS: ClassDiscussion[] = [
   },
 ];
 
-// ==========================================
-// 7. EKSTRAKURIKULER SISWA (KEHIDUPAN SISWA)
-// ==========================================
 export const INITIAL_EXTRACURRICULARS: ExtracurricularActivity[] = [
   {
     id: 'ekskul-1',
@@ -1104,9 +1082,6 @@ export const INITIAL_EXTRACURRICULARS: ExtracurricularActivity[] = [
   },
 ];
 
-// ==========================================
-// 8. KARYA SISWA (CERITA, PUISI, JURNALISTIK, SENI)
-// ==========================================
 export const INITIAL_STUDENT_WORKS: StudentWork[] = [
   {
     id: 'kw-1',
@@ -1195,9 +1170,6 @@ Generasi Z Flores tidak boleh hanya berbangga pada nama besar Komodo, melainkan 
   },
 ];
 
-// ==========================================
-// 9. JURUSAN & PEMINATAN (DIKELOLA ADMIN UTAMA)
-// ==========================================
 export const INITIAL_MAJORS: MajorProgram[] = [
   {
     id: 'jur-1',
@@ -1256,11 +1228,13 @@ export const INITIAL_SCHOOL_PROFILE: SchoolProfile = {
   logoUrl: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=300&q=80',
   heroImageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80',
   principalPhotoUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&q=80',
+  // ==========================================================
+  // FIELD BARU: Foto Sejarah & Kilas Balik (bisa diubah dari Admin Panel)
+  // ==========================================================
+  historyPhotoUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80',
+  historyPhotoCaption: 'Kampus Hijau Berwawasan Lingkungan',
 };
 
-// ==========================================
-// 11. DOKUMEN ADMINISTRASI GURU (PERANGKAT AJAR UNTUK ADMIN UTAMA)
-// ==========================================
 export const INITIAL_TEACHER_ADMIN_DOCS: TeacherAdministrationDoc[] = [
   {
     id: 'adm-001',
@@ -1290,7 +1264,7 @@ export const INITIAL_TEACHER_ADMIN_DOCS: TeacherAdministrationDoc[] = [
       'Prota & Promes',
       'Kriteria Ketercapaian (KKTP)',
       'Rencana Pembelajaran Modul (RPM)',
-      'Instrumen Asesmen & Evaluasi'
+      'Instrumen Asesmen & Evaluasi',
     ],
   },
   {
@@ -1343,7 +1317,7 @@ export const INITIAL_TEACHER_ADMIN_DOCS: TeacherAdministrationDoc[] = [
       'Prota & Promes',
       'Kriteria Ketercapaian (KKTP)',
       'Rencana Pembelajaran Modul (RPM)',
-      'Instrumen Asesmen & Evaluasi'
+      'Instrumen Asesmen & Evaluasi',
     ],
   },
   {
@@ -1413,9 +1387,6 @@ export const INITIAL_TEACHER_ADMIN_DOCS: TeacherAdministrationDoc[] = [
   },
 ];
 
-// ==========================================
-// 12. RIWAYAT PRESENSI PER PERTEMUAN MATA PELAJARAN (GURU MAPEL)
-// ==========================================
 export const INITIAL_SUBJECT_ATTENDANCE_SESSIONS: SubjectAttendanceSession[] = [
   {
     id: 'att-ses-001',
@@ -1500,9 +1471,6 @@ export const INITIAL_SUBJECT_ATTENDANCE_SESSIONS: SubjectAttendanceSession[] = [
   },
 ];
 
-// ==========================================
-// 12. KONFIGURASI DEFAULT GAMBAR & TULISAN HALAMAN UTAMA (BERANDA)
-// ==========================================
 export const HOMEPAGE_PRESET_IMAGES = [
   {
     title: 'Gedung Utama Kampus Ruteng',
@@ -1657,4 +1625,3 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
     targetTab: 'ppdb',
   },
 };
-
