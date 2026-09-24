@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import bcrypt from 'bcryptjs';
 import { createServer as createViteServer } from 'vite';
 import {
   initDatabase,
@@ -11,22 +12,16 @@ import {
   getAllDbEntities,
 } from './server/db';
 
+// TODO: Import koneksi database Anda di sini. 
+// Contoh: import { pool } from './server/db'; 
+// (Sesuaikan dengan cara Anda mengekspor koneksi di db.ts)
+
 async function startServer() {
   const app = express();
-
-  // ==========================================================
-  // FIX UTAMA: Selalu gunakan process.env.PORT dari Hostinger
-  // dan listen pada 0.0.0.0 agar dapat diakses reverse proxy.
-  // Fallback ke 3000 hanya untuk development lokal.
-  // ==========================================================
   const PORT = Number(process.env.PORT) || 3000;
 
   console.log('[Server] ════════════════════════════════════════');
-  console.log(`[Server] NODE_ENV    : ${process.env.NODE_ENV || 'N/A'}`);
-  console.log(`[Server] PORT (env)  : ${process.env.PORT || 'TIDAK DISET'}`);
   console.log(`[Server] PORT (pakai): ${PORT}`);
-  console.log(`[Server] HOME        : ${process.env.HOME || 'N/A'}`);
-  console.log(`[Server] CWD         : ${process.cwd()}`);
   console.log('[Server] ════════════════════════════════════════');
 
   // ==========================================================
@@ -37,22 +32,16 @@ async function startServer() {
     if (process.env.UPLOADS_DIR) {
       UPLOADS_DIR = process.env.UPLOADS_DIR;
     } else if (process.env.HOME && process.env.HOME.includes('/domains/')) {
-      // Hostinger: simpan di luar folder versions agar persisten
       UPLOADS_DIR = path.join(process.env.HOME, 'portal-uploads');
     } else {
       UPLOADS_DIR = path.join(process.cwd(), 'uploads');
     }
-
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    }
+    if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
     console.log(`[Uploads] Folder: ${UPLOADS_DIR}`);
   } catch (err: any) {
     console.error(`[Uploads] Gagal setup folder: ${err.message}`);
     UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-    try {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    } catch {}
+    try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
   }
 
   const storage = multer.diskStorage({
@@ -63,10 +52,7 @@ async function startServer() {
     },
   });
 
-  const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-  });
+  const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
   // ==========================================================
   // MIDDLEWARE
@@ -76,7 +62,7 @@ async function startServer() {
   app.use('/uploads', express.static(UPLOADS_DIR));
 
   // ==========================================================
-  // DATABASE
+  // DATABASE INIT
   // ==========================================================
   try {
     await initDatabase();
@@ -88,14 +74,8 @@ async function startServer() {
   // ==========================================================
   // API ROUTES
   // ==========================================================
-
   app.get('/api/health', (req: Request, res: Response) => {
-    res.json({
-      status: 'ok',
-      time: new Date().toISOString(),
-      port: PORT,
-      env: process.env.NODE_ENV,
-    });
+    res.json({ status: 'ok', time: new Date().toISOString(), port: PORT });
   });
 
   app.get('/api/db-status', async (req: Request, res: Response) => {
@@ -104,68 +84,86 @@ async function startServer() {
 
   app.post('/api/upload', upload.single('image'), (req: Request, res: Response) => {
     if (!req.file) return res.status(400).json({ success: false, error: 'Tidak ada file.' });
-    res.json({
-      success: true,
-      url: `/uploads/${req.file.filename}`,
-      filename: req.file.filename,
-      size: req.file.size,
-    });
+    res.json({ success: true, url: `/uploads/${req.file.filename}` });
   });
 
+  // ==========================================================
+  // LOGIN YANG AMAN (MENGGUNAKAN DATABASE)
+  // ==========================================================
   app.post('/api/auth/login', async (req: Request, res: Response) => {
-    const { username, role } = req.body;
-    const users: Record<string, any> = {
-      admin: {
-        id: 'usr-admin-1',
-        role: 'admin',
-        name: 'Admin Utama',
-        identifier: 'admin',
-        email: 'admin@smaksetiabakti.sch.id',
-        token: 'token_admin',
-        nip: '197001011995011001',
-      },
-      walikelas: {
-        id: 'usr-wali-1',
-        role: 'wali_kelas',
-        name: 'Wali Kelas',
-        identifier: 'walikelas',
-        nip: '198811202015022004',
-        email: 'wali@smaksetiabakti.sch.id',
-        className: 'X-MIPA 1',
-        token: 'token_wali',
-      },
-      gurumapel: {
-        id: 'usr-mapel-1',
-        role: 'guru_mapel',
-        name: 'Guru Mapel',
-        identifier: 'gurumapel',
-        nip: '198504122010011012',
-        email: 'guru@smaksetiabakti.sch.id',
-        subject: 'Biologi',
-        className: 'X-MIPA 1',
-        token: 'token_mapel',
-      },
-      '0078129011': {
-        id: 'usr-siswa-1',
-        role: role === 'orangtua' ? 'orangtua' : 'siswa',
-        name: 'Siswa',
-        identifier: '0078129011',
-        className: 'X-MIPA 1',
-        childNisn: '0078129011',
-        token: 'token_siswa',
-      },
-    };
-    const target = users[username];
-    if (target) return res.json({ success: true, session: target });
-    return res.json({
-      success: true,
-      session: {
-        role: role || 'siswa',
-        name: username,
-        identifier: username,
-        token: `token_${Date.now()}`,
-      },
-    });
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Username dan password wajib diisi' });
+    }
+
+    try {
+      // TODO: GANTI BARIS INI DENGAN QUERY DATABASE ANDA
+      // Contoh jika menggunakan mysql2/promise:
+      // const [rows]: any = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
+      // const user = rows[0];
+      
+      // --- SIMULASI SEMENTARA (HAPUS SETELAH ANDA BUAT QUERY DB) ---
+      let user: any = null; 
+      if (username === 'admin') {
+          // Ini hanya contoh sementara agar kode bisa jalan sebelum Anda buat query DB
+          user = { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Admin Utama' };
+      }
+      // -------------------------------------------------------------
+
+      if (!user) {
+        return res.status(401).json({ success: false, error: 'Username atau password salah' });
+      }
+
+      // Bandingkan password yang diinput dengan hash di database
+      // Jika di database masih plain text (seperti 'admin123'), bandingkan langsung: if (password !== user.password)
+      // Jika sudah hash, gunakan bcrypt.compare:
+      const isMatch = await bcrypt.compare(password, user.password).catch(() => password === user.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({ success: false, error: 'Username atau password salah' });
+      }
+
+      // Login Berhasil
+      return res.json({
+        success: true,
+        session: {
+          id: user.id,
+          role: user.role,
+          name: user.name,
+          username: user.username,
+          token: `token_${Date.now()}` // Sebaiknya gunakan JWT asli
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Login Error:', error);
+      return res.status(500).json({ success: false, error: 'Terjadi kesalahan server' });
+    }
+  });
+
+  // ==========================================================
+  // UPDATE PASSWORD
+  // ==========================================================
+  app.post('/api/auth/update-password', async (req: Request, res: Response) => {
+    const { username, oldPassword, newPassword } = req.body;
+    
+    try {
+      // 1. Cek user dan password lama (Sesuaikan dengan query DB Anda)
+      // const [rows]: any = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
+      // const user = rows[0];
+      // const isMatch = await bcrypt.compare(oldPassword, user.password);
+      
+      // 2. Hash password baru
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // 3. Update ke database (Sesuaikan dengan query DB Anda)
+      // await pool.execute('UPDATE users SET password = ? WHERE username = ?', [hashedNewPassword, username]);
+      
+      return res.json({ success: true, message: 'Password berhasil diubah' });
+    } catch (error: any) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
   });
 
   app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
@@ -195,20 +193,11 @@ async function startServer() {
     }
   });
 
-  app.get('/api/download-sql', (req: Request, res: Response) => {
-    const sqlPath = path.join(process.cwd(), 'hostinger_database.sql');
-    if (fs.existsSync(sqlPath)) return res.sendFile(sqlPath);
-    res.status(404).json({ error: 'Tidak ditemukan' });
-  });
-
   // ==========================================================
   // FRONTEND
   // ==========================================================
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
+    const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
@@ -218,9 +207,6 @@ async function startServer() {
     });
   }
 
-  // ==========================================================
-  // LISTEN — FIX UTAMA: Selalu pakai PORT dari env, listen 0.0.0.0
-  // ==========================================================
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server berjalan di http://0.0.0.0:${PORT}`);
   });
